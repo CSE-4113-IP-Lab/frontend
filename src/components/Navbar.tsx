@@ -21,6 +21,14 @@ const navItems = [
   { label: "CONTACT", href: "/contact" },
 ];
 
+const additionalNavItems = [
+  { label: "Academics", href: "/academics" },
+  { label: "Research", href: "/research" },
+  { label: "Admissions", href: "/admissions" },
+  { label: "Faculty", href: "/faculty" },
+  { label: "Schedule", href: "/schedule" },
+];
+
 export function Navbar({ className }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -99,6 +107,17 @@ export function Navbar({ className }: NavbarProps) {
                       </Link>
                     </DropdownMenuItem>
                   ))}
+                  {additionalNavItems.map((item) => (
+                    <DropdownMenuItem
+                      key={item.label}
+                      className="text-white hover:bg-white/10 focus:bg-white/10">
+                      <Link
+                        to={item.href}
+                        className="w-full block px-3 py-2 text-sm font-medium">
+                        {item.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
                   <DropdownMenuItem className="text-white hover:bg-white/10 focus:bg-white/10">
                     <Button
                       variant="outline"
@@ -111,6 +130,15 @@ export function Navbar({ className }: NavbarProps) {
 
                 {/* Desktop additional menu items */}
                 <div className="hidden md:block">
+                  {additionalNavItems.map((item) => (
+                    <DropdownMenuItem
+                      key={item.label}
+                      className="text-white hover:bg-white/10 focus:bg-white/10">
+                      <Link to={item.href} className="w-full">
+                        {item.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
                   <DropdownMenuItem className="text-white hover:bg-white/10 focus:bg-white/10">
                     <Link to="/profile" className="w-full">
                       Profile
