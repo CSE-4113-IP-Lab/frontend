@@ -3,15 +3,19 @@ import { Layout } from "@/components/Layout";
 import { Home } from "@/pages/Home";
 import { Notice } from "@/pages/Notice";
 import { Contact } from "@/pages/Contact";
-import Event from "@/pages/UpcomingEvent/UpcomingEvents";
+
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
 import SchedulePage from "./pages/Schedule/schedule";
+import ArchivedEvents from "./pages/Event/ArchivedEvents";
+import EventPage from "./pages/Event/EventPage";
+import UpcomingEvents from "./pages/Event/UpcomingEvents";
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
     children: [
+
       {
         index: true,
         element: <Home />,
@@ -20,10 +24,7 @@ export const router = createBrowserRouter([
         path: "notice",
         element: <Notice />,
       },
-      {
-        path: "event",
-        element: <Event />,
-      },
+     
       {
         path: "contact",
         element: <Contact />,
@@ -40,52 +41,18 @@ export const router = createBrowserRouter([
         path: "exam-schedule",
         element: <ExamSchedule />,
       },
-      // Additional routes that can be accessed via the dropdown menu
       {
-        path: "profile",
-        element: (
-          <div className="container mx-auto px-4 py-16">
-            <h1
-              className="text-4xl font-bold text-center"
-              style={{ color: "#14244C" }}>
-              Profile Page
-            </h1>
-            <p className="text-center text-gray-600 mt-4">
-              Profile page content will go here.
-            </p>
-          </div>
-        ),
+        path: "archived-events",
+        element: <ArchivedEvents />,
       },
       {
-        path: "settings",
-        element: (
-          <div className="container mx-auto px-4 py-16">
-            <h1
-              className="text-4xl font-bold text-center"
-              style={{ color: "#14244C" }}>
-              Settings Page
-            </h1>
-            <p className="text-center text-gray-600 mt-4">
-              Settings page content will go here.
-            </p>
-          </div>
-        ),
+          path: "event",
+          element: <EventPage />,
       },
       {
-        path: "help",
-        element: (
-          <div className="container mx-auto px-4 py-16">
-            <h1
-              className="text-4xl font-bold text-center"
-              style={{ color: "#14244C" }}>
-              Help Page
-            </h1>
-            <p className="text-center text-gray-600 mt-4">
-              Help page content will go here.
-            </p>
-          </div>
-        ),
+        path: "upcoming-events",
+        element: <UpcomingEvents />,
       },
+
     ],
-  },
-]);
+ },] );
