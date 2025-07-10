@@ -6,6 +6,7 @@ import { Contact } from "@/pages/Contact";
 import Event from "@/pages/UpcomingEvent/UpcomingEvents";
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
+import SchedulePage from "./pages/Schedule/schedule";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -26,6 +27,10 @@ export const router = createBrowserRouter([
       {
         path: "contact",
         element: <Contact />,
+      },
+      {
+        path: "schedule",
+        element: <SchedulePage />,
       },
       {
         path: "class-schedule",
