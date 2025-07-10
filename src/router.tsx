@@ -2,9 +2,10 @@ import { createBrowserRouter } from "react-router";
 import { Layout } from "@/components/Layout";
 import { Home } from "@/pages/Home";
 import { Notice } from "@/pages/Notice";
-import { Event } from "@/pages/Event";
 import { Contact } from "@/pages/Contact";
-
+import Event from "@/pages/UpcomingEvent/UpcomingEvents";
+import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
+import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -25,6 +26,14 @@ export const router = createBrowserRouter([
       {
         path: "contact",
         element: <Contact />,
+      },
+      {
+        path: "class-schedule",
+        element: <ClassSchedule />,
+      },
+      {
+        path: "exam-schedule",
+        element: <ExamSchedule />,
       },
       // Additional routes that can be accessed via the dropdown menu
       {
