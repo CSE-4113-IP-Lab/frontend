@@ -10,10 +10,13 @@ import SchedulePage from "./pages/Schedule/schedule";
 import ArchivedEvents from "./pages/Event/ArchivedEvents";
 import EventPage from "./pages/Event/EventPage";
 import UpcomingEvents from "./pages/Event/UpcomingEvents";
+import ErrorPage from "./ErrorPage";
+import  EventDetails  from "./pages/Event/EventDetails";
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
+    errorElement: <ErrorPage />,
     children: [
 
       {
@@ -53,6 +56,10 @@ export const router = createBrowserRouter([
         path: "upcoming-events",
         element: <UpcomingEvents />,
       },
+      {
+        path: "event/:id",
+        element: <EventDetails />,
+      }
 
     ],
  },] );
