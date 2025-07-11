@@ -10,26 +10,37 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Archive, Calendar, FileText, Plus } from "lucide-react";
+import { ArrowLeft, Calendar, FileText, Archive } from "lucide-react";
 import { NoticeService } from "@/services/noticeService";
-import type { Post, PostType, UserRole } from "@/types";
+import type { Post, PostType } from "@/types";
 
-export function NoticeBoardPage() {
+export default function ArchivedNotices() {
   const navigate = useNavigate();
   const [notices, setNotices] = useState<Post[]>([]);
   const [filteredNotices, setFilteredNotices] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<string>("all-types");
   const [selectedDate, setSelectedDate] = useState<string>("all-dates");
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
 
   useEffect(() => {
-    loadActiveNotices();
-    // In a real app, you'd get the user role from authentication context
-    // For now, we'll assume it's available in localStorage or context
-    const role = localStorage.getItem("userRole") as UserRole;
-    setUserRole(role);
+    loadArchivedNotices();
   }, []);
+
+  useEffect(() => {
+    filterNotices();
+  }, [notices, selectedType, selectedDate]);
+
+  const loadArchivedNotices = async () => {
+    try {
+      setLoading(true);
+      const archivedNotices = await NoticeService.getArchivedNotices();
+      setNotices(archivedNotices);
+    } catch (error) {
+      console.error("Error loading archived notices:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filterNotices = useCallback(() => {
     let filtered = notices;
@@ -47,14 +58,17 @@ export function NoticeBoardPage() {
       const cutoffDate = new Date();
 
       switch (selectedDate) {
-        case "this-week":
+        case "last-week":
           cutoffDate.setDate(now.getDate() - 7);
           break;
-        case "this-month":
+        case "last-month":
           cutoffDate.setMonth(now.getMonth() - 1);
           break;
-        case "last-month":
-          cutoffDate.setMonth(now.getMonth() - 2);
+        case "last-quarter":
+          cutoffDate.setMonth(now.getMonth() - 3);
+          break;
+        case "last-year":
+          cutoffDate.setFullYear(now.getFullYear() - 1);
           break;
       }
 
@@ -65,24 +79,6 @@ export function NoticeBoardPage() {
 
     setFilteredNotices(filtered);
   }, [notices, selectedType, selectedDate]);
-
-  useEffect(() => {
-    filterNotices();
-  }, [filterNotices]);
-
-  const loadActiveNotices = async () => {
-    try {
-      setLoading(true);
-      const activeNotices = await NoticeService.getActiveNotices();
-      setNotices(activeNotices);
-    } catch (error) {
-      console.error("Error loading notices:", error);
-      // Fallback to sample data for demo purposes
-      setNotices([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getTypeColor = (type: PostType) => {
     switch (type) {
@@ -111,15 +107,7 @@ export function NoticeBoardPage() {
   };
 
   const handleNoticeClick = (noticeId: number) => {
-    navigate(`/notice/${noticeId}`);
-  };
-
-  const handleCreateNotice = () => {
-    navigate("/notice/create");
-  };
-
-  const handleViewArchive = () => {
-    navigate("/notices/archived");
+    navigate(`/notice/archived/${noticeId}`);
   };
 
   if (loading) {
@@ -127,37 +115,67 @@ export function NoticeBoardPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading notices...</p>
+          <p className="text-gray-600">Loading archived notices...</p>
         </div>
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
       <main className="px-6 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">NOTICES</h1>
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={handleViewArchive}
-                className="flex items-center gap-2">
-                <Archive className="w-4 h-4" />
-                View Archive
-              </Button>
-              {userRole === "admin" && (
-                <Button
-                  onClick={handleCreateNotice}
-                  className="flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  Create Notice
-                </Button>
-              )}
+          <div className="flex items-center gap-4 mb-8">
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/notices")}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-800">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Active Notices
+            </Button>
+          </div>
+
+          {/* Page Title */}
+          <div className="flex items-center gap-3 mb-8">
+            <Archive className="w-8 h-8 text-gray-600" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                ARCHIVED NOTICES
+              </h1>
+              <p className="text-gray-600 mt-1">
+                View older notices and announcements
+              </p>
             </div>
           </div>
+
+          {/* Stats Card */}
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="bg-blue-100 p-3 rounded-lg">
+                    <FileText className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">
+                      Total Archived Notices
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {notices.length}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-600">Showing</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {filteredNotices.length} notices
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Filter Section */}
           <Card className="mb-6">
@@ -190,9 +208,10 @@ export function NoticeBoardPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all-dates">All Dates</SelectItem>
-                      <SelectItem value="this-week">This Week</SelectItem>
-                      <SelectItem value="this-month">This Month</SelectItem>
+                      <SelectItem value="last-week">Last Week</SelectItem>
                       <SelectItem value="last-month">Last Month</SelectItem>
+                      <SelectItem value="last-quarter">Last Quarter</SelectItem>
+                      <SelectItem value="last-year">Last Year</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -205,12 +224,12 @@ export function NoticeBoardPage() {
             <CardContent className="p-0">
               {filteredNotices.length === 0 ? (
                 <div className="text-center py-12">
-                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 text-lg">No notices found</p>
+                  <Archive className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 text-lg">
+                    No archived notices found
+                  </p>
                   <p className="text-gray-400 text-sm mt-1">
-                    {notices.length === 0
-                      ? "No notices available at the moment"
-                      : "Try adjusting your filters"}
+                    Try adjusting your filters
                   </p>
                 </div>
               ) : (

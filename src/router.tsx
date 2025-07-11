@@ -2,6 +2,12 @@ import { createBrowserRouter } from "react-router";
 import { Layout } from "@/components/Layout";
 import { Home } from "@/pages/Home";
 import { NoticeBoardPage } from "@/pages/Notice/Notices";
+import ArchivedNotices from "@/pages/Notice/ArchivedNotices";
+import ArchivedNoticeDetail from "@/pages/Notice/ArchivedNoticeDetail";
+import CreateNotice from "@/pages/Notice/CreateNotice";
+import EditNotice from "@/pages/Notice/EditNotice";
+import NoticeDetail from "@/pages/Notice/NoticeDetail";
+import AdminNoticeDashboard from "@/pages/Notice/AdminNoticeDashboard";
 import { Contact } from "@/pages/Contact";
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
@@ -11,14 +17,13 @@ import ArchivedEvents from "./pages/Event/ArchivedEvents";
 import EventPage from "./pages/Event/EventPage";
 import UpcomingEvents from "./pages/Event/UpcomingEvents";
 import ErrorPage from "./ErrorPage";
-import  EventDetails  from "./pages/Event/EventDetails";
+import EventDetails from "./pages/Event/EventDetails";
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
     errorElement: <ErrorPage />,
     children: [
-
       {
         index: true,
         element: <Home />,
@@ -27,7 +32,35 @@ export const router = createBrowserRouter([
         path: "notice",
         element: <NoticeBoardPage />,
       },
-     
+      {
+        path: "notices",
+        element: <NoticeBoardPage />,
+      },
+      {
+        path: "notices/archived",
+        element: <ArchivedNotices />,
+      },
+      {
+        path: "notice/create",
+        element: <CreateNotice />,
+      },
+      {
+        path: "notice/edit/:id",
+        element: <EditNotice />,
+      },
+      {
+        path: "notice/:id",
+        element: <NoticeDetail />,
+      },
+      {
+        path: "notice/archived/:id",
+        element: <ArchivedNoticeDetail />,
+      },
+      {
+        path: "notice/admin",
+        element: <AdminNoticeDashboard />,
+      },
+
       {
         path: "contact",
         element: <Contact />,
@@ -49,8 +82,8 @@ export const router = createBrowserRouter([
         element: <ArchivedEvents />,
       },
       {
-          path: "event",
-          element: <EventPage />,
+        path: "event",
+        element: <EventPage />,
       },
       {
         path: "upcoming-events",
@@ -59,7 +92,7 @@ export const router = createBrowserRouter([
       {
         path: "event/:id",
         element: <EventDetails />,
-      }
-
+      },
     ],
- },] );
+  },
+]);

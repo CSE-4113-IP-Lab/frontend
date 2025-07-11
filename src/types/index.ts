@@ -12,7 +12,6 @@ export interface EventCardProps {
   event: Event;
 }
 
-
 export interface ExamScheduleItem {
   id: number;
   courseName: string;
@@ -51,3 +50,62 @@ export interface TimeSlot {
   start: string;
   end: string;
 }
+
+// Notice/Post related types
+export const PostType = {
+  NOTICE: "notice",
+  ANNOUNCEMENT: "announcement",
+  EVENT: "event",
+} as const;
+
+export type PostType = (typeof PostType)[keyof typeof PostType];
+
+export interface Post {
+  id: number;
+  type: PostType;
+  title: string;
+  content: string;
+  date: string;
+  created_at: string;
+  updated_at: string;
+  attachments: FileAttachment[];
+}
+
+export interface PostCreate {
+  type: PostType;
+  title: string;
+  content: string;
+  date: string;
+}
+
+export interface PostUpdate {
+  type?: PostType;
+  title?: string;
+  content?: string;
+  date?: string;
+}
+
+export interface FileAttachment {
+  id: number;
+  filename: string;
+  url: string;
+  size?: number;
+  content_type?: string;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  role: UserRole;
+}
+
+export const UserRole = {
+  ADMIN: "admin",
+  FACULTY: "faculty",
+  STUDENT: "student",
+  STAFF: "staff",
+  USER: "user",
+} as const;
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
