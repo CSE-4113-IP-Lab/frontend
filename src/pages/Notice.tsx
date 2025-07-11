@@ -1,16 +1,11 @@
-import {
-  FileText,
-  Video,
-  FlaskRoundIcon as Flask,
-} from "lucide-react";
-// import { Search, Menu, Play } from "lucide-react";
-// import { Button } from "@/components/ui/button";
+import { Search, Menu, FileText, Play, Video, FlaskRoundIcon as Flask } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
-export function Notice() {
+export default function Component() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      {/* <header className="bg-slate-800 text-white">
+      <header className="bg-slate-800 text-white">
         <div className="flex items-center justify-between px-6 py-4">
           <nav className="flex items-center space-x-8">
             <a href="#" className="text-sm font-medium tracking-wider hover:text-gray-300">
@@ -40,13 +35,13 @@ export function Notice() {
             <Menu className="w-6 h-6" />
           </div>
         </div>
-      </header> */}
+      </header>
 
       {/* Notification Bar */}
-      {/* <div className="bg-gray-200 px-6 py-3 flex items-center justify-between">
+      <div className="bg-gray-200 px-6 py-3 flex items-center justify-between">
         <span className="text-gray-700 text-sm">Notice !!! Shawon got cgpa -4 in semester 4-1</span>
         <Play className="w-4 h-4 text-gray-600" />
-      </div> */}
+      </div>
 
       {/* Main Content */}
       <main className="bg-orange-50 min-h-screen px-6 py-12">
@@ -62,38 +57,29 @@ export function Notice() {
           {/* Content */}
           <div className="space-y-6 text-gray-800 leading-relaxed">
             <p>
-              The Department of Computer Science and Engineering at the
-              University of Dhaka is pleased to announce an upcoming seminar on
-              "Advancements in Artificial Intelligence." The seminar will
-              feature renowned experts in the field, discussing the latest
-              trends, research findings, and practical applications of AI. This
-              event is open to all students, faculty, and industry professionals
-              interested in learning more about AI.
+              The Department of Computer Science and Engineering at the University of Dhaka is pleased to announce an
+              upcoming seminar on "Advancements in Artificial Intelligence." The seminar will feature renowned experts
+              in the field, discussing the latest trends, research findings, and practical applications of AI. This
+              event is open to all students, faculty, and industry professionals interested in learning more about AI.
             </p>
 
             <p>
-              Keynote speakers include Dr. Anya Sharma from the Institute of
-              Technology and Dr. Ben Carter from the National University of
-              Science. The seminar will cover topics such as machine learning,
-              natural language processing, computer vision, and robotics. There
-              will also be interactive sessions and Q&A opportunities with the
-              speakers.
+              Keynote speakers include Dr. Anya Sharma from the Institute of Technology and Dr. Ben Carter from the
+              National University of Science. The seminar will cover topics such as machine learning, natural language
+              processing, computer vision, and robotics. There will also be interactive sessions and Q&A opportunities
+              with the speakers.
             </p>
 
             <p>
-              We encourage all interested individuals to register for the
-              seminar by August 10, 2024. Registration details and the full
-              seminar schedule can be found on our website. Don't miss this
-              opportunity to gain valuable insights into the rapidly evolving
-              field of artificial intelligence.
+              We encourage all interested individuals to register for the seminar by August 10, 2024. Registration
+              details and the full seminar schedule can be found on our website. Don't miss this opportunity to gain
+              valuable insights into the rapidly evolving field of artificial intelligence.
             </p>
           </div>
 
           {/* Attachments Section */}
           <div className="mt-12">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Attachments
-            </h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Attachments</h2>
             <div className="space-y-4">
               <div className="flex items-center space-x-3 p-4 bg-white rounded border hover:bg-gray-50 cursor-pointer">
                 <FileText className="w-5 h-5 text-gray-600" />
@@ -108,9 +94,7 @@ export function Notice() {
 
           {/* Related Information Section */}
           <div className="mt-12">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Related Information
-            </h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Related Information</h2>
             <div className="space-y-4">
               <div className="flex items-center space-x-3 p-4 bg-white rounded border hover:bg-gray-50 cursor-pointer">
                 <Video className="w-5 h-5 text-gray-600" />
@@ -125,5 +109,5 @@ export function Notice() {
         </div>
       </main>
     </div>
-  );
+  )
 }

@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { Layout } from "@/components/Layout";
 import { Home } from "@/pages/Home";
-import { Notice } from "@/pages/Notice";
+// import { Notice } from "@/pages/Notice";
 import { NoticeBoardPage } from "@/pages/Notices";
 import { Event } from "@/pages/Event";
 import { Contact } from "@/pages/Contact";
@@ -18,10 +18,6 @@ export const router = createBrowserRouter([
       {
         path: "notice",
         element: <NoticeBoardPage />,
-      },
-      {
-        path: "notice/:id",
-        element: <Notice />,
       },
       {
         path: "event",
