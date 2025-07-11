@@ -19,6 +19,7 @@ const navItems = [
   { label: "NOTICE", href: "/notice" },
   { label: "EVENT", href: "/event" },
   { label: "CONTACT", href: "/contact" },
+  { label: "SCHEDULE", href: "/schedule" },
 ];
 
 const additionalNavItems = [
