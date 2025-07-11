@@ -6,7 +6,6 @@ import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuList,
-  navigationMenuTriggerStyle,
 } from "./ui/navigation-menu";
 
 interface LayoutProps {
@@ -32,7 +31,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   // Authenticated user navigation items
   const authenticatedNavItems = [
     { name: "SCHEDULE", path: "/schedule" },
-    { name: "NOTICES", path: "/notices" },
+    { name: "NOTICES", path: "/notice" },
     { name: "EVENTS", path: "/events" },
   ];
 

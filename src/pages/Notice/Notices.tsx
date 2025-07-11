@@ -119,7 +119,7 @@ export function NoticeBoardPage() {
   };
 
   const handleViewArchive = () => {
-    navigate("/notices/archived");
+    navigate("/notice/archived");
   };
 
   if (loading) {

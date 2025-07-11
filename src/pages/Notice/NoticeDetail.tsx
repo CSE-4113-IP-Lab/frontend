@@ -11,7 +11,7 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
-import { NoticeService } from "@/services/noticeService";
+import { NoticeService } from "@/services/noticeservice";
 import type { Post, PostType, FileAttachment, UserRole } from "@/types";
 
 export default function NoticeDetail() {
@@ -60,7 +60,7 @@ export default function NoticeDetail() {
     ) {
       try {
         await NoticeService.deleteNotice(notice.id);
-        navigate("/notices");
+        navigate("/notice");
       } catch (error) {
         console.error("Error deleting notice:", error);
         alert("Failed to delete notice. Please try again.");
@@ -118,7 +118,7 @@ export default function NoticeDetail() {
             Notice Not Found
           </h2>
           <p className="text-gray-600 mb-6">{error}</p>
-          <Button onClick={() => navigate("/notices")}>Back to Notices</Button>
+          <Button onClick={() => navigate("/notice")}>Back to Notices</Button>
         </div>
       </div>
     );
@@ -133,7 +133,7 @@ export default function NoticeDetail() {
           <div className="flex items-center justify-between mb-8">
             <Button
               variant="ghost"
-              onClick={() => navigate("/notices")}
+              onClick={() => navigate("/notice")}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-800">
               <ArrowLeft className="w-4 h-4" />
               Back to Notices

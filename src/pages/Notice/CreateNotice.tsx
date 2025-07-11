@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Upload, X } from "lucide-react";
 import { NoticeService } from "@/services/noticeService";
-import { PostType } from "@/types";
+import type { PostType } from "@/types";
 
 export default function CreateNotice() {
   const navigate = useNavigate();
@@ -111,25 +111,25 @@ export default function CreateNotice() {
 
           {/* Page Title */}
           <h1 className="text-3xl font-bold text-gray-900 mb-8">
-            Create New Notice
+            Create New Post
           </h1>
 
           <Card>
             <CardHeader>
-              <CardTitle>Notice Details</CardTitle>
+              <CardTitle>Post Details</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Notice Type */}
+                {/* Post Type */}
                 <div className="space-y-2">
-                  <Label htmlFor="type">Notice Type</Label>
+                  <Label htmlFor="type">Post Type</Label>
                   <Select
                     value={formData.type}
                     onValueChange={(value: PostType) =>
                       setFormData((prev) => ({ ...prev, type: value }))
                     }>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select notice type" />
+                      <SelectValue placeholder="Select post type" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="notice">Notice</SelectItem>
@@ -151,7 +151,7 @@ export default function CreateNotice() {
                         title: e.target.value,
                       }))
                     }
-                    placeholder="Enter notice title"
+                    placeholder="Enter post title"
                     required
                   />
                 </div>
@@ -182,7 +182,7 @@ export default function CreateNotice() {
                         content: e.target.value,
                       }))
                     }
-                    placeholder="Enter notice content"
+                    placeholder="Enter post content"
                     rows={10}
                     required
                   />
@@ -251,7 +251,7 @@ export default function CreateNotice() {
                     Cancel
                   </Button>
                   <Button type="submit" disabled={loading}>
-                    {loading ? "Creating..." : "Create Notice"}
+                    {loading ? "Creating..." : "Create Post"}
                   </Button>
                 </div>
               </form>

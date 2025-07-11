@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Archive, FileText, Plus, Calendar, TrendingUp } from "lucide-react";
-import { NoticeService } from "@/services/noticeService";
+import { NoticeService } from "@/services/noticeservice";
 
 interface ArchiveStats {
   total_posts: number;
@@ -220,7 +220,7 @@ export default function AdminNoticeDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Button
                   variant="outline"
-                  onClick={() => navigate("/notices")}
+                  onClick={() => navigate("/notice")}
                   className="flex items-center gap-2 h-auto p-4 flex-col">
                   <FileText className="w-6 h-6" />
                   <div className="text-center">
@@ -233,7 +233,7 @@ export default function AdminNoticeDashboard() {
 
                 <Button
                   variant="outline"
-                  onClick={() => navigate("/notices/archived")}
+                  onClick={() => navigate("/notice/archived")}
                   className="flex items-center gap-2 h-auto p-4 flex-col">
                   <Archive className="w-6 h-6" />
                   <div className="text-center">

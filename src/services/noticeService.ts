@@ -1,13 +1,14 @@
 import type { Post, PostCreate, PostUpdate } from "@/types";
 
 const API_ENDPOINT =
-  import.meta.env.VITE_API_ENDPOINT || "http://127.0.0.1:8000";
+  import.meta.env.API_ENDPOINT || "http://127.0.0.1:8000";
 
 export class NoticeService {
   private static getAuthHeaders() {
     const token = localStorage.getItem("token");
     return {
       "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true",
       ...(token && { Authorization: `Bearer ${token}` }),
     };
   }
@@ -71,7 +72,9 @@ export class NoticeService {
     formData.append("file", file);
 
     const token = localStorage.getItem("token");
-    const headers: HeadersInit = {};
+    const headers: HeadersInit = {
+      "ngrok-skip-browser-warning": "true",
+    };
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }

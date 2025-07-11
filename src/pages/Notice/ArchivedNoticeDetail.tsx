@@ -86,7 +86,7 @@ export default function ArchivedNoticeDetail() {
             Notice Not Found
           </h2>
           <p className="text-gray-600 mb-6">{error}</p>
-          <Button onClick={() => navigate("/notices/archived")}>
+          <Button onClick={() => navigate("/notice/archived")}>
             Back to Archived Notices
           </Button>
         </div>
@@ -103,7 +103,7 @@ export default function ArchivedNoticeDetail() {
           <div className="flex items-center gap-4 mb-8">
             <Button
               variant="ghost"
-              onClick={() => navigate("/notices/archived")}
+              onClick={() => navigate("/notice/archived")}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-800">
               <ArrowLeft className="w-4 h-4" />
               Back to Archived Notices

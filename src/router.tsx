@@ -4,10 +4,9 @@ import { Home } from "@/pages/Home";
 import { NoticeBoardPage } from "@/pages/Notice/Notices";
 import ArchivedNotices from "@/pages/Notice/ArchivedNotices";
 import ArchivedNoticeDetail from "@/pages/Notice/ArchivedNoticeDetail";
+import ViewNotice from "@/pages/Notice/ViewNotice";
 import CreateNotice from "@/pages/Notice/CreateNotice";
 import EditNotice from "@/pages/Notice/EditNotice";
-import NoticeDetail from "@/pages/Notice/NoticeDetail";
-import AdminNoticeDashboard from "@/pages/Notice/AdminNoticeDashboard";
 import { Contact } from "@/pages/Contact";
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
@@ -33,32 +32,28 @@ export const router = createBrowserRouter([
       //   element: <NoticeBoardPage />,
       // },
       {
-        path: "notices",
+        path: "notice",
         element: <NoticeBoardPage />,
       },
       {
-        path: "notices/archived",
+        path: "notice/archived",
         element: <ArchivedNotices />,
-      },
-      {
-        path: "notice/create",
-        element: <CreateNotice />,
-      },
-      {
-        path: "notice/edit/:id",
-        element: <EditNotice />,
-      },
-      {
-        path: "notice/:id",
-        element: <NoticeDetail />,
       },
       {
         path: "notice/archived/:id",
         element: <ArchivedNoticeDetail />,
       },
       {
-        path: "notice/admin",
-        element: <AdminNoticeDashboard />,
+        path: "notice/create",
+        element: <CreateNotice />,
+      },
+      {
+        path: "notice/:id/edit",
+        element: <EditNotice />,
+      },
+      {
+        path: "notice/:id",
+        element: <ViewNotice />,
       },
 
       {

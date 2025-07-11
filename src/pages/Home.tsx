@@ -15,48 +15,53 @@ export function Home() {
         <div className="absolute bottom-0 left-0 right-0">
           {/* Blue background box */}
           <div className="relative h-32" style={{ backgroundColor: "#14244C" }}>
-            {/* Yellow box centered and overflowing top */}
-            <div
-              className="absolute left-1/2 transform -translate-x-1/2 -top-8 h-24 w-3/4 flex items-center"
-              style={{ backgroundColor: "#ECB31D" }}>
-              {/* CSE text in yellow box */}
-              <div className="flex-1 flex justify-end items-center pr-2">
+            {/* Container for both CSE and DU */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 h-24 w-3/4 flex items-center justify-center">
+              {/* Yellow box for CSE - bigger and center aligned */}
+              <div
+                className="flex items-center justify-end h-full"
+                style={{
+                  backgroundColor: "#ECB31D",
+                  width: "85%",
+                  paddingLeft: "2rem",
+                }}>
                 <h1
                   className="text-6xl font-bold tracking-tight"
                   style={{ color: "#14244C" }}>
                   CSE
                 </h1>
               </div>
+              {/* DU text in blue area, right next to yellow box */}
+              <div className="flex items-center justify-start pl-3 h-full flex-1">
+                <h1
+                  className="text-6xl font-bold tracking-tight"
+                  style={{ color: "#ECB31D" }}>
+                  DU
+                </h1>
+              </div>
             </div>
 
             {/* DU text in blue section, positioned to hug the E */}
-            <div
-              className="absolute right-1/4 -top-8 h-24 flex items-center"
-              style={{ marginLeft: "-10px" }}>
-              <h1 className="text-6xl font-bold tracking-tight text-white">
-                DU
-              </h1>
-            </div>
 
             {/* Horizontal line separator */}
             <div className="absolute bottom-12 left-0 right-0 h-px bg-white/30"></div>
 
             {/* Navigation links at bottom */}
-            <div className="absolute bottom-3 left-8">
-              <div className="flex space-x-8">
-                <button className="text-white hover:text-gray-300 font-medium text-sm">
+            <div className="absolute bottom-3 left-0 right-0">
+              <div className="flex justify-center space-x-8">
+                <button className="text-white hover:text-gray-300 font-medium text-lg padding-y-5">
                   Academics
                 </button>
-                <button className="text-white hover:text-gray-300 font-medium text-sm">
+                <button className="text-white hover:text-gray-300 font-medium text-lg padding-y-5">
                   Research
                 </button>
-                <button className="text-white hover:text-gray-300 font-medium text-sm">
+                <button className="text-white hover:text-gray-300 font-medium text-lg padding-y-5">
                   Admissions
                 </button>
-                <button className="text-white hover:text-gray-300 font-medium text-sm">
+                <button className="text-white hover:text-gray-300 font-medium text-lg padding-y-5">
                   Faculty
                 </button>
-                <button className="text-white hover:text-gray-300 font-medium text-sm">
+                <button className="text-white hover:text-gray-300 font-medium text-lg padding-y-5">
                   Schedule
                 </button>
               </div>

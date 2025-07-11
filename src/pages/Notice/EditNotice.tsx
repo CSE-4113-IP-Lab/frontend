@@ -46,7 +46,7 @@ export default function EditNotice() {
       } catch (error) {
         console.error("Error fetching notice:", error);
         alert("Failed to load notice. Please try again.");
-        navigate("/notices");
+        navigate("/notice");
       } finally {
         setLoadingNotice(false);
       }
@@ -125,7 +125,7 @@ export default function EditNotice() {
           <p className="text-gray-600 mb-4">
             The notice you're looking for doesn't exist.
           </p>
-          <Button onClick={() => navigate("/notices")}>Back to Notices</Button>
+          <Button onClick={() => navigate("/notice")}>Back to Notices</Button>
         </div>
       </div>
     );
@@ -143,7 +143,7 @@ export default function EditNotice() {
               HOME
             </a>
             <a
-              href="/notices"
+              href="/notice"
               className="text-sm font-medium tracking-wider hover:text-gray-300">
               NOTICE
             </a>
