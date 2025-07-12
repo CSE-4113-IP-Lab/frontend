@@ -8,6 +8,12 @@ import ArchivedNoticeDetail from "@/pages/Notice/ArchivedNoticeDetail";
 import ViewNotice from "@/pages/Notice/ViewNotice";
 import CreateNotice from "@/pages/Notice/CreateNotice";
 import EditNotice from "@/pages/Notice/EditNotice";
+// import Auth from "@/pages/Auth/Auth";
+import Resources from "@/pages/Resources/Resources";
+import EquipmentManagement from "@/pages/Admin/EquipmentManagement";
+// import ApiTest from "@/pages/ApiTest";
+
+import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
 import ArchivedEvents from "./pages/Event/ArchivedEvents";
 import EventPage from "./pages/Event/EventPage";
@@ -15,7 +21,6 @@ import UpcomingEvents from "./pages/Event/UpcomingEvents";
 import EventDetails from "./pages/Event/EventDetails";
 import TestComponent from "./pages/Test/TestComponent";
 import CourseList from "./pages/Courses/CourseList";
-import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ProgramOutlines from "./pages/Programs/ProgramOutlines";
 import SchedulePage from "./pages/Schedule/schedule";
 import ErrorPage from "./ErrorPage";
@@ -24,6 +29,7 @@ import AdminCourseManagement from "./pages/Admin/AdminCourseManagement";
 import AdminScheduleManagement from "./pages/Admin/AdminScheduleManagement";
 import AdminProgramManagement from "./pages/Admin/AdminProgramManagement";
 import AdminExamScheduleManagement from "./pages/Admin/AdminExamScheduleManagement";
+import ApiTestPage from "./pages/ApiTest";
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +41,14 @@ export const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
+      // {
+      //   path: "auth",
+      //   element: <Auth />, // Placeholder for Auth page, replace with
+      // },
+      // {
+      //   path: "notice",
+      //   element: <NoticeBoardPage />,
+      // },
       {
         path: "notice",
         element: <NoticeBoardPage />,
@@ -122,6 +136,18 @@ export const router = createBrowserRouter([
       {
         path: "admin/exam-schedules",
         element: <AdminExamScheduleManagement />,
+      },
+      {
+        path: "resources",
+        element: <Resources />,
+      },
+      {
+        path: "admin/equipment-management",
+        element: <EquipmentManagement />,
+      },
+      {
+        path: "api-test",
+        element: <ApiTestPage />,
       },
     ],
   },

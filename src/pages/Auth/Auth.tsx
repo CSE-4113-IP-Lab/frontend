@@ -163,12 +163,21 @@ export default function Home() {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.API_ENDPOINT}/auth/login`,
-        postData
+        `${import.meta.env.VITE_SERVER_URL}/auth/login`,
+        postData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
       );
+
       if (response.status === 200) {
+        console.log("Login successful", response.data);
+
         localStorage.setItem("token", response.data.access_token);
-        localStorage.setItem("id", response.data.used_id);
+        localStorage.setItem("id", response.data.user_id.toString());
         localStorage.setItem("role", response.data.user_role);
         // setToastMessage("Signed in successfully");
 
@@ -210,6 +219,12 @@ export default function Home() {
           userEmail: id,
           otp,
           type: "FORGOT_PASSWORD",
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
         }
       );
 

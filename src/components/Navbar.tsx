@@ -21,6 +21,7 @@ const navItems = [
   { label: "EVENT", href: "/event" },
   { label: "CONTACT", href: "/contact" },
   { label: "SCHEDULE", href: "/schedule" },
+  { label: "RESOURCES", href: "/resources" },
 ];
 
 const additionalNavItems = [
