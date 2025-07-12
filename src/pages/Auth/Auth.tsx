@@ -16,7 +16,7 @@ import axios from "axios";
 import emailjs from "@emailjs/browser";
 import Otp from "@/components/Otp";
 import { useNavigate } from "react-router-dom";
-import Button from "@/components/Button";
+import { useAuth } from "@/contexts/AuthContext";
 
 type DecodedGoogleDetails = {
   email: string;
@@ -27,6 +27,7 @@ export default function Home() {
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useNavigate();
+  const { login, isAuthenticated } = useAuth();
 
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -36,17 +37,20 @@ export default function Home() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
-  const [userRole, setUserRole] = useState<"student" | "faculty" | "admin">(
-    "student"
-  );
   const [rememberMe, setRememberMe] = useState(false);
 
+  // Redirect if already authenticated
   useEffect(() => {
+    if (isAuthenticated) {
+      router("/resources");
+      return;
+    }
+    
     const userEmail = localStorage.getItem("userEmail");
     if (userEmail) {
       setId(userEmail);
     }
-  }, []);
+  }, [isAuthenticated, router]);
 
   const resetValues = () => {
     setId("");
@@ -153,43 +157,34 @@ export default function Home() {
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    console.log("Login form submitted", { id, password }); // Debug log
 
     if (!id.includes("@")) {
       setWarning("Invalid email");
       return;
     }
 
-    const postData = { email: id, password };
-
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/auth/login`,
-        postData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true",
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        console.log("Login successful", response.data);
-
-        localStorage.setItem("token", response.data.access_token);
-        localStorage.setItem("id", response.data.user_id.toString());
-        localStorage.setItem("role", response.data.user_role);
-        // setToastMessage("Signed in successfully");
-
+      setWarning(""); // Clear previous warnings
+      console.log("Attempting login..."); // Debug log
+      
+      const success = await login(id, password);
+      
+      if (success) {
+        console.log("Login successful, redirecting to resources"); // Debug log
         if (rememberMe) {
           localStorage.setItem("userEmail", id);
         }
-
-        router("/");
+        // AuthContext will handle redirect to appropriate resources page
+        router("/resources");
+      } else {
+        console.log("Login failed - invalid credentials"); // Debug log
+        setWarning("Invalid credentials");
       }
     } catch (error) {
-      console.log(error);
-      setWarning("Invalid credentials");
+      console.error("Login error:", error); // Debug log
+      setWarning("Login failed. Please try again.");
     }
   };
 
@@ -265,26 +260,6 @@ export default function Home() {
                     marginRight: "5px",
                   }}
                 />
-              </div>
-
-              <div className="my-4 w-[380px]">
-                <h3 className="font-bold text-sm uppercase text-primary-dark mb-3">
-                  QUICK DEMO LOGIN
-                </h3>
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                  {(["student", "faculty", "admin"] as const).map((type) => (
-                    <Button
-                      key={type}
-                      variant="outline"
-                      size="sm"
-                      cornerStyle="tr"
-                      className="capitalize text-xs"
-                      onClick={() => setUserRole(type)}
-                    >
-                      Demo {type}
-                    </Button>
-                  ))}
-                </div>
               </div>
 
               <div className="input-field">

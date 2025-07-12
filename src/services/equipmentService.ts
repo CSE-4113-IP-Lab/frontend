@@ -88,7 +88,7 @@ export const equipmentService = {
 
   // Get equipment requests (filtered by user role)
   async getEquipmentRequests(status?: string): Promise<EquipmentRequest[]> {
-    const params = status ? { status } : {};
+    const params = status ? { status_filter: status } : {};
     const response = await apiClient.get('/equipment/requests', { params });
     return response.data;
   },

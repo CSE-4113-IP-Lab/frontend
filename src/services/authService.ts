@@ -31,6 +31,7 @@ export const authService = {
     localStorage.setItem('token', response.data.access_token);
     localStorage.setItem('id', response.data.user_id.toString());
     localStorage.setItem('role', response.data.user_role);
+    localStorage.setItem('email', response.data.email);
     
     return response.data;
   },
@@ -47,6 +48,7 @@ export const authService = {
     localStorage.removeItem('token');
     localStorage.removeItem('id');
     localStorage.removeItem('role');
+    localStorage.removeItem('email');
     localStorage.removeItem('user');
   },
 
