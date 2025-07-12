@@ -8,7 +8,7 @@ import ArchivedNoticeDetail from "@/pages/Notice/ArchivedNoticeDetail";
 import ViewNotice from "@/pages/Notice/ViewNotice";
 import CreateNotice from "@/pages/Notice/CreateNotice";
 import EditNotice from "@/pages/Notice/EditNotice";
-// import Auth from "@/pages/Auth/Auth";
+import Auth from "@/pages/Auth/Auth";
 import Resources from "@/pages/Resources/Resources";
 import EquipmentManagement from "@/pages/Admin/EquipmentManagement";
 // import ApiTest from "@/pages/ApiTest";
@@ -41,10 +41,10 @@ export const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
-      // {
-      //   path: "auth",
-      //   element: <Auth />, // Placeholder for Auth page, replace with
-      // },
+      {
+        path: "auth",
+        element: <Auth />, // Placeholder for Auth page, replace with
+      },
       // {
       //   path: "notice",
       //   element: <NoticeBoardPage />,
