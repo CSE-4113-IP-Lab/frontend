@@ -9,6 +9,9 @@ import CreateNotice from "@/pages/Notice/CreateNotice";
 import EditNotice from "@/pages/Notice/EditNotice";
 import { Contact } from "@/pages/Contact";
 import Auth from "@/pages/Auth/Auth";
+import AssignmentCreate from "./pages/Assignments/AssignmentCreate";
+import Assignments from "./pages/Assignments/Assignments";
+import AssignmentDetails from "./pages/Assignments/AssignmentDetails";
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
@@ -93,6 +96,10 @@ export const router = createBrowserRouter([
         path: "event/:id",
         element: <EventDetails />,
       },
+      { path: "assignmentsCreate", element: <AssignmentCreate /> },
+      { path: `assignmentsEdit/:assignmentId`, element: <AssignmentCreate /> },
+      { path: `assignments`, element: <Assignments /> },
+      { path: `assignmentDetails/:id`, element: <AssignmentDetails /> },
     ],
   },
 ]);
