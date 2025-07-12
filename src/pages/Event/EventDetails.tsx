@@ -1,8 +1,8 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import type { Event } from '../../types';
-import { allEvents } from './eventData'; // Combine upcoming & archived
-import RegisterForm from './RegisterForm';
+import React from "react";
+import { useParams, useNavigate } from "react-router";
+import type { Event } from "../../types";
+import { allEvents } from "./eventData"; // Combine upcoming & archived
+import RegisterForm from "./RegisterForm";
 
 const EventDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,20 +15,19 @@ const EventDetails: React.FC = () => {
         <h1 className="text-2xl font-bold mb-4">Event not found</h1>
         <button
           onClick={() => navigate(-1)}
-          className="text-blue-700 underline"
-        >
+          className="text-blue-700 underline">
           Go back
         </button>
       </div>
     );
   }
 
-  const isArchived = event.status.toLowerCase() === 'completed';
+  const isArchived = event.status.toLowerCase() === "completed";
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <div className="mb-4 text-sm text-gray-500">
-        {isArchived ? 'Archived Event' : 'Upcoming Event'}
+        {isArchived ? "Archived Event" : "Upcoming Event"}
       </div>
       <h1 className="text-3xl font-bold text-gray-800 mb-4">{event.title}</h1>
       <p className="text-gray-600 mb-6">{event.description}</p>

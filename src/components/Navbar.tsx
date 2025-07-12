@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Search, Menu, X, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "../contexts/AuthContext";
 
 interface NavbarProps {
   className?: string;
@@ -32,6 +33,16 @@ const additionalNavItems = [
 
 export function Navbar({ className }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { user, isAuthenticated } = useAuth();
+
+  // Add admin link for admin users
+  const navItemsWithAdmin = React.useMemo(() => {
+    const items = [...navItems];
+    if (isAuthenticated && user?.role === 'admin') {
+      items.push({ label: "ADMIN", href: "/admin" });
+    }
+    return items;
+  }, [isAuthenticated, user?.role]);
 
   return (
     <nav
@@ -44,7 +55,7 @@ export function Navbar({ className }: NavbarProps) {
 
           {/* Center - Navigation Links */}
           <div className="hidden md:flex items-center justify-center space-x-8 flex-1">
-            {navItems.map((item) => (
+            {navItemsWithAdmin.map((item) => (
               <Link
                 key={item.label}
                 to={item.href}
@@ -97,7 +108,7 @@ export function Navbar({ className }: NavbarProps) {
                 }}>
                 {/* Mobile navigation items */}
                 <div className="md:hidden">
-                  {navItems.map((item) => (
+                  {navItemsWithAdmin.map((item) => (
                     <DropdownMenuItem
                       key={item.label}
                       className="text-white hover:bg-white/10 focus:bg-white/10">

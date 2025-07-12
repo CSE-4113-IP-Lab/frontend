@@ -3,7 +3,7 @@ import OtpInput from "./OtpInput";
 import { Button } from "@/components/ui/button";
 import { CgPassword } from "react-icons/cg";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 interface OtpProps {
   setShowOtp: (value: boolean) => void;
@@ -105,13 +105,13 @@ const Otp = ({ setShowOtp }: OtpProps) => {
         ) {
           response = await axios.post(
             `${
-              import.meta.env.VITE_SERVER_URL
+              import.meta.env.API_ENDPOINT
             }/auth/verifyOtp?username=${username}&password=${password}`,
             dataToSend
           );
         } else if (otpObject.type === "FORGOT_PASSWORD") {
           response = await axios.post(
-            `${import.meta.env.VITE_SERVER_URL}/auth/forgotPassword`,
+            `${import.meta.env.API_ENDPOINT}/auth/forgotPassword`,
             dataToSend
           );
         }
@@ -148,8 +148,7 @@ const Otp = ({ setShowOtp }: OtpProps) => {
         <div className="w-full h-[2.3rem] bg-slate-500 flex items-center justify-end rounded-t">
           <div
             className="font-bold text-sm text-white h-[1.8rem] w-[1.8rem] mr-2 hover:bg-red-600 hover:rounded-full flex justify-center items-center cursor-pointer"
-            onClick={handleCancel}
-          >
+            onClick={handleCancel}>
             X
           </div>
         </div>

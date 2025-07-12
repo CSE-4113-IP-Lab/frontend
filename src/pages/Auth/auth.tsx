@@ -15,7 +15,7 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import emailjs from "@emailjs/browser";
 import Otp from "@/components/Otp";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import Button from "@/components/Button";
 
 type DecodedGoogleDetails = {
@@ -36,7 +36,9 @@ export default function Home() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
-  const [userRole, setUserRole] = useState<"student" | "faculty" | "admin">("student");
+  const [userRole, setUserRole] = useState<"student" | "faculty" | "admin">(
+    "student"
+  );
   const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
@@ -120,7 +122,7 @@ export default function Home() {
           .then(
             async () => {
               const res = await axios.post(
-                `${import.meta.env.VITE_SERVER_URL}/auth/saveOtp`,
+                `${import.meta.env.API_ENDPOINT}/auth/saveOtp`,
                 {
                   userEmail: id,
                   otp,
@@ -161,7 +163,7 @@ export default function Home() {
 
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/auth/login`,
+        `${import.meta.env.API_ENDPOINT}/auth/login`,
         postData
       );
       if (response.status === 200) {
@@ -203,7 +205,7 @@ export default function Home() {
       );
 
       const res = await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/auth/saveOtp`,
+        `${import.meta.env.API_ENDPOINT}/auth/saveOtp`,
         {
           userEmail: id,
           otp,
@@ -238,8 +240,7 @@ export default function Home() {
                   display: "flex",
                   flexDirection: "row-reverse",
                   alignItems: "center",
-                }}
-              >
+                }}>
                 <p className="title">Sign in</p>
                 <TbLogin
                   style={{
@@ -262,8 +263,7 @@ export default function Home() {
                       size="sm"
                       cornerStyle="tr"
                       className="capitalize text-xs"
-                      onClick={() => setUserRole(type)}
-                    >
+                      onClick={() => setUserRole(type)}>
                       Demo {type}
                     </Button>
                   ))}
@@ -332,8 +332,7 @@ export default function Home() {
                     color: "#ECB31D",
                     cursor: "pointer",
                   }}
-                  onClick={handleForgetPassword}
-                >
+                  onClick={handleForgetPassword}>
                   Forget password? Click here
                 </span>
               </div>
@@ -345,8 +344,7 @@ export default function Home() {
               {mounted && (
                 <div className="mt-4 w-full flex justify-center items-center">
                   <GoogleOAuthProvider
-                    clientId={import.meta.env.VITE_OAUTH_CLIENT_ID ?? ""}
-                  >
+                    clientId={import.meta.env.VITE_OAUTH_CLIENT_ID ?? ""}>
                     <GoogleLogin
                       onSuccess={(credentialResponse) => {
                         const details = jwtDecode(
@@ -369,8 +367,7 @@ export default function Home() {
                   display: "flex",
                   flexDirection: "row",
                   alignItems: "center",
-                }}
-              >
+                }}>
                 <p className="title">Sign up</p>
                 <BiLogIn style={{ fontSize: "40px", marginBottom: "10px" }} />
               </div>
@@ -469,8 +466,7 @@ export default function Home() {
               {mounted && (
                 <div className="mt-4 w-full flex justify-center items-center">
                   <GoogleOAuthProvider
-                    clientId={import.meta.env.VITE_OAUTH_CLIENT_ID ?? ""}
-                  >
+                    clientId={import.meta.env.VITE_OAUTH_CLIENT_ID ?? ""}>
                     <GoogleLogin
                       onSuccess={(credentialResponse) => {
                         const details = jwtDecode(
@@ -503,8 +499,7 @@ export default function Home() {
                 onClick={() => {
                   resetValues();
                   setIsSignUpMode(true);
-                }}
-              >
+                }}>
                 Sign up
               </button>
             </div>
@@ -522,8 +517,7 @@ export default function Home() {
                 onClick={() => {
                   resetValues();
                   setIsSignUpMode(false);
-                }}
-              >
+                }}>
                 Sign in
               </button>
             </div>
