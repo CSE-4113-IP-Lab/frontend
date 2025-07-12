@@ -9,6 +9,9 @@ import CreateNotice from "@/pages/Notice/CreateNotice";
 import EditNotice from "@/pages/Notice/EditNotice";
 import { Contact } from "@/pages/Contact";
 import Auth from "@/pages/Auth/Auth";
+import Resources from "@/pages/Resources/Resources";
+import EquipmentManagement from "@/pages/Admin/EquipmentManagement";
+import ApiTest from "@/pages/ApiTest";
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
@@ -92,6 +95,18 @@ export const router = createBrowserRouter([
       {
         path: "event/:id",
         element: <EventDetails />,
+      },
+      {
+        path: "resources",
+        element: <Resources />,
+      },
+      {
+        path: "admin/equipment-management",
+        element: <EquipmentManagement />,
+      },
+      {
+        path: "api-test",
+        element: <ApiTest />,
       },
     ],
   },
