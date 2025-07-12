@@ -174,8 +174,10 @@ export default function Home() {
       );
 
       if (response.status === 200) {
+        console.log("Login successful", response.data);
+
         localStorage.setItem("token", response.data.access_token);
-        localStorage.setItem("id", response.data.used_id);
+        localStorage.setItem("id", response.data.user_id.toString());
         localStorage.setItem("role", response.data.user_role);
         // setToastMessage("Signed in successfully");
 
