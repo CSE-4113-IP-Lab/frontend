@@ -10,9 +10,13 @@ import {
   X,
   Upload,
   Download,
-  Image as ImageIcon
+  Image as ImageIcon,
 } from "lucide-react";
-import { adminService, type ExamScheduleCreateRequest, type ExamScheduleResponse } from "../../services/adminService";
+import {
+  adminService,
+  type ExamScheduleCreateRequest,
+  type ExamScheduleResponse,
+} from "../../services/adminService";
 import type { ProgramResponse } from "../../services/programService";
 
 interface ExamScheduleFormData {
@@ -23,7 +27,7 @@ interface ExamScheduleFormData {
 const SCHEDULE_TYPES = [
   { value: "exam", label: "Exam Schedule" },
   { value: "class", label: "Class Schedule" },
-  { value: "seminar", label: "Seminar Schedule" }
+  { value: "seminar", label: "Seminar Schedule" },
 ];
 
 const AdminExamScheduleManagement: React.FC = () => {
@@ -32,7 +36,8 @@ const AdminExamScheduleManagement: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [editingSchedule, setEditingSchedule] = useState<ExamScheduleResponse | null>(null);
+  const [editingSchedule, setEditingSchedule] =
+    useState<ExamScheduleResponse | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProgram, setSelectedProgram] = useState<number | "">("");
   const [selectedType, setSelectedType] = useState<string>("");
@@ -40,7 +45,7 @@ const AdminExamScheduleManagement: React.FC = () => {
 
   const [formData, setFormData] = useState<ExamScheduleFormData>({
     program_id: 0,
-    type: "exam"
+    type: "exam",
   });
 
   // Load data
@@ -52,12 +57,12 @@ const AdminExamScheduleManagement: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const [schedulesData, programsData] = await Promise.all([
         adminService.getAllExamSchedules(),
-        adminService.getAllPrograms()
+        adminService.getAllPrograms(),
       ]);
-      
+
       setSchedules(schedulesData);
       setPrograms(programsData);
     } catch (err) {
@@ -69,18 +74,20 @@ const AdminExamScheduleManagement: React.FC = () => {
   };
 
   // Helper functions
-  const getProgramById = (programId: number) => programs.find(p => p.id === programId);
+  const getProgramById = (programId: number) =>
+    programs.find((p) => p.id === programId);
 
   // Filter schedules
-  const filteredSchedules = schedules.filter(schedule => {
+  const filteredSchedules = schedules.filter((schedule) => {
     const program = getProgramById(schedule.program_id);
-    const matchesSearch = 
+    const matchesSearch =
       program?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       schedule.type.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesProgram = selectedProgram === "" || schedule.program_id === selectedProgram;
+
+    const matchesProgram =
+      selectedProgram === "" || schedule.program_id === selectedProgram;
     const matchesType = selectedType === "" || schedule.type === selectedType;
-    
+
     return matchesSearch && matchesProgram && matchesType;
   });
 
@@ -98,7 +105,7 @@ const AdminExamScheduleManagement: React.FC = () => {
     setEditingSchedule(null);
     setFormData({
       program_id: programs[0]?.id || 0,
-      type: "exam"
+      type: "exam",
     });
     setShowModal(true);
   };
@@ -107,14 +114,14 @@ const AdminExamScheduleManagement: React.FC = () => {
     setEditingSchedule(schedule);
     setFormData({
       program_id: schedule.program_id,
-      type: schedule.type
+      type: schedule.type,
     });
     setShowModal(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (editingSchedule) {
         // Update schedule
@@ -124,7 +131,7 @@ const AdminExamScheduleManagement: React.FC = () => {
         const createData: ExamScheduleCreateRequest = formData;
         await adminService.createExamSchedule(createData);
       }
-      
+
       setShowModal(false);
       await loadData(); // Reload data
     } catch (err) {
@@ -134,12 +141,14 @@ const AdminExamScheduleManagement: React.FC = () => {
 
   const handleDelete = async (scheduleId: number) => {
     if (!confirm("Are you sure you want to delete this schedule?")) return;
-    
+
     try {
       await adminService.deleteExamSchedule(scheduleId);
       await loadData(); // Reload data
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete schedule");
+      setError(
+        err instanceof Error ? err.message : "Failed to delete schedule"
+      );
     }
   };
 
@@ -174,13 +183,16 @@ const AdminExamScheduleManagement: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Exam Schedule Management</h1>
-              <p className="text-gray-600 mt-1">Manage exam schedules and timetable images by program</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Exam Schedule Management
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Manage exam schedules and timetable images by program
+              </p>
             </div>
             <button
               onClick={openCreateModal}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
               <Plus className="w-4 h-4" />
               Add Schedule
             </button>
@@ -195,8 +207,7 @@ const AdminExamScheduleManagement: React.FC = () => {
             <p className="text-red-600">{error}</p>
             <button
               onClick={() => setError(null)}
-              className="text-red-600 hover:text-red-700 font-medium mt-2"
-            >
+              className="text-red-600 hover:text-red-700 font-medium mt-2">
               Dismiss
             </button>
           </div>
@@ -215,16 +226,19 @@ const AdminExamScheduleManagement: React.FC = () => {
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
+
             <div className="flex items-center gap-2">
               <Filter className="w-5 h-5 text-gray-400" />
               <select
                 value={selectedProgram}
-                onChange={(e) => setSelectedProgram(e.target.value === "" ? "" : parseInt(e.target.value))}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
+                onChange={(e) =>
+                  setSelectedProgram(
+                    e.target.value === "" ? "" : parseInt(e.target.value)
+                  )
+                }
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">All Programs</option>
-                {programs.map(program => (
+                {programs.map((program) => (
                   <option key={program.id} value={program.id}>
                     {program.name}
                   </option>
@@ -236,10 +250,9 @@ const AdminExamScheduleManagement: React.FC = () => {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">All Types</option>
-                {SCHEDULE_TYPES.map(type => (
+                {SCHEDULE_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
                     {type.label}
                   </option>
@@ -253,14 +266,17 @@ const AdminExamScheduleManagement: React.FC = () => {
         {Object.entries(schedulesByType).map(([type, typeSchedules]) => (
           <div key={type} className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4 capitalize">
-              {SCHEDULE_TYPES.find(t => t.value === type)?.label || type} ({typeSchedules.length})
+              {SCHEDULE_TYPES.find((t) => t.value === type)?.label || type} (
+              {typeSchedules.length})
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {typeSchedules.map((schedule) => {
                 const program = getProgramById(schedule.program_id);
                 return (
-                  <div key={schedule.id} className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                  <div
+                    key={schedule.id}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -268,7 +284,9 @@ const AdminExamScheduleManagement: React.FC = () => {
                             <FileText className="w-6 h-6 text-orange-600" />
                           </div>
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{program?.name || 'Unknown Program'}</h3>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {program?.name || "Unknown Program"}
+                            </h3>
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 capitalize">
                               {schedule.type}
                             </span>
@@ -278,15 +296,13 @@ const AdminExamScheduleManagement: React.FC = () => {
                           <button
                             onClick={() => openEditModal(schedule)}
                             className="text-blue-600 hover:text-blue-700 p-1"
-                            title="Edit schedule"
-                          >
+                            title="Edit schedule">
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(schedule.id)}
                             className="text-red-600 hover:text-red-700 p-1"
-                            title="Delete schedule"
-                          >
+                            title="Delete schedule">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -294,9 +310,9 @@ const AdminExamScheduleManagement: React.FC = () => {
 
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <span>Program: {program?.type || 'N/A'}</span>
+                          <span>Program: {program?.type || "N/A"}</span>
                         </div>
-                        
+
                         {/* Image Section */}
                         <div className="border-t pt-3">
                           {schedule.image_id ? (
@@ -313,10 +329,14 @@ const AdminExamScheduleManagement: React.FC = () => {
                           ) : (
                             <div className="text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">
                               <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                              <p className="text-sm text-gray-500 mb-2">No schedule image</p>
+                              <p className="text-sm text-gray-500 mb-2">
+                                No schedule image
+                              </p>
                               <label className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors cursor-pointer">
                                 <Upload className="w-4 h-4" />
-                                {uploadingImage === schedule.id ? 'Uploading...' : 'Upload Image'}
+                                {uploadingImage === schedule.id
+                                  ? "Uploading..."
+                                  : "Upload Image"}
                                 <input
                                   type="file"
                                   accept="image/*"
@@ -345,8 +365,12 @@ const AdminExamScheduleManagement: React.FC = () => {
         {filteredSchedules.length === 0 && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
             <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No schedules found</h3>
-            <p className="text-gray-500">Get started by creating your first exam schedule.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No schedules found
+            </h3>
+            <p className="text-gray-500">
+              Get started by creating your first exam schedule.
+            </p>
           </div>
         )}
       </div>
@@ -357,16 +381,15 @@ const AdminExamScheduleManagement: React.FC = () => {
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900">
-                {editingSchedule ? 'Edit Schedule' : 'Add New Schedule'}
+                {editingSchedule ? "Edit Schedule" : "Add New Schedule"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
+                className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -376,11 +399,15 @@ const AdminExamScheduleManagement: React.FC = () => {
                   <select
                     required
                     value={formData.program_id}
-                    onChange={(e) => setFormData(prev => ({ ...prev, program_id: parseInt(e.target.value) }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        program_id: parseInt(e.target.value),
+                      }))
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value={0}>Select Program</option>
-                    {programs.map(program => (
+                    {programs.map((program) => (
                       <option key={program.id} value={program.id}>
                         {program.name} ({program.type})
                       </option>
@@ -395,10 +422,11 @@ const AdminExamScheduleManagement: React.FC = () => {
                   <select
                     required
                     value={formData.type}
-                    onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {SCHEDULE_TYPES.map(type => (
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, type: e.target.value }))
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    {SCHEDULE_TYPES.map((type) => (
                       <option key={type.value} value={type.value}>
                         {type.label}
                       </option>
@@ -410,7 +438,8 @@ const AdminExamScheduleManagement: React.FC = () => {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h4 className="font-medium text-gray-900 mb-2">Next Steps</h4>
                 <p className="text-sm text-gray-600">
-                  After creating the schedule entry, you can upload the schedule image using the "Upload Image" button in the schedule card.
+                  After creating the schedule entry, you can upload the schedule
+                  image using the "Upload Image" button in the schedule card.
                 </p>
               </div>
 
@@ -418,16 +447,14 @@ const AdminExamScheduleManagement: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
+                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                   <Save className="w-4 h-4" />
-                  {editingSchedule ? 'Update' : 'Create'} Schedule
+                  {editingSchedule ? "Update" : "Create"} Schedule
                 </button>
               </div>
             </form>

@@ -38,7 +38,7 @@ export function Navbar({ className }: NavbarProps) {
   // Add admin link for admin users
   const navItemsWithAdmin = React.useMemo(() => {
     const items = [...navItems];
-    if (isAuthenticated && user?.role === 'admin') {
+    if (isAuthenticated && user?.role === "admin") {
       items.push({ label: "ADMIN", href: "/admin" });
     }
     return items;

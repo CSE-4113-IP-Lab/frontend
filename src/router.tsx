@@ -25,7 +25,6 @@ import AdminScheduleManagement from "./pages/Admin/AdminScheduleManagement";
 import AdminProgramManagement from "./pages/Admin/AdminProgramManagement";
 import AdminExamScheduleManagement from "./pages/Admin/AdminExamScheduleManagement";
 
-
 export const router = createBrowserRouter([
   {
     path: "/",

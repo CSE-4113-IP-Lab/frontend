@@ -8,11 +8,13 @@ import type { CourseResponse } from "../../types";
 
 const ProgramOutlines: React.FC = () => {
   const [programs, setPrograms] = useState<ProgramResponse[]>([]);
-  const [selectedProgram, setSelectedProgram] = useState<ProgramResponse | null>(null);
+  const [selectedProgram, setSelectedProgram] =
+    useState<ProgramResponse | null>(null);
   const [outline, setOutline] = useState<ProgramOutlineResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingOutline, setIsLoadingOutline] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usingFallbackData, setUsingFallbackData] = useState(false);
 
   // Load programs on component mount
   useEffect(() => {
@@ -20,50 +22,107 @@ const ProgramOutlines: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        
+        console.log("Starting to load programs...");
+
         // Try to fetch from backend API first
         try {
+          console.log("Attempting to load programs from API...");
           const data = await programService.getPublicPrograms();
-          setPrograms(data);
+
+          if (data && data.length > 0) {
+            console.log("API programs loaded successfully:", data.length, data);
+            setPrograms(data);
+            setUsingFallbackData(false);
+          } else {
+            throw new Error("No programs returned from API");
+          }
         } catch (apiError) {
           console.warn("API failed, using fallback data:", apiError);
-          
-          // Fallback to mock data if API fails
+
+          // Always use fallback data when API fails
           const mockPrograms: ProgramResponse[] = [
             {
               id: 1,
               type: "BSc",
               name: "Computer Science and Engineering",
               duration: 4,
-              description: "Bachelor of Science in Computer Science and Engineering",
-              is_active: 1
+              description:
+                "Bachelor of Science in Computer Science and Engineering",
+              is_active: 1,
             },
             {
               id: 2,
-              type: "MSc", 
+              type: "MSc",
               name: "Computer Science and Engineering",
               duration: 2,
-              description: "Master of Science in Computer Science and Engineering",
-              is_active: 1
+              description:
+                "Master of Science in Computer Science and Engineering",
+              is_active: 1,
             },
             {
               id: 3,
               type: "PhD",
-              name: "Computer Science and Engineering", 
+              name: "Computer Science and Engineering",
               duration: 4,
-              description: "Doctor of Philosophy in Computer Science and Engineering",
-              is_active: 1
-            }
+              description:
+                "Doctor of Philosophy in Computer Science and Engineering",
+              is_active: 1,
+            },
           ];
-          
+
           setPrograms(mockPrograms);
+          setUsingFallbackData(true);
+          setError(null); // Clear any error since we have fallback data
+          console.log(
+            "Using mock programs as fallback:",
+            mockPrograms.length,
+            mockPrograms
+          );
+          console.log(
+            "Current programs state after setting fallback:",
+            mockPrograms
+          );
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load programs"
-        );
-        console.error("Error loading programs:", err);
+        console.error("Critical error loading programs:", err);
+
+        // Even on critical error, try to show fallback data
+        const mockPrograms: ProgramResponse[] = [
+          {
+            id: 1,
+            type: "BSc",
+            name: "Computer Science and Engineering",
+            duration: 4,
+            description:
+              "Bachelor of Science in Computer Science and Engineering",
+            is_active: 1,
+          },
+          {
+            id: 2,
+            type: "MSc",
+            name: "Computer Science and Engineering",
+            duration: 2,
+            description:
+              "Master of Science in Computer Science and Engineering",
+            is_active: 1,
+          },
+          {
+            id: 3,
+            type: "PhD",
+            name: "Computer Science and Engineering",
+            duration: 4,
+            description:
+              "Doctor of Philosophy in Computer Science and Engineering",
+            is_active: 1,
+          },
+        ];
+
+        setPrograms(mockPrograms);
+        setUsingFallbackData(true);
+        setError(null); // Clear error to show the fallback data
+        console.log("Using mock programs after critical error");
       } finally {
+        console.log("Finished loading programs, setting isLoading to false");
         setIsLoading(false);
       }
     };
@@ -80,11 +139,19 @@ const ProgramOutlines: React.FC = () => {
 
       // Try to fetch from backend API first
       try {
+        console.log(
+          "Attempting to load program outline from API for program:",
+          program.id
+        );
         const data = await programService.getProgramOutline(program.id);
+        console.log("API outline loaded successfully:", data);
         setOutline(data);
       } catch (apiError) {
-        console.warn("API failed for program outline, using fallback data:", apiError);
-        
+        console.warn(
+          "API failed for program outline, using fallback data:",
+          apiError
+        );
+
         // Fallback to mock data if API fails
         const mockOutline: ProgramOutlineResponse = {
           program: program,
@@ -97,10 +164,11 @@ const ProgramOutlines: React.FC = () => {
                   course_code: "CSE 101",
                   program_id: program.id,
                   credits: 3,
-                  description: "Basic concepts of computer science and programming fundamentals",
+                  description:
+                    "Basic concepts of computer science and programming fundamentals",
                   semester: 1,
                   year: 1,
-                  batch: "2023"
+                  batch: "2023",
                 },
                 {
                   id: 2,
@@ -108,10 +176,11 @@ const ProgramOutlines: React.FC = () => {
                   course_code: "MATH 101",
                   program_id: program.id,
                   credits: 3,
-                  description: "Differential and integral calculus with applications",
+                  description:
+                    "Differential and integral calculus with applications",
                   semester: 1,
                   year: 1,
-                  batch: "2023"
+                  batch: "2023",
                 },
                 {
                   id: 3,
@@ -122,49 +191,74 @@ const ProgramOutlines: React.FC = () => {
                   description: "Classical mechanics and thermodynamics",
                   semester: 1,
                   year: 1,
-                  batch: "2023"
-                }
+                  batch: "2023",
+                },
+                {
+                  id: 4,
+                  name: "English Composition",
+                  course_code: "ENG 101",
+                  program_id: program.id,
+                  credits: 3,
+                  description: "Academic writing and communication skills",
+                  semester: 1,
+                  year: 1,
+                  batch: "2023",
+                },
               ],
               "2": [
                 {
-                  id: 4,
+                  id: 5,
                   name: "Data Structures",
                   course_code: "CSE 201",
                   program_id: program.id,
                   credits: 3,
-                  description: "Arrays, linked lists, stacks, queues, trees, and graphs",
+                  description:
+                    "Arrays, linked lists, stacks, queues, trees, and graphs",
                   semester: 2,
                   year: 1,
-                  batch: "2023"
+                  batch: "2023",
                 },
                 {
-                  id: 5,
+                  id: 6,
                   name: "Mathematics II (Linear Algebra)",
                   course_code: "MATH 201",
                   program_id: program.id,
                   credits: 3,
-                  description: "Vector spaces, matrices, and linear transformations",
+                  description:
+                    "Vector spaces, matrices, and linear transformations",
                   semester: 2,
                   year: 1,
-                  batch: "2023"
-                }
-              ]
+                  batch: "2023",
+                },
+                {
+                  id: 7,
+                  name: "Digital Logic Design",
+                  course_code: "CSE 202",
+                  program_id: program.id,
+                  credits: 3,
+                  description: "Boolean algebra and digital circuit design",
+                  semester: 2,
+                  year: 1,
+                  batch: "2023",
+                },
+              ],
             },
             "2": {
               "1": [
                 {
-                  id: 6,
+                  id: 8,
                   name: "Algorithm Analysis",
                   course_code: "CSE 301",
                   program_id: program.id,
                   credits: 3,
-                  description: "Algorithm design techniques and complexity analysis",
+                  description:
+                    "Algorithm design techniques and complexity analysis",
                   semester: 1,
                   year: 2,
-                  batch: "2023"
+                  batch: "2023",
                 },
                 {
-                  id: 7,
+                  id: 9,
                   name: "Database Systems",
                   course_code: "CSE 302",
                   program_id: program.id,
@@ -172,27 +266,126 @@ const ProgramOutlines: React.FC = () => {
                   description: "Relational databases, SQL, and database design",
                   semester: 1,
                   year: 2,
-                  batch: "2023"
-                }
+                  batch: "2023",
+                },
+                {
+                  id: 10,
+                  name: "Computer Architecture",
+                  course_code: "CSE 303",
+                  program_id: program.id,
+                  credits: 3,
+                  description: "Processor design and computer organization",
+                  semester: 1,
+                  year: 2,
+                  batch: "2023",
+                },
               ],
               "2": [
                 {
-                  id: 8,
+                  id: 11,
                   name: "Software Engineering",
                   course_code: "CSE 401",
                   program_id: program.id,
                   credits: 3,
-                  description: "Software development methodologies and project management",
+                  description:
+                    "Software development methodologies and project management",
                   semester: 2,
                   year: 2,
-                  batch: "2023"
-                }
-              ]
-            }
-          }
+                  batch: "2023",
+                },
+                {
+                  id: 12,
+                  name: "Operating Systems",
+                  course_code: "CSE 402",
+                  program_id: program.id,
+                  credits: 3,
+                  description: "Process management, memory, and file systems",
+                  semester: 2,
+                  year: 2,
+                  batch: "2023",
+                },
+              ],
+            },
+            ...(program.duration > 2 && {
+              "3": {
+                "1": [
+                  {
+                    id: 13,
+                    name: "Computer Networks",
+                    course_code: "CSE 501",
+                    program_id: program.id,
+                    credits: 3,
+                    description: "Network protocols and distributed systems",
+                    semester: 1,
+                    year: 3,
+                    batch: "2023",
+                  },
+                  {
+                    id: 14,
+                    name: "Machine Learning",
+                    course_code: "CSE 502",
+                    program_id: program.id,
+                    credits: 3,
+                    description:
+                      "Supervised and unsupervised learning algorithms",
+                    semester: 1,
+                    year: 3,
+                    batch: "2023",
+                  },
+                ],
+                "2": [
+                  {
+                    id: 15,
+                    name: "Artificial Intelligence",
+                    course_code: "CSE 601",
+                    program_id: program.id,
+                    credits: 3,
+                    description: "AI principles and intelligent systems",
+                    semester: 2,
+                    year: 3,
+                    batch: "2023",
+                  },
+                ],
+              },
+            }),
+            ...(program.duration > 3 && {
+              "4": {
+                "1": [
+                  {
+                    id: 16,
+                    name: "Final Project I",
+                    course_code: "CSE 701",
+                    program_id: program.id,
+                    credits: 3,
+                    description: "Independent research project",
+                    semester: 1,
+                    year: 4,
+                    batch: "2023",
+                  },
+                ],
+                "2": [
+                  {
+                    id: 17,
+                    name: "Final Project II",
+                    course_code: "CSE 702",
+                    program_id: program.id,
+                    credits: 3,
+                    description: "Continuation of research project",
+                    semester: 2,
+                    year: 4,
+                    batch: "2023",
+                  },
+                ],
+              },
+            }),
+          },
         };
-        
+
         setOutline(mockOutline);
+        console.log(
+          "Using mock outline as fallback for program:",
+          program.name
+        );
       }
     } catch (err) {
       setError(
@@ -349,6 +542,32 @@ const ProgramOutlines: React.FC = () => {
         <p className="text-lg text-gray-500 mt-2">
           Explore program structures and course requirements
         </p>
+
+        {/* Data Source Indicator */}
+        <div className="mt-4 text-xs text-gray-400">
+          {programs.length > 0 && (
+            <span>
+              {programs.length} academic programs available
+              {usingFallbackData && (
+                <span className="ml-2 inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
+                  </svg>
+                  Using demo data
+                </span>
+              )}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Program Selection */}
@@ -360,8 +579,9 @@ const ProgramOutlines: React.FC = () => {
         {isLoading ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="ml-4 text-gray-600">Loading programs...</div>
           </div>
-        ) : (
+        ) : programs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {programs.map((program) => (
               <button
@@ -393,6 +613,21 @@ const ProgramOutlines: React.FC = () => {
                 )}
               </button>
             ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <div className="text-gray-400 text-lg mb-2">📚</div>
+            <div className="text-gray-600 text-lg font-medium">
+              No programs available
+            </div>
+            <div className="text-gray-500 text-sm mt-1">
+              Programs may not be loaded yet or there might be an API issue
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+              Reload
+            </button>
           </div>
         )}
       </div>
@@ -441,6 +676,25 @@ const ProgramOutlines: React.FC = () => {
               </div>
             ) : outline ? (
               <div>
+                {/* Data source notice */}
+                <div className="mb-6 text-center">
+                  <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Course outline for {selectedProgram.type} program
+                  </div>
+                </div>
+
                 {Object.keys(outline.outline)
                   .sort((a, b) => parseInt(a) - parseInt(b))
                   .map((yearNum) =>

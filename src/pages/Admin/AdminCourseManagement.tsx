@@ -7,9 +7,13 @@ import {
   Search,
   Filter,
   Save,
-  X
+  X,
 } from "lucide-react";
-import { adminService, type CourseCreateRequest, type CourseUpdateRequest } from "../../services/adminService";
+import {
+  adminService,
+  type CourseCreateRequest,
+  type CourseUpdateRequest,
+} from "../../services/adminService";
 import type { CourseResponse } from "../../types";
 import type { ProgramResponse } from "../../services/programService";
 
@@ -31,7 +35,9 @@ const AdminCourseManagement: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [editingCourse, setEditingCourse] = useState<CourseResponse | null>(null);
+  const [editingCourse, setEditingCourse] = useState<CourseResponse | null>(
+    null
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProgram, setSelectedProgram] = useState<number | "">("");
 
@@ -41,7 +47,7 @@ const AdminCourseManagement: React.FC = () => {
     program_id: 0,
     credits: 3,
     description: "",
-    batch: ""
+    batch: "",
   });
 
   // Load data
@@ -53,12 +59,12 @@ const AdminCourseManagement: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const [coursesData, programsData] = await Promise.all([
         adminService.getAllCourses(),
-        adminService.getAllPrograms()
+        adminService.getAllPrograms(),
       ]);
-      
+
       setCourses(coursesData);
       setPrograms(programsData);
     } catch (err) {
@@ -70,14 +76,15 @@ const AdminCourseManagement: React.FC = () => {
   };
 
   // Filter courses
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = 
+  const filteredCourses = courses.filter((course) => {
+    const matchesSearch =
       course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       course.course_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       course.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesProgram = selectedProgram === "" || course.program_id === selectedProgram;
-    
+
+    const matchesProgram =
+      selectedProgram === "" || course.program_id === selectedProgram;
+
     return matchesSearch && matchesProgram;
   });
 
@@ -90,7 +97,7 @@ const AdminCourseManagement: React.FC = () => {
       program_id: programs[0]?.id || 0,
       credits: 3,
       description: "",
-      batch: ""
+      batch: "",
     });
     setShowModal(true);
   };
@@ -106,14 +113,14 @@ const AdminCourseManagement: React.FC = () => {
       description: course.description || "",
       semester: course.semester || undefined,
       year: course.year || undefined,
-      batch: course.batch || ""
+      batch: course.batch || "",
     });
     setShowModal(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (editingCourse) {
         // Update course
@@ -121,7 +128,7 @@ const AdminCourseManagement: React.FC = () => {
           ...formData,
           teacher_id: formData.teacher_id || undefined,
           semester: formData.semester || undefined,
-          year: formData.year || undefined
+          year: formData.year || undefined,
         };
         await adminService.updateCourse(editingCourse.id, updateData);
       } else {
@@ -130,11 +137,11 @@ const AdminCourseManagement: React.FC = () => {
           ...formData,
           teacher_id: formData.teacher_id || undefined,
           semester: formData.semester || undefined,
-          year: formData.year || undefined
+          year: formData.year || undefined,
         };
         await adminService.createCourse(createData);
       }
-      
+
       setShowModal(false);
       await loadData(); // Reload data
     } catch (err) {
@@ -144,7 +151,7 @@ const AdminCourseManagement: React.FC = () => {
 
   const handleDelete = async (courseId: number) => {
     if (!confirm("Are you sure you want to delete this course?")) return;
-    
+
     try {
       await adminService.deleteCourse(courseId);
       await loadData(); // Reload data
@@ -172,13 +179,16 @@ const AdminCourseManagement: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Course Management</h1>
-              <p className="text-gray-600 mt-1">Manage courses, credits, and academic requirements</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Course Management
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Manage courses, credits, and academic requirements
+              </p>
             </div>
             <button
               onClick={openCreateModal}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
               <Plus className="w-4 h-4" />
               Add Course
             </button>
@@ -193,8 +203,7 @@ const AdminCourseManagement: React.FC = () => {
             <p className="text-red-600">{error}</p>
             <button
               onClick={() => setError(null)}
-              className="text-red-600 hover:text-red-700 font-medium mt-2"
-            >
+              className="text-red-600 hover:text-red-700 font-medium mt-2">
               Dismiss
             </button>
           </div>
@@ -213,16 +222,19 @@ const AdminCourseManagement: React.FC = () => {
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
+
             <div className="flex items-center gap-2">
               <Filter className="w-5 h-5 text-gray-400" />
               <select
                 value={selectedProgram}
-                onChange={(e) => setSelectedProgram(e.target.value === "" ? "" : parseInt(e.target.value))}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
+                onChange={(e) =>
+                  setSelectedProgram(
+                    e.target.value === "" ? "" : parseInt(e.target.value)
+                  )
+                }
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">All Programs</option>
-                {programs.map(program => (
+                {programs.map((program) => (
                   <option key={program.id} value={program.id}>
                     {program.name}
                   </option>
@@ -260,17 +272,25 @@ const AdminCourseManagement: React.FC = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredCourses.map((course) => {
-                  const program = programs.find(p => p.id === course.program_id);
+                  const program = programs.find(
+                    (p) => p.id === course.program_id
+                  );
                   return (
                     <tr key={course.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{course.name}</div>
-                          <div className="text-sm text-gray-500">{course.course_code}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {course.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {course.course_code}
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-900">{program?.name || 'N/A'}</span>
+                        <span className="text-sm text-gray-900">
+                          {program?.name || "N/A"}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -278,25 +298,25 @@ const AdminCourseManagement: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {course.year && course.semester ? `Year ${course.year}, Semester ${course.semester}` : 'Not specified'}
+                        {course.year && course.semester
+                          ? `Year ${course.year}, Semester ${course.semester}`
+                          : "Not specified"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {course.batch || 'N/A'}
+                        {course.batch || "N/A"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openEditModal(course)}
                             className="text-blue-600 hover:text-blue-700 p-1"
-                            title="Edit course"
-                          >
+                            title="Edit course">
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(course.id)}
                             className="text-red-600 hover:text-red-700 p-1"
-                            title="Delete course"
-                          >
+                            title="Delete course">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -307,12 +327,16 @@ const AdminCourseManagement: React.FC = () => {
               </tbody>
             </table>
           </div>
-          
+
           {filteredCourses.length === 0 && (
             <div className="text-center py-12">
               <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
-              <p className="text-gray-500">Get started by creating your first course.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No courses found
+              </h3>
+              <p className="text-gray-500">
+                Get started by creating your first course.
+              </p>
             </div>
           )}
         </div>
@@ -324,16 +348,15 @@ const AdminCourseManagement: React.FC = () => {
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900">
-                {editingCourse ? 'Edit Course' : 'Add New Course'}
+                {editingCourse ? "Edit Course" : "Add New Course"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
+                className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
@@ -344,7 +367,9 @@ const AdminCourseManagement: React.FC = () => {
                     type="text"
                     required
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, name: e.target.value }))
+                    }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -356,7 +381,12 @@ const AdminCourseManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.course_code}
-                    onChange={(e) => setFormData(prev => ({ ...prev, course_code: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        course_code: e.target.value,
+                      }))
+                    }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -368,11 +398,15 @@ const AdminCourseManagement: React.FC = () => {
                   <select
                     required
                     value={formData.program_id}
-                    onChange={(e) => setFormData(prev => ({ ...prev, program_id: parseInt(e.target.value) }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        program_id: parseInt(e.target.value),
+                      }))
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value={0}>Select Program</option>
-                    {programs.map(program => (
+                    {programs.map((program) => (
                       <option key={program.id} value={program.id}>
                         {program.name}
                       </option>
@@ -390,7 +424,12 @@ const AdminCourseManagement: React.FC = () => {
                     max="6"
                     required
                     value={formData.credits}
-                    onChange={(e) => setFormData(prev => ({ ...prev, credits: parseInt(e.target.value) }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        credits: parseInt(e.target.value),
+                      }))
+                    }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -401,9 +440,15 @@ const AdminCourseManagement: React.FC = () => {
                   </label>
                   <select
                     value={formData.year || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value ? parseInt(e.target.value) : undefined }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        year: e.target.value
+                          ? parseInt(e.target.value)
+                          : undefined,
+                      }))
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Select Year</option>
                     <option value={1}>1st Year</option>
                     <option value={2}>2nd Year</option>
@@ -418,9 +463,15 @@ const AdminCourseManagement: React.FC = () => {
                   </label>
                   <select
                     value={formData.semester || ""}
-                    onChange={(e) => setFormData(prev => ({ ...prev, semester: e.target.value ? parseInt(e.target.value) : undefined }))}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        semester: e.target.value
+                          ? parseInt(e.target.value)
+                          : undefined,
+                      }))
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Select Semester</option>
                     <option value={1}>1st Semester</option>
                     <option value={2}>2nd Semester</option>
@@ -434,7 +485,12 @@ const AdminCourseManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.batch}
-                    onChange={(e) => setFormData(prev => ({ ...prev, batch: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        batch: e.target.value,
+                      }))
+                    }
                     placeholder="e.g., 2023"
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -447,7 +503,12 @@ const AdminCourseManagement: React.FC = () => {
                   <textarea
                     rows={3}
                     value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -457,16 +518,14 @@ const AdminCourseManagement: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
+                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                   <Save className="w-4 h-4" />
-                  {editingCourse ? 'Update' : 'Create'} Course
+                  {editingCourse ? "Update" : "Create"} Course
                 </button>
               </div>
             </form>
