@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { Layout } from "@/components/Layout";
 import { Home } from "@/pages/Home";
+
 import { Contact } from "@/pages/Contact";
 import { NoticeBoardPage } from "@/pages/Notice/Notices";
 import ArchivedNotices from "@/pages/Notice/ArchivedNotices";
@@ -31,6 +32,16 @@ import AdminProgramManagement from "./pages/Admin/AdminProgramManagement";
 import AdminExamScheduleManagement from "./pages/Admin/AdminExamScheduleManagement";
 import ApiTestPage from "./pages/ApiTest";
 
+//import { Notice } from "@/pages/Notice";
+import FacultyProfile from "@/pages/FacultyProfile";
+import FacultyDirectory from "@/pages/FacultyDirectory";
+import EditFaculty from "@/pages/EditFaculty";
+import FacultyOverview from "@/pages/FacultyOverview";
+import ActiveFacultyList from "@/pages/ActiveFacultyList";
+import FacultyOnLeaveList from "@/pages/FacultyOnLeaveList";
+import NewFacultyYearwise from "@/pages/NewFacultyYearwise";
+
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -54,6 +65,7 @@ export const router = createBrowserRouter([
         element: <NoticeBoardPage />,
       },
       {
+
         path: "notice/archived",
         element: <ArchivedNotices />,
       },
@@ -77,6 +89,38 @@ export const router = createBrowserRouter([
         path: "contact",
         element: <Contact />,
       },
+
+       // Faculty Routes
+       {
+        path: "faculty",
+        element: <FacultyOverview />, // Faculty Information overall
+      },
+      {
+        path: "faculty/profile/:id",
+        element: <FacultyProfile />,
+      },
+      {
+        path: "faculty/directory",
+        element: <FacultyDirectory />, // Faculty search by directory
+      },
+      {
+        path: "faculty/edit/:id",
+        element: <EditFaculty />, // Edit Faculty
+      },
+      {
+        path: "faculty/active",
+        element: <ActiveFacultyList />, // Active Faculty List
+      },
+      {
+        path: "faculty/on-leave",
+        element: <FacultyOnLeaveList />, // Faculty on leave list
+      },
+      {
+        path: "faculty/yearly",
+        element: <NewFacultyYearwise />, // New Faculty Information yearwise
+      },
+      
+
       {
         path: "exam-schedule",
         element: <ExamSchedule />,
