@@ -12,6 +12,10 @@ import EventPage from "./pages/Event/EventPage";
 import UpcomingEvents from "./pages/Event/UpcomingEvents";
 import ErrorPage from "./ErrorPage";
 import  EventDetails  from "./pages/Event/EventDetails";
+import ScheduleManager from "./pages/Schedule/schedulemanager/ScheduleManager";
+import ResearchGallery from "./pages/Research/ResearchGallery";
+import ResearchDetail from "./pages/Research/ResearchDetail";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -59,6 +63,18 @@ export const router = createBrowserRouter([
       {
         path: "event/:id",
         element: <EventDetails />,
+      },
+      {
+        path: "schedule-manager",
+        element: <ScheduleManager />,
+      },
+      {
+        path: "research-gallery",
+        element: <ResearchGallery />,
+      },
+      {
+        path: "research/:id",
+        element: <ResearchDetail />,
       }
 
     ],

@@ -17,5 +17,5 @@ export const examData: ExamScheduleItem[] = [
     roomNo: "Room 210",
     level: "Masters"
   },
-  // Add remaining entries with level: "Undergraduate" or "Masters"
+  
 ];
