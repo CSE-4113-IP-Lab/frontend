@@ -36,7 +36,9 @@ export default function Home() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
-  const [userRole, setUserRole] = useState<"student" | "faculty" | "admin">("student");
+  const [userRole, setUserRole] = useState<"student" | "faculty" | "admin">(
+    "student"
+  );
   const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
@@ -162,8 +164,15 @@ export default function Home() {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/auth/login`,
-        postData
+        postData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
       );
+
       if (response.status === 200) {
         localStorage.setItem("token", response.data.access_token);
         localStorage.setItem("id", response.data.used_id);
@@ -208,6 +217,12 @@ export default function Home() {
           userEmail: id,
           otp,
           type: "FORGOT_PASSWORD",
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
         }
       );
 
