@@ -12,6 +12,7 @@ import Auth from "@/pages/Auth/Auth";
 import AssignmentCreate from "./pages/Assignments/AssignmentCreate";
 import Assignments from "./pages/Assignments/Assignments";
 import AssignmentDetails from "./pages/Assignments/AssignmentDetails";
+import AssignmentSubmission from "./pages/Assignments/AssignmentSubmission";
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
@@ -100,6 +101,7 @@ export const router = createBrowserRouter([
       { path: `assignmentsEdit/:assignmentId`, element: <AssignmentCreate /> },
       { path: `assignments`, element: <Assignments /> },
       { path: `assignmentDetails/:id`, element: <AssignmentDetails /> },
+      { path: `assignmentSubmissions/:id`, element: <AssignmentSubmission /> },
     ],
   },
 ]);
