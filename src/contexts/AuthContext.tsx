@@ -5,20 +5,16 @@ import React, {
   useEffect,
 } from "react";
 import type { ReactNode } from "react";
+import { authService } from "@/services/authService";
 
-export type UserRole = "student" | "faculty" | "admin" | null;
+export type UserRole = "student" | "faculty" | "admin" | "staff" | null;
 
 export interface User {
   id: string;
   name: string;
   email: string;
   role: UserRole;
-  studentId?: string;
-  facultyId?: string;
-  department?: string;
-  semester?: string;
-  batch?: string;
-  courses?: string[]; // Courses taught (faculty) or enrolled (student)
+  token: string;
 }
 
 interface AuthContextType {
@@ -29,84 +25,70 @@ interface AuthContextType {
   hasRole: (role: UserRole) => boolean;
   hasAnyRole: (roles: UserRole[]) => boolean;
   canAccessCourse: (courseCode: string) => boolean;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Mock users for demonstration
-const mockUsers: { [key: string]: User } = {
-  "student@csedu.du.ac.bd": {
-    id: "1",
-    name: "Fatima Khan",
-    email: "student@csedu.du.ac.bd",
-    role: "student",
-    studentId: "2021-1-60-001",
-    department: "Computer Science and Engineering",
-    semester: "7th",
-    batch: "2021",
-    courses: ["CSE 425", "CSE 301", "CSE 201", "CSE 401", "CSE 101"],
-  },
-  "faculty@csedu.du.ac.bd": {
-    id: "2",
-    name: "Dr. Mohammad Rahman",
-    email: "faculty@csedu.du.ac.bd",
-    role: "faculty",
-    facultyId: "CSE-001",
-    department: "Computer Science and Engineering",
-    courses: ["CSE 425", "CSE 471", "CSE 472"],
-  },
-  "admin@csedu.du.ac.bd": {
-    id: "3",
-    name: "Ahmed Hassan",
-    email: "admin@csedu.du.ac.bd",
-    role: "admin",
-    department: "Computer Science and Engineering",
-    courses: [], // Admin has access to all courses
-  },
-  "faculty2@csedu.du.ac.bd": {
-    id: "4",
-    name: "Dr. Sarah Ahmed",
-    email: "faculty2@csedu.du.ac.bd",
-    role: "faculty",
-    facultyId: "CSE-002",
-    department: "Computer Science and Engineering",
-    courses: ["CSE 401", "CSE 471", "CSE 472"],
-  },
-};
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check for saved authentication state
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    const currentUser = authService.getCurrentUser();
+    if (currentUser && authService.isAuthenticated()) {
+      // Get the stored email from localStorage (could be from login or signup)
+      const storedEmail = localStorage.getItem('email') || localStorage.getItem('userEmail') || '';
+      
+      setUser({
+        id: currentUser.id,
+        name: storedEmail.split('@')[0] || 'User', // Use email prefix as name
+        email: storedEmail,
+        role: currentUser.role as UserRole,
+        token: currentUser.token
+      });
       setIsAuthenticated(true);
     }
+    setLoading(false);
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - in real app, this would call an API
-    const mockUser = mockUsers[email];
-
-    if (mockUser && password === "password123") {
-      setUser(mockUser);
+    try {
+      console.log("AuthContext: Starting login process", { email }); // Debug log
+      setLoading(true);
+      const response = await authService.login({ email, password });
+      console.log("AuthContext: Login response received", response); // Debug log
+      
+      const newUser: User = {
+        id: response.user_id.toString(),
+        name: response.email.split('@')[0], // Use email prefix as name
+        email: response.email,
+        role: response.user_role as UserRole,
+        token: response.access_token
+      };
+      
+      console.log("AuthContext: Setting user", newUser); // Debug log
+      setUser(newUser);
       setIsAuthenticated(true);
-      localStorage.setItem("user", JSON.stringify(mockUser));
+      localStorage.setItem('email', response.email);
+      
       return true;
+    } catch (error) {
+      console.error('AuthContext: Login failed:', error);
+      return false;
+    } finally {
+      setLoading(false);
     }
-
-    return false;
   };
 
   const logout = () => {
+    authService.logout();
     setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem("user");
   };
 
   const hasRole = (role: UserRole): boolean => {
@@ -117,14 +99,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     return roles.includes(user?.role || null);
   };
 
-  const canAccessCourse = (courseCode: string): boolean => {
-    if (!user) return false;
-
-    // Admin can access all courses
-    if (user.role === "admin") return true;
-
-    // Check if user is enrolled in or teaches the course
-    return user.courses?.includes(courseCode) || false;
+  const canAccessCourse = (_courseCode: string): boolean => {
+    // Simple course access logic - can be expanded later
+    return isAuthenticated;
   };
 
   const value: AuthContextType = {
@@ -135,6 +112,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     hasRole,
     hasAnyRole,
     canAccessCourse,
+    loading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

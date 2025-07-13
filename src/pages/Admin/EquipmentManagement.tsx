@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,7 @@ import {
   TabsTrigger 
 } from "@/components/ui/tabs";
 import { 
-  Plus, 
+  Plus,
   Edit, 
   Trash2, 
   Search, 
@@ -28,7 +29,8 @@ import {
   XCircle, 
   HandHeart,
   ArrowLeftRight,
-  RotateCcw
+  RotateCcw,
+  ArrowLeft
 } from "lucide-react";
 import { 
   equipmentService,
@@ -36,7 +38,8 @@ import {
   type EquipmentCreateInput, 
   type EquipmentUpdateInput, 
   type EquipmentRequest 
-} from "@/services/publicEquipmentService";
+} from "@/services/equipmentService";
+import { useNavigate } from 'react-router-dom';
 
 // Simple Modal Component
 const Modal: React.FC<{
@@ -45,14 +48,43 @@ const Modal: React.FC<{
   title: string;
   children: React.ReactNode;
 }> = ({ isOpen, onClose, title, children }) => {
+  // Handle escape key press
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Lighter Backdrop - more transparent */}
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-30 transition-opacity"
+        onClick={onClose}
+      />
+      
+      {/* Modal Content */}
+      <div className="relative bg-white rounded-lg shadow-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto m-4 z-10 border-2 border-gray-200">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">{title}</h2>
-          <Button variant="outline" onClick={onClose}>×</Button>
+          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors"
+            title="Close (Press Escape)"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
         {children}
       </div>
@@ -71,11 +103,21 @@ const AlertDialog: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-sm">
-        <h3 className="text-lg font-semibold mb-2">{title}</h3>
-        <p className="text-gray-600 mb-4">{description}</p>
-        <div className="flex space-x-2 justify-end">
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-2xl border-2 border-gray-200">
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <p className="text-gray-600 mb-6">{description}</p>
+        <div className="flex space-x-3 justify-end">
           <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button onClick={onConfirm} className="bg-red-600 hover:bg-red-700">Delete</Button>
         </div>
@@ -116,6 +158,14 @@ const TableCell: React.FC<{ children: React.ReactNode; className?: string }> = (
 );
 
 const EquipmentManagement: React.FC = () => {
+  const navigate = useNavigate();
+  
+  // Set admin JWT token for testing
+  useEffect(() => {
+    const adminToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJ0YWhzaW5AeWFob28uY29tIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzUyNDI1OTU2fQ.0sSuQwO0AC0DkzE-WoUGpIGTfLlbhQJUpfSqdkQesL0";
+    localStorage.setItem('accessToken', adminToken);
+  }, []);
+
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [requests, setRequests] = useState<EquipmentRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,12 +188,49 @@ const EquipmentManagement: React.FC = () => {
     description: '',
     quantity: 0,
   });
-
   const [editForm, setEditForm] = useState<EquipmentUpdateInput>({});
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<string>('equipment');
 
   // Load data
   useEffect(() => {
     loadData();
+    
+    // Handle URL parameters
+    const tab = searchParams.get('tab');
+    const filter = searchParams.get('filter');
+    
+    if (tab === 'requests') {
+      setActiveTab('requests');
+    }
+    
+    if (filter === 'pending') {
+      setRequestStatusFilter('pending');
+    }
+  }, [searchParams]);
+
+  // Separate useEffect for handling the add dialog event
+  useEffect(() => {
+    // Listen for custom events to open add dialog
+    const handleOpenAddDialog = () => {
+      console.log('Opening add equipment dialog...');
+      setIsAddDialogOpen(true);
+    };
+    
+    window.addEventListener('openAddEquipmentDialog', handleOpenAddDialog);
+    
+    // Also check if we should open the dialog immediately after navigation
+    const shouldOpenDialog = sessionStorage.getItem('openAddDialog');
+    if (shouldOpenDialog === 'true') {
+      sessionStorage.removeItem('openAddDialog');
+      setTimeout(() => {
+        setIsAddDialogOpen(true);
+      }, 100);
+    }
+    
+    return () => {
+      window.removeEventListener('openAddEquipmentDialog', handleOpenAddDialog);
+    };
   }, []);
 
   const loadData = async () => {
@@ -306,23 +393,44 @@ const EquipmentManagement: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-lg text-gray-600">Loading Equipment Management...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Equipment Management</h1>
-        <Button onClick={() => setIsAddDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Equipment
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Main Content */}
+      <main className="px-6 py-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-4 mb-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/resources/admin')}
+                    className="flex items-center gap-2"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Admin Resources
+                  </Button>
+                </div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Equipment Management</h1>
+                <p className="text-gray-600">
+                  Manage laboratory equipment inventory and approve equipment requests.
+                </p>
+              </div>
+            </div>
+          </div>
 
-      <Tabs defaultValue="equipment" className="space-y-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="equipment">Equipment</TabsTrigger>
           <TabsTrigger value="requests">
@@ -346,6 +454,10 @@ const EquipmentManagement: React.FC = () => {
                 className="pl-10"
               />
             </div>
+            <Button onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Equipment
+            </Button>
           </div>
 
           <Card>
@@ -538,52 +650,82 @@ const EquipmentManagement: React.FC = () => {
         onClose={() => setIsAddDialogOpen(false)}
         title="Add New Equipment"
       >
-        <div className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); handleAddEquipment(); }} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
+            <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+              Equipment Name *
+            </Label>
             <Input
               id="name"
               value={newEquipment.name}
               onChange={(e) => setNewEquipment({ ...newEquipment, name: e.target.value })}
-              placeholder="Equipment name"
+              placeholder="Enter equipment name"
+              className="w-full"
+              required
             />
           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="type">Type *</Label>
+            <Label htmlFor="type" className="text-sm font-medium text-gray-700">
+              Equipment Type *
+            </Label>
             <Input
               id="type"
               value={newEquipment.type}
               onChange={(e) => setNewEquipment({ ...newEquipment, type: e.target.value })}
-              placeholder="Equipment type"
+              placeholder="e.g., Microscope, Computer, Lab Equipment"
+              className="w-full"
+              required
             />
           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="quantity">Quantity *</Label>
+            <Label htmlFor="quantity" className="text-sm font-medium text-gray-700">
+              Quantity *
+            </Label>
             <Input
               id="quantity"
               type="number"
               value={newEquipment.quantity}
               onChange={(e) => setNewEquipment({ ...newEquipment, quantity: parseInt(e.target.value) || 0 })}
-              placeholder="0"
+              placeholder="Enter quantity"
+              className="w-full"
               min="1"
+              required
             />
           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+              Description (Optional)
+            </Label>
             <Textarea
               id="description"
               value={newEquipment.description}
               onChange={(e) => setNewEquipment({ ...newEquipment, description: e.target.value })}
-              placeholder="Equipment description"
+              placeholder="Enter equipment description, specifications, or notes"
+              className="w-full min-h-[80px] resize-none"
+              rows={3}
             />
           </div>
-          <div className="flex space-x-2 justify-end">
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+          
+          <div className="flex space-x-3 pt-4 border-t">
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={() => setIsAddDialogOpen(false)}
+              className="flex-1"
+            >
               Cancel
             </Button>
-            <Button onClick={handleAddEquipment}>Add Equipment</Button>
+            <Button 
+              type="submit"
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
+            >
+              Add Equipment
+            </Button>
           </div>
-        </div>
+        </form>
       </Modal>
 
       {/* Edit Equipment Modal */}
@@ -652,6 +794,8 @@ const EquipmentManagement: React.FC = () => {
         title="Delete Equipment"
         description="Are you sure you want to delete this equipment? This action cannot be undone."
       />
+        </div>
+      </main>
     </div>
   );
 };

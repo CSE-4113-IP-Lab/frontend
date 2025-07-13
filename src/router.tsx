@@ -17,7 +17,16 @@ import AssignmentDetails from "./pages/Assignments/AssignmentDetails";
 import AssignmentSubmission from "./pages/Assignments/AssignmentSubmission";
 
 import Resources from "@/pages/Resources/Resources";
-import EquipmentManagement from "@/pages/Admin/EquipmentManagement";
+import AdminResources from "@/pages/Resources/AdminResources";
+import StudentResources from "@/pages/Resources/StudentResources";
+import FacultyResources from "@/pages/Resources/FacultyResources";
+import EquipmentManagement from "@/pages/Admin/AdminEquipmentManagement";
+import StudentEquipmentPage from "@/pages/Student/StudentEquipment";
+import FacultyEquipmentPage from "@/pages/Faculty/FacultyEquipment";
+import { AdminRoute, StudentRoute, FacultyRoute } from "@/components/ProtectedRoute";
+import ApiTest from "@/pages/ApiTest";
+import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
+
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
@@ -196,12 +205,76 @@ export const router = createBrowserRouter([
         element: <Resources />,
       },
       {
+        path: "resources/admin",
+        element: (
+          <AdminRoute>
+            <AdminResources />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "resources/student", 
+        element: (
+          <StudentRoute>
+            <StudentResources />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "resources/faculty",
+        element: (
+          <FacultyRoute>
+            <FacultyResources />
+          </FacultyRoute>
+        ),
+      },
+      {
         path: "admin/equipment-management",
-        element: <EquipmentManagement />,
+        element: (
+          <AdminRoute>
+            <EquipmentManagement />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "student/equipment",
+        element: (
+          <StudentRoute>
+            <StudentEquipmentPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "faculty/equipment",
+        element: (
+          <FacultyRoute>
+            <FacultyEquipmentPage />
+          </FacultyRoute>
+        ),
       },
       {
         path: "api-test",
         element: <ApiTestPage />,
+      },
+      {
+        path: "room-booking",
+        element: <RoomBookingDashboard />,
+      },
+      {
+        path: "room-booking/available",
+        element: <AvailableRooms />,
+      },
+      {
+        path: "room-booking/book",
+        element: (
+          <FacultyRoute>
+            <BookRoom />
+          </FacultyRoute>
+        ),
+      },
+      {
+        path: "room-booking/my-bookings",
+        element: <MyBookings />,
       },
     ],
   },

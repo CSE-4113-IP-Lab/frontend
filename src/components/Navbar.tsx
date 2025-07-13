@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,9 +7,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, Menu, X, ChevronRight } from "lucide-react";
+import { Search, Menu, X, ChevronRight, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "../contexts/AuthContext";
+
+import { useAuth } from "@/contexts/AuthContext";
+
 
 interface NavbarProps {
   className?: string;
@@ -22,6 +24,7 @@ const navItems = [
   { label: "CONTACT", href: "/contact" },
   { label: "SCHEDULE", href: "/schedule" },
   { label: "RESOURCES", href: "/resources" },
+  { label: "ROOM BOOKING", href: "/room-booking" },
 ];
 
 const additionalNavItems = [
@@ -34,7 +37,18 @@ const additionalNavItems = [
 
 export function Navbar({ className }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { user, isAuthenticated } = useAuth();
+
+  const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    navigate('/auth');
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   // Add admin link for admin users
   const navItemsWithAdmin = React.useMemo(() => {
@@ -44,6 +58,7 @@ export function Navbar({ className }: NavbarProps) {
     }
     return items;
   }, [isAuthenticated, user?.role]);
+
 
   return (
     <nav
@@ -77,13 +92,38 @@ export function Navbar({ className }: NavbarProps) {
               <span className="sr-only">Search</span>
             </Button>
 
-            {/* Login Button (hidden on mobile) */}
-            <Button
-              variant="outline"
-              className="hidden md:inline-flex text-sm px-6 py-1.5 h-8 font-medium border-0 rounded-sm"
-              style={{ backgroundColor: "#ECB31D", color: "#14244C" }}>
-              LOG IN
-            </Button>
+            {/* Login/Logout Button (hidden on mobile) */}
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="hidden md:inline-flex text-sm px-6 py-1.5 h-8 font-medium border-0 rounded-sm items-center space-x-2"
+                    style={{ backgroundColor: "#ECB31D", color: "#14244C" }}>
+                    <User className="h-4 w-4" />
+                    <span>{user?.name || user?.email}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={handleLogin}
+                className="hidden md:inline-flex text-sm px-6 py-1.5 h-8 font-medium border-0 rounded-sm"
+                style={{ backgroundColor: "#ECB31D", color: "#14244C" }}>
+                LOG IN
+              </Button>
+            )}
 
             {/* Hamburger menu button */}
             <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -109,7 +149,22 @@ export function Navbar({ className }: NavbarProps) {
                 }}>
                 {/* Mobile navigation items */}
                 <div className="md:hidden">
-                  {navItemsWithAdmin.map((item) => (
+                  {/* User info when authenticated */}
+                  {isAuthenticated && (
+                    <>
+                      <DropdownMenuItem className="text-white hover:bg-white/10 focus:bg-white/10">
+                        <div className="w-full px-3 py-2">
+                          <div className="flex items-center space-x-2">
+                            <User className="h-4 w-4" />
+                            <span className="text-sm font-medium">{user?.name || user?.email}</span>
+                          </div>
+                          <div className="text-xs text-gray-300 mt-1">{user?.role?.toUpperCase()}</div>
+                        </div>
+                      </DropdownMenuItem>
+                      <div className="border-t border-gray-600 my-1"></div>
+                    </>
+                  )}
+                  {navItems.map((item) => (
                     <DropdownMenuItem
                       key={item.label}
                       className="text-white hover:bg-white/10 focus:bg-white/10">
@@ -132,12 +187,24 @@ export function Navbar({ className }: NavbarProps) {
                     </DropdownMenuItem>
                   ))}
                   <DropdownMenuItem className="text-white hover:bg-white/10 focus:bg-white/10">
-                    <Button
-                      variant="outline"
-                      className="w-full border-0 font-medium rounded-sm"
-                      style={{ backgroundColor: "#ECB31D", color: "#14244C" }}>
-                      LOG IN
-                    </Button>
+                    {isAuthenticated ? (
+                      <Button
+                        variant="outline"
+                        onClick={handleLogout}
+                        className="w-full border-0 font-medium rounded-sm"
+                        style={{ backgroundColor: "#ECB31D", color: "#14244C" }}>
+                        <LogOut className="h-4 w-4 mr-2" />
+                        LOGOUT
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={handleLogin}
+                        className="w-full border-0 font-medium rounded-sm"
+                        style={{ backgroundColor: "#ECB31D", color: "#14244C" }}>
+                        LOG IN
+                      </Button>
+                    )}
                   </DropdownMenuItem>
                 </div>
 
