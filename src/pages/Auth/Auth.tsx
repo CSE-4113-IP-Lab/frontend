@@ -16,7 +16,7 @@ import axios from "axios";
 import emailjs from "@emailjs/browser";
 import Otp from "@/components/Otp";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import Button from "@/components/Button";
 
 type DecodedGoogleDetails = {
   email: string;
@@ -27,7 +27,6 @@ export default function Home() {
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useNavigate();
-  const { login, isAuthenticated } = useAuth();
 
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -37,20 +36,17 @@ export default function Home() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
+  const [userRole, setUserRole] = useState<"student" | "faculty" | "admin">(
+    "student"
+  );
   const [rememberMe, setRememberMe] = useState(false);
 
-  // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      router("/resources");
-      return;
-    }
-    
     const userEmail = localStorage.getItem("userEmail");
     if (userEmail) {
       setId(userEmail);
     }
-  }, [isAuthenticated, router]);
+  }, []);
 
   const resetValues = () => {
     setId("");
@@ -76,11 +72,15 @@ export default function Home() {
 
   const handleGoogleAuth = async (details: DecodedGoogleDetails) => {
     const postData = {
-      id: details.email,
-      name: details.given_name,
+      email: details.email,
+      username: details.given_name,
+      role: userRole,
     };
     try {
-      const response = await axios.post(`/auth/googleAuth`, postData);
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/auth/oauth`,
+        postData
+      );
       if (response.status === 200) {
         localStorage.setItem("token", response.data.access_token);
         localStorage.setItem("id", response.data.used_id);
@@ -105,50 +105,49 @@ export default function Home() {
       email: id,
       username,
       password,
-      role: "student",
+      role: userRole,
     };
 
     try {
-      const response = await axios.post(`/auth/signup`, postData);
-      if (response.status === 200) {
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        emailjs
-          .send(
-            import.meta.env.VITE_EMAILJS_SERVICE_ID!,
-            import.meta.env.VITE_EMAILJS_TEMPLATE_ID!,
-            {
-              to_name: username,
-              to_email: id,
-              message: `OTP ${otp}`,
-            },
-            import.meta.env.VITE_EMAILJS_PUBLIC_KEY!
-          )
-          .then(
-            async () => {
-              const res = await axios.post(
-                `${import.meta.env.VITE_SERVER_URL}/auth/saveOtp`,
-                {
-                  userEmail: id,
-                  otp,
-                  type: "REGISTER",
-                }
-              );
-              if (res.status === 200) {
-                const otpObject = {
-                  signupDto: postData,
-                  timestamp: new Date().getTime(),
-                  type: "REGISTER",
-                };
-                localStorage.setItem("otpObject", JSON.stringify(otpObject));
-                setShowOtp(true);
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      emailjs
+        .send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID!,
+          import.meta.env.VITE_EMAILJS_TEMPLATE_ID!,
+          {
+            to_name: username,
+            to_email: id,
+            message: `OTP ${otp}`,
+          },
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY!
+        )
+        .then(
+          async () => {
+            const res = await axios.post(
+              `${import.meta.env.VITE_SERVER_URL}/auth/saveOTP`,
+              {
+                userEmail: id,
+                otp,
+                type: "REGISTER",
               }
-            },
-            (error) => {
-              console.log("Error:", error);
-              setWarning("This email doesn't exist");
+            );
+            console.log("Response:", res);
+
+            if (res.status === 201) {
+              const otpObject = {
+                signupDto: postData,
+                timestamp: new Date().getTime(),
+                type: "REGISTER",
+              };
+              localStorage.setItem("otpObject", JSON.stringify(otpObject));
+              setShowOtp(true);
             }
-          );
-      }
+          },
+          (error) => {
+            console.log("Error:", error);
+            setWarning("This email doesn't exist");
+          }
+        );
     } catch (error) {
       console.log(error);
       setWarning("Duplicate email");
@@ -157,34 +156,43 @@ export default function Home() {
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    console.log("Login form submitted", { id, password }); // Debug log
 
     if (!id.includes("@")) {
       setWarning("Invalid email");
       return;
     }
 
+    const postData = { email: id, password };
+
     try {
-      setWarning(""); // Clear previous warnings
-      console.log("Attempting login..."); // Debug log
-      
-      const success = await login(id, password);
-      
-      if (success) {
-        console.log("Login successful, redirecting to resources"); // Debug log
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/auth/login`,
+        postData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        console.log("Login successful", response.data);
+
+        localStorage.setItem("token", response.data.access_token);
+        localStorage.setItem("id", response.data.user_id.toString());
+        localStorage.setItem("role", response.data.user_role);
+        // setToastMessage("Signed in successfully");
+
         if (rememberMe) {
           localStorage.setItem("userEmail", id);
         }
-        // AuthContext will handle redirect to appropriate resources page
-        router("/resources");
-      } else {
-        console.log("Login failed - invalid credentials"); // Debug log
-        setWarning("Invalid credentials");
+
+        router("/");
       }
     } catch (error) {
-      console.error("Login error:", error); // Debug log
-      setWarning("Login failed. Please try again.");
+      console.log(error);
+      setWarning("Invalid credentials");
     }
   };
 
@@ -209,7 +217,7 @@ export default function Home() {
       );
 
       const res = await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/auth/saveOtp`,
+        `${import.meta.env.VITE_SERVER_URL}/auth/saveOTP`,
         {
           userEmail: id,
           otp,
@@ -223,7 +231,7 @@ export default function Home() {
         }
       );
 
-      if (res.status === 200) {
+      if (res.status === 201) {
         const otpObject = {
           id,
           timestamp: new Date().getTime(),
@@ -260,6 +268,26 @@ export default function Home() {
                     marginRight: "5px",
                   }}
                 />
+              </div>
+
+              <div className="my-4 w-[380px]">
+                <h3 className="font-bold text-sm uppercase text-primary-dark mb-3">
+                  QUICK DEMO LOGIN
+                </h3>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {(["student", "faculty"] as const).map((type) => (
+                    <Button
+                      key={type}
+                      variant="outline"
+                      size="sm"
+                      cornerStyle="tr"
+                      className="capitalize text-xs"
+                      onClick={() => setUserRole(type)}
+                    >
+                      Demo {type}
+                    </Button>
+                  ))}
+                </div>
               </div>
 
               <div className="input-field">
@@ -365,6 +393,25 @@ export default function Home() {
               >
                 <p className="title">Sign up</p>
                 <BiLogIn style={{ fontSize: "40px", marginBottom: "10px" }} />
+              </div>
+              <div className="my-4 w-[380px]">
+                <h3 className="font-bold text-sm uppercase text-primary-dark mb-3">
+                  QUICK DEMO SIGNUP
+                </h3>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {(["student", "faculty"] as const).map((type) => (
+                    <Button
+                      key={type}
+                      variant="outline"
+                      size="sm"
+                      cornerStyle="tr"
+                      className="capitalize text-xs"
+                      onClick={() => setUserRole(type)}
+                    >
+                      Demo {type}
+                    </Button>
+                  ))}
+                </div>
               </div>
               <div className="input-field">
                 <input

@@ -81,10 +81,10 @@ const Otp = ({ setShowOtp }: OtpProps) => {
       dataToSend = {
         userEmail:
           otpObject.type === "REGISTER"
-            ? signupDto.id
+            ? signupDto.email
             : otpObject.type === "FORGOT_PASSWORD"
             ? otpObject.id
-            : signupDto.id,
+            : signupDto.email,
         otp: otp,
         type: otpObject.type,
       };
@@ -97,32 +97,25 @@ const Otp = ({ setShowOtp }: OtpProps) => {
         password = signupDto.password;
       }
 
+      console.log("Data to send:", dataToSend);
+
       try {
         let response;
-        if (
-          otpObject.type === "REGISTER" ||
-          otpObject.type === "UPDATE_PASSWORD"
-        ) {
-          response = await axios.post(
-            `${
-              import.meta.env.VITE_SERVER_URL
-            }/auth/verifyOtp?username=${username}&password=${password}`,
-            dataToSend
-          );
-        } else if (otpObject.type === "FORGOT_PASSWORD") {
-          response = await axios.post(
-            `${import.meta.env.VITE_SERVER_URL}/auth/forgotPassword`,
-            dataToSend
-          );
-        }
+
+        response = await axios.post(
+          `${import.meta.env.VITE_SERVER_URL}/auth/verify`,
+          dataToSend
+        );
+
+        console.log("Response:", response);
 
         if (response?.status === 200) {
-          if (otpObject.type === "UPDATE_PASSWORD") {
-            // setToastMessage("Password updated successfully");
-            router("/account");
-            setShowOtp(false);
-            localStorage.removeItem("otpObject");
-            return;
+          if (otpObject.type === "REGISTER") {
+            const user = otpObject.signupDto;
+            await axios.post(
+              `${import.meta.env.VITE_SERVER_URL}/auth/signup`,
+              user
+            );
           }
 
           localStorage.setItem("token", response.data.access_token);
