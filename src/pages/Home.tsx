@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
+import { ChatWidget } from "@/components/agent";
 
 export function Home() {
   return (
@@ -132,6 +133,9 @@ export function Home() {
           </div>
         </div>
       </div>
+
+      {/* ChatWidget for bottom-left positioning */}
+      <ChatWidget />
     </div>
   );
 }
