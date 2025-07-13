@@ -14,4 +14,16 @@ export default defineConfig({
       "@/utils": resolve("./src/lib/utils"),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://8f786701c9bd.ngrok-free.app',
+        changeOrigin: true,
+        secure: true,
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      }
+    }
+  }
 });
