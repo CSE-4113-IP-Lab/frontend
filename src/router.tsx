@@ -47,13 +47,14 @@ import AdminExamScheduleManagement from "./pages/Admin/AdminExamScheduleManageme
 import ApiTestPage from "./pages/ApiTest";
 
 //import { Notice } from "@/pages/Notice";
-import FacultyProfile from "@/pages/FacultyProfile";
-import FacultyDirectory from "@/pages/FacultyDirectory";
-import EditFaculty from "@/pages/EditFaculty";
-import FacultyOverview from "@/pages/FacultyOverview";
-import ActiveFacultyList from "@/pages/ActiveFacultyList";
-import FacultyOnLeaveList from "@/pages/FacultyOnLeaveList";
-import NewFacultyYearwise from "@/pages/NewFacultyYearwise";
+import FacultyProfile from "@/pages/FacultyInformation/FacultyProfile";
+import FacultyDirectory from "@/pages/FacultyInformation/FacultyDirectory";
+import EditFaculty from "@/pages/FacultyInformation/EditFaculty";
+import FacultyOverview from "@/pages/FacultyInformation/FacultyOverview";
+import ActiveFacultyList from "@/pages/FacultyInformation/ActiveFacultyList";
+import NewFacultyYearwise from "@/pages/FacultyInformation/NewFacultyYearwise";
+import FacultyByResearch from "@/pages/FacultyInformation/FacultyByResearch";
+import FacultyOnLeaveList from "@/pages/FacultyInformation/FacultyOnLeaveList";
 
 
 export const router = createBrowserRouter([
@@ -133,8 +134,12 @@ export const router = createBrowserRouter([
         path: "faculty/yearly",
         element: <NewFacultyYearwise />, // New Faculty Information yearwise
       },
+      {
+        path: "faculty/byresearch",
+        element: <FacultyByResearch/>
+      },
       
-
+  
       {
         path: "exam-schedule",
         element: <ExamSchedule />,
