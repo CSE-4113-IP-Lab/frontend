@@ -25,7 +25,7 @@ export const ChatInterface: React.FC = () => {
         // Add welcome message
         const welcomeMessage: ChatMessageType = {
             id: 'welcome',
-            content: `#### Welcome to the University Information Assistant! 🎓
+            content: `#### Welcome to the CSEDU Bot! 🎓
 
 I'm here to help you find information about the **Department of Computer Science and Engineering (CSE)** at the **University of Dhaka**.
 
