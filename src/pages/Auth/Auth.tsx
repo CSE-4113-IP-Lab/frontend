@@ -15,7 +15,7 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import emailjs from "@emailjs/browser";
 import Otp from "@/components/Otp";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import Button from "@/components/Button";
 
 type DecodedGoogleDetails = {
@@ -72,11 +72,15 @@ export default function Home() {
 
   const handleGoogleAuth = async (details: DecodedGoogleDetails) => {
     const postData = {
-      id: details.email,
-      name: details.given_name,
+      email: details.email,
+      username: details.given_name,
+      role: userRole,
     };
     try {
-      const response = await axios.post(`/auth/googleAuth`, postData);
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/auth/oauth`,
+        postData
+      );
       if (response.status === 200) {
         localStorage.setItem("token", response.data.access_token);
         localStorage.setItem("id", response.data.used_id);
@@ -101,50 +105,49 @@ export default function Home() {
       email: id,
       username,
       password,
-      role: "student",
+      role: userRole,
     };
 
     try {
-      const response = await axios.post(`/auth/signup`, postData);
-      if (response.status === 200) {
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        emailjs
-          .send(
-            import.meta.env.VITE_EMAILJS_SERVICE_ID!,
-            import.meta.env.VITE_EMAILJS_TEMPLATE_ID!,
-            {
-              to_name: username,
-              to_email: id,
-              message: `OTP ${otp}`,
-            },
-            import.meta.env.VITE_EMAILJS_PUBLIC_KEY!
-          )
-          .then(
-            async () => {
-              const res = await axios.post(
-                `${import.meta.env.API_ENDPOINT}/auth/saveOtp`,
-                {
-                  userEmail: id,
-                  otp,
-                  type: "REGISTER",
-                }
-              );
-              if (res.status === 200) {
-                const otpObject = {
-                  signupDto: postData,
-                  timestamp: new Date().getTime(),
-                  type: "REGISTER",
-                };
-                localStorage.setItem("otpObject", JSON.stringify(otpObject));
-                setShowOtp(true);
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      emailjs
+        .send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID!,
+          import.meta.env.VITE_EMAILJS_TEMPLATE_ID!,
+          {
+            to_name: username,
+            to_email: id,
+            message: `OTP ${otp}`,
+          },
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY!
+        )
+        .then(
+          async () => {
+            const res = await axios.post(
+              `${import.meta.env.VITE_SERVER_URL}/auth/saveOTP`,
+              {
+                userEmail: id,
+                otp,
+                type: "REGISTER",
               }
-            },
-            (error) => {
-              console.log("Error:", error);
-              setWarning("This email doesn't exist");
+            );
+            console.log("Response:", res);
+
+            if (res.status === 201) {
+              const otpObject = {
+                signupDto: postData,
+                timestamp: new Date().getTime(),
+                type: "REGISTER",
+              };
+              localStorage.setItem("otpObject", JSON.stringify(otpObject));
+              setShowOtp(true);
             }
-          );
-      }
+          },
+          (error) => {
+            console.log("Error:", error);
+            setWarning("This email doesn't exist");
+          }
+        );
     } catch (error) {
       console.log(error);
       setWarning("Duplicate email");
@@ -214,7 +217,7 @@ export default function Home() {
       );
 
       const res = await axios.post(
-        `${import.meta.env.API_ENDPOINT}/auth/saveOtp`,
+        `${import.meta.env.VITE_SERVER_URL}/auth/saveOTP`,
         {
           userEmail: id,
           otp,
@@ -228,7 +231,7 @@ export default function Home() {
         }
       );
 
-      if (res.status === 200) {
+      if (res.status === 201) {
         const otpObject = {
           id,
           timestamp: new Date().getTime(),
@@ -255,7 +258,8 @@ export default function Home() {
                   display: "flex",
                   flexDirection: "row-reverse",
                   alignItems: "center",
-                }}>
+                }}
+              >
                 <p className="title">Sign in</p>
                 <TbLogin
                   style={{
@@ -270,15 +274,16 @@ export default function Home() {
                 <h3 className="font-bold text-sm uppercase text-primary-dark mb-3">
                   QUICK DEMO LOGIN
                 </h3>
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                  {(["student", "faculty", "admin"] as const).map((type) => (
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {(["student", "faculty"] as const).map((type) => (
                     <Button
                       key={type}
                       variant="outline"
                       size="sm"
                       cornerStyle="tr"
                       className="capitalize text-xs"
-                      onClick={() => setUserRole(type)}>
+                      onClick={() => setUserRole(type)}
+                    >
                       Demo {type}
                     </Button>
                   ))}
@@ -347,7 +352,8 @@ export default function Home() {
                     color: "#ECB31D",
                     cursor: "pointer",
                   }}
-                  onClick={handleForgetPassword}>
+                  onClick={handleForgetPassword}
+                >
                   Forget password? Click here
                 </span>
               </div>
@@ -359,7 +365,8 @@ export default function Home() {
               {mounted && (
                 <div className="mt-4 w-full flex justify-center items-center">
                   <GoogleOAuthProvider
-                    clientId={import.meta.env.VITE_OAUTH_CLIENT_ID ?? ""}>
+                    clientId={import.meta.env.VITE_OAUTH_CLIENT_ID ?? ""}
+                  >
                     <GoogleLogin
                       onSuccess={(credentialResponse) => {
                         const details = jwtDecode(
@@ -382,9 +389,29 @@ export default function Home() {
                   display: "flex",
                   flexDirection: "row",
                   alignItems: "center",
-                }}>
+                }}
+              >
                 <p className="title">Sign up</p>
                 <BiLogIn style={{ fontSize: "40px", marginBottom: "10px" }} />
+              </div>
+              <div className="my-4 w-[380px]">
+                <h3 className="font-bold text-sm uppercase text-primary-dark mb-3">
+                  QUICK DEMO SIGNUP
+                </h3>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {(["student", "faculty"] as const).map((type) => (
+                    <Button
+                      key={type}
+                      variant="outline"
+                      size="sm"
+                      cornerStyle="tr"
+                      className="capitalize text-xs"
+                      onClick={() => setUserRole(type)}
+                    >
+                      Demo {type}
+                    </Button>
+                  ))}
+                </div>
               </div>
               <div className="input-field">
                 <input
@@ -481,7 +508,8 @@ export default function Home() {
               {mounted && (
                 <div className="mt-4 w-full flex justify-center items-center">
                   <GoogleOAuthProvider
-                    clientId={import.meta.env.VITE_OAUTH_CLIENT_ID ?? ""}>
+                    clientId={import.meta.env.VITE_OAUTH_CLIENT_ID ?? ""}
+                  >
                     <GoogleLogin
                       onSuccess={(credentialResponse) => {
                         const details = jwtDecode(
@@ -514,7 +542,8 @@ export default function Home() {
                 onClick={() => {
                   resetValues();
                   setIsSignUpMode(true);
-                }}>
+                }}
+              >
                 Sign up
               </button>
             </div>
@@ -532,7 +561,8 @@ export default function Home() {
                 onClick={() => {
                   resetValues();
                   setIsSignUpMode(false);
-                }}>
+                }}
+              >
                 Sign in
               </button>
             </div>

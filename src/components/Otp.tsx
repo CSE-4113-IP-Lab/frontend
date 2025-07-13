@@ -3,7 +3,7 @@ import OtpInput from "./OtpInput";
 import { Button } from "@/components/ui/button";
 import { CgPassword } from "react-icons/cg";
 import axios from "axios";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 interface OtpProps {
   setShowOtp: (value: boolean) => void;
@@ -81,10 +81,10 @@ const Otp = ({ setShowOtp }: OtpProps) => {
       dataToSend = {
         userEmail:
           otpObject.type === "REGISTER"
-            ? signupDto.id
+            ? signupDto.email
             : otpObject.type === "FORGOT_PASSWORD"
             ? otpObject.id
-            : signupDto.id,
+            : signupDto.email,
         otp: otp,
         type: otpObject.type,
       };
@@ -97,32 +97,25 @@ const Otp = ({ setShowOtp }: OtpProps) => {
         password = signupDto.password;
       }
 
+      console.log("Data to send:", dataToSend);
+
       try {
         let response;
-        if (
-          otpObject.type === "REGISTER" ||
-          otpObject.type === "UPDATE_PASSWORD"
-        ) {
-          response = await axios.post(
-            `${
-              import.meta.env.API_ENDPOINT
-            }/auth/verifyOtp?username=${username}&password=${password}`,
-            dataToSend
-          );
-        } else if (otpObject.type === "FORGOT_PASSWORD") {
-          response = await axios.post(
-            `${import.meta.env.API_ENDPOINT}/auth/forgotPassword`,
-            dataToSend
-          );
-        }
+
+        response = await axios.post(
+          `${import.meta.env.VITE_SERVER_URL}/auth/verify`,
+          dataToSend
+        );
+
+        console.log("Response:", response);
 
         if (response?.status === 200) {
-          if (otpObject.type === "UPDATE_PASSWORD") {
-            // setToastMessage("Password updated successfully");
-            router("/account");
-            setShowOtp(false);
-            localStorage.removeItem("otpObject");
-            return;
+          if (otpObject.type === "REGISTER") {
+            const user = otpObject.signupDto;
+            await axios.post(
+              `${import.meta.env.VITE_SERVER_URL}/auth/signup`,
+              user
+            );
           }
 
           localStorage.setItem("token", response.data.access_token);
@@ -148,7 +141,8 @@ const Otp = ({ setShowOtp }: OtpProps) => {
         <div className="w-full h-[2.3rem] bg-slate-500 flex items-center justify-end rounded-t">
           <div
             className="font-bold text-sm text-white h-[1.8rem] w-[1.8rem] mr-2 hover:bg-red-600 hover:rounded-full flex justify-center items-center cursor-pointer"
-            onClick={handleCancel}>
+            onClick={handleCancel}
+          >
             X
           </div>
         </div>
