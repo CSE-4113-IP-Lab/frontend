@@ -152,3 +152,6 @@ export const UserRole = {
 } as const;
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
+// Agent and Chat types
+export type { ChatMessage, AgentResponse, ChatSession } from "./agent";

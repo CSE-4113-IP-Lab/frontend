@@ -1,0 +1,107 @@
+/* Custom styles for agent chat tables */
+.agent-table-container {
+  @apply overflow-x-auto my-4 rounded-lg border border-gray-200 shadow-sm;
+}
+
+.agent-table {
+  @apply w-full border-collapse;
+  font-size: 0.875rem;
+}
+
+.agent-table thead {
+  @apply bg-gradient-to-r from-[#14244c] to-[#1e3a5f];
+}
+
+.agent-table th {
+  @apply px-4 py-3 text-left text-white font-semibold border-b border-gray-300;
+  background: linear-gradient(135deg, #14244c 0%, #1e3a5f 100%);
+}
+
+.agent-table th:first-child {
+  @apply rounded-tl-lg;
+}
+
+.agent-table th:last-child {
+  @apply rounded-tr-lg;
+}
+
+.agent-table td {
+  @apply px-4 py-3 border-b border-gray-200 text-gray-700;
+  background-color: #ffffff;
+}
+
+.agent-table tbody tr:nth-child(even) td {
+  @apply bg-gray-50;
+}
+
+.agent-table tbody tr:hover td {
+  @apply bg-yellow-50;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.agent-table tbody tr:last-child td {
+  @apply border-b-0;
+}
+
+.agent-table tbody tr:last-child td:first-child {
+  @apply rounded-bl-lg;
+}
+
+.agent-table tbody tr:last-child td:last-child {
+  @apply rounded-br-lg;
+}
+
+/* Special styling for cells with numbers/statistics */
+.agent-table td strong,
+.agent-table td b {
+  @apply text-[#14244c] font-semibold;
+}
+
+/* Style for any currency values */
+.agent-table td:contains("৳") {
+  @apply text-[#ecb31d] font-medium;
+}
+
+/* Responsive table styling */
+@media (max-width: 768px) {
+  .agent-table-container {
+    @apply rounded-md;
+  }
+
+  .agent-table {
+    @apply text-xs;
+  }
+
+  .agent-table th,
+  .agent-table td {
+    @apply px-2 py-2;
+  }
+}
+
+/* Additional markdown styling for agent messages */
+.prose .agent-table-container h3,
+.prose .agent-table-container h4 {
+  @apply text-[#14244c] font-bold mb-2 mt-4;
+}
+
+.prose .agent-table-container p {
+  @apply text-gray-600 mb-2;
+}
+
+/* Highlight important statistics */
+.agent-table .stat-highlight {
+  @apply bg-[#ecb31d]/20 font-semibold text-[#14244c];
+}
+
+/* Status indicators */
+.agent-table .status-active {
+  @apply text-green-600 font-medium;
+}
+
+.agent-table .status-inactive {
+  @apply text-red-600 font-medium;
+}
+
+.agent-table .status-pending {
+  @apply text-yellow-600 font-medium;
+}
