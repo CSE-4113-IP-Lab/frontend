@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Search, Menu, X, ChevronRight, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -37,6 +38,17 @@ const additionalNavItems = [
 
 export function Navbar({ className }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    navigate('/auth');
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();

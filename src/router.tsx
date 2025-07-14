@@ -281,6 +281,26 @@ export const router = createBrowserRouter([
         path: "room-booking/my-bookings",
         element: <MyBookings />,
       },
+      {
+        path: "room-booking",
+        element: <RoomBookingDashboard />,
+      },
+      {
+        path: "room-booking/available",
+        element: <AvailableRooms />,
+      },
+      {
+        path: "room-booking/book",
+        element: (
+          <FacultyRoute>
+            <BookRoom />
+          </FacultyRoute>
+        ),
+      },
+      {
+        path: "room-booking/my-bookings",
+        element: <MyBookings />,
+      },
     ],
   },
 ]);
