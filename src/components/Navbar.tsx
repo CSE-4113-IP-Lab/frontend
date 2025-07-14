@@ -22,7 +22,6 @@ const navItems = [
   { label: "CONTACT", href: "/contact" },
   { label: "SCHEDULE", href: "/schedule" },
   { label: "RESOURCES", href: "/resources" },
-  { label: "ROOM BOOKING", href: "/room-booking" },
 ];
 
 const additionalNavItems = [
