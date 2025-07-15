@@ -107,13 +107,14 @@ const EditFaculty: React.FC = () => {
                    localStorage.getItem('authToken');
       
       const authHeaders: Record<string, string> = token ? {
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'ngrok-skip-browser-warning': 'true'
       } : {};
       
       // Try individual faculty endpoint first
       try {
         const response = await fetch(`${apiUrl}/faculties/${id}`, {
-          headers: authHeaders
+          headers: authHeaders,
         });
 
         if (response.ok) {
@@ -167,7 +168,8 @@ const EditFaculty: React.FC = () => {
                      localStorage.getItem('authToken');
         
         const authHeaders: Record<string, string> = token ? {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'true'
         } : {};
         
         console.log('Auth token found:', token ? 'Yes' : 'No');
@@ -212,7 +214,7 @@ const EditFaculty: React.FC = () => {
             try {
               console.log('Trying individual user endpoint...');
               const userResponse = await fetch(`${apiUrl}/users/${id}`, {
-                headers: authHeaders
+                headers: authHeaders,
               });
 
               if (userResponse.ok) {
@@ -379,7 +381,8 @@ const EditFaculty: React.FC = () => {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
         },
         body: JSON.stringify(formData)
       });
@@ -474,7 +477,8 @@ const EditFaculty: React.FC = () => {
       const response = await fetch(`${apiUrl}/users/${facultyData.user_id}/image`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'true'
         },
         body: formData
       });
@@ -541,7 +545,8 @@ const EditFaculty: React.FC = () => {
       const response = await fetch(`${apiUrl}/users/${facultyData.user_id}/image`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'ngrok-skip-browser-warning': 'true'
         }
       });
       

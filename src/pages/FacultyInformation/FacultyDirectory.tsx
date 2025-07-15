@@ -66,9 +66,11 @@ const FacultyDirectory: React.FC = () => {
 
       const authHeaders: Record<string, string> = token ? {
         'Authorization': `Bearer ${token}`,
-        'accept': 'application/json'
+        'accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       } : {
-        'accept': 'application/json'
+        'accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       };
 
       console.log('Performing search...');
@@ -151,9 +153,11 @@ const FacultyDirectory: React.FC = () => {
       
       const authHeaders: Record<string, string> = token ? {
         'Authorization': `Bearer ${token}`,
-        'accept': 'application/json'
+        'accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       } : {
-        'accept': 'application/json'
+        'accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       };
 
       console.log('Fetching faculty data...');
@@ -217,6 +221,10 @@ const FacultyDirectory: React.FC = () => {
     return [...new Set(allDesignations)].sort();
   }, [facultyData]);
 
+
+
+
+  //aita thik korte hobe 
   const expertiseOptions = useMemo(() => {
     // This would need to be fetched from API or derived from faculty data
     // For now, return some common expertise areas

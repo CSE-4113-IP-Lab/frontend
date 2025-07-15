@@ -60,7 +60,8 @@ const ActiveFacultyList: React.FC = () => {
         const response = await fetch(`${apiUrl}/faculties?skip=0&limit=100`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
           }
         });
 

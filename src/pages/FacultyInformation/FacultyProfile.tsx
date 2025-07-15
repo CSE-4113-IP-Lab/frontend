@@ -131,11 +131,19 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
       console.log('API URL:', apiUrl);
       console.log('Full request URL:', `${apiUrl}/faculties/${targetFacultyId}`);
 
+      // Get token from localStorage
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          throw new Error('No authentication token found. Please log in.');
+        }
+
       // Fetch faculty data
       const facultyResponse = await fetch(`${apiUrl}/faculties/${targetFacultyId}`, {
         headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJmQGdtYWlsLmNvbSIsInJvbGUiOiJmYWN1bHR5IiwiZXhwIjoxNzUyNDUzNzY1fQ.q_FzXT5PBLXHxGVgf4K1qwaeXelreawFpGtgOy41bVM`,
-          'Accept': 'application/json'
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
         }
       });
       
@@ -170,7 +178,8 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
           const coursesResponse = await fetch(`${apiUrl}/faculties/${facultyData.id}/courses`, {
             headers: {
               'Authorization': `Bearer ${token}`,
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true'
             }
           });
           
@@ -192,8 +201,9 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
           console.log('Fetching programs for faculty ID:', facultyData.id);
           const programsResponse = await fetch(`${apiUrl}/faculties/${facultyData.id}/programs`, {
             headers: {
-              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJmQGdtYWlsLmNvbSIsInJvbGUiOiJmYWN1bHR5IiwiZXhwIjoxNzUyNDUzNzY1fQ.q_FzXT5PBLXHxGVgf4K1qwaeXelreawFpGtgOy41bVM`,
-              'Accept': 'application/json'
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true'
             }
           });
           
@@ -223,7 +233,8 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
           const researchResponse = await fetch(`${apiUrl}/researchs/user/${facultyData.user_id}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true'
             }
           });
           
@@ -369,6 +380,7 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
                     {faculty.user.username.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
+
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full flex items-center justify-center">
                   <Button 
                     variant="secondary" 

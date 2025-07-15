@@ -73,9 +73,11 @@ const FacultyByResearch: React.FC = () => {
         
         const authHeaders: Record<string, string> = token ? {
           'Authorization': `Bearer ${token}`,
-          'accept': 'application/json'
+          'accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
         } : {
-          'accept': 'application/json'
+          'accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
         };
 
         console.log('Fetching faculty data with expertise...');
