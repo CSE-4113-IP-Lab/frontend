@@ -1,6 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { RoomService, type Room, type RoomBooking, type SystemStatus } from "@/services/roomService";
 import {
   FileText,
   Download,
@@ -12,11 +15,70 @@ import {
   Plus,
   Eye,
   Users,
-  CheckCircle
+  CheckCircle,
+  MapPin,
+  Clock
 } from "lucide-react";
 
 export default function FacultyResources() {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [recentRequests, setRecentRequests] = useState<number>(0);
+  
+  // Room booking state
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [myBookings, setMyBookings] = useState<RoomBooking[]>([]);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
+
+  // Check authentication and redirect if needed
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      navigate('/auth');
+      return;
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  // Fetch faculty dashboard data
+  const fetchFacultyData = async () => {
+    if (!isAuthenticated || !user) return;
+    
+    setLoading(true);
+    try {
+      // Fetch room booking data
+      const [statusData, roomsData, bookingsData] = await Promise.all([
+        RoomService.getSystemStatus(),
+        RoomService.getAllRooms({ include_schedule: false, limit: 6 }),
+        RoomService.getBookings({ 
+          user_id: user?.id ? parseInt(user.id.toString()) : undefined,
+          limit: 5 
+        })
+      ]);
+      
+      setSystemStatus(statusData);
+      setRooms(roomsData.slice(0, 6)); // Show only first 6 rooms
+      setMyBookings(bookingsData.filter(b => 
+        new Date(`${b.booking_date}T${b.start_time}`) > new Date() && 
+        b.status === 'scheduled'
+      ));
+      
+      // TODO: Replace with actual equipment requests API when available
+      // For now, set mock data for equipment requests
+      setRecentRequests(Math.floor(Math.random() * 3) + 1);
+    } catch (error) {
+      console.error('Error fetching faculty data:', error);
+      // Set fallback values
+      setRecentRequests(0);
+      setRooms([]);
+      setMyBookings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFacultyData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,10 +111,50 @@ export default function FacultyResources() {
               </div>
               <Button>Search</Button>
             </div>
-          </CardContent>
-        </Card>
+          </CardContent>          </Card>
 
-        {/* Faculty Resource Categories */}
+          {/* Quick Actions & Recent Activity */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Quick Actions & Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      {loading ? 'Loading...' : `${recentRequests} Equipment Requests`}
+                    </h3>
+                    <p className="text-sm text-gray-600">Pending & recent</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate('/faculty/equipment?tab=current')}
+                  >
+                    <Settings className="w-4 h-4 mr-1" />
+                    Manage
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-orange-50">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Quick Room Booking</h3>
+                    <p className="text-sm text-gray-600">Find and book available rooms</p>
+                  </div>
+                  <Button 
+                    size="sm"
+                    onClick={() => navigate('/faculty/room-booking')}
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    <Calendar className="w-4 h-4 mr-1" />
+                    Book Now
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Faculty Resource Categories */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Course Management */}
           <Card className="hover:shadow-lg transition-shadow">
@@ -78,6 +180,114 @@ export default function FacultyResources() {
                 <Button variant="outline" size="sm" className="w-full justify-start">
                   <FileText className="w-4 h-4 mr-2" />
                   Manage Syllabus
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Room Booking System */}
+          <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-teal-500">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-teal-600" />
+                Room Booking System
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">
+                Reserve classrooms, labs, and meeting rooms with 30-minute slot precision
+              </p>
+              
+              {/* Quick Stats */}
+              {systemStatus && (
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="p-3 bg-teal-50 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-700">Available Rooms</h4>
+                    <p className="text-xl font-bold text-teal-600">{systemStatus.available_rooms}</p>
+                  </div>
+                  <div className="p-3 bg-orange-50 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-700">My Bookings</h4>
+                    <p className="text-xl font-bold text-orange-600">{myBookings.length}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Available Rooms Preview */}
+              {rooms.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Available Rooms</h4>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {rooms.slice(0, 3).map((room) => (
+                      <div key={room.id} className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm">
+                        <span className="font-medium">Room {room.room_number}</span>
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          room.status === 'available' ? 'bg-green-100 text-green-800' :
+                          room.status === 'occupied' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {room.status}
+                        </span>
+                      </div>
+                    ))}
+                    {rooms.length > 3 && (
+                      <p className="text-xs text-gray-500 text-center">
+                        +{rooms.length - 3} more rooms available
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* My Upcoming Bookings */}
+              {myBookings.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Upcoming Bookings</h4>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {myBookings.slice(0, 2).map((booking) => (
+                      <div key={booking.id} className="p-2 bg-gray-50 rounded text-sm">
+                        <div className="flex justify-between items-start">
+                          <span className="font-medium">Room {booking.room?.room_number}</span>
+                          <span className="text-xs text-gray-500">
+                            {booking.booking_date}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600">
+                          {RoomService.formatTime(booking.start_time)} - {RoomService.formatTime(booking.end_time)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="space-y-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start hover:bg-teal-50"
+                  onClick={() => navigate('/room-booking/available')}
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Browse Available Rooms
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start hover:bg-teal-50"
+                  onClick={() => navigate('/room-booking')}
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  View Schedules
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start hover:bg-teal-50"
+                  onClick={() => navigate('/room-booking/my-bookings')}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  My Bookings & History
                 </Button>
               </div>
             </CardContent>
@@ -142,45 +352,50 @@ export default function FacultyResources() {
           </Card>
 
           {/* Equipment Requests */}
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-orange-500">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="w-5 h-5 text-orange-600" />
-                Equipment Requests
+                Equipment Management
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-4">
-                Request and manage laboratory equipment
+                Request and manage laboratory equipment for teaching and research
               </p>
               <div className="space-y-2">
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="w-full justify-start"
+                  className="w-full justify-start hover:bg-orange-50"
                   onClick={() => navigate('/faculty/equipment')}
                 >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Browse Equipment
+                  <Eye className="w-4 h-4 mr-2" />
+                  Browse Equipment Catalog
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="w-full justify-start"
+                  className="w-full justify-start hover:bg-orange-50"
                   onClick={() => navigate('/faculty/equipment')}
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Request Equipment
+                  Submit New Request
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="w-full justify-start"
+                  className="w-full justify-start hover:bg-orange-50"
                   onClick={() => navigate('/faculty/equipment?tab=current')}
                 >
-                  <Eye className="w-4 h-4 mr-2" />
-                  My Requests
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Track My Requests
                 </Button>
+              </div>
+              <div className="mt-4 p-3 bg-orange-50 rounded-lg">
+                <p className="text-sm text-orange-700">
+                  <strong>Status:</strong> {loading ? 'Loading...' : `${recentRequests} active requests`}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -301,46 +516,111 @@ export default function FacultyResources() {
             </CardContent>
           </Card>
 
-          {/* Room Booking */}
-          <Card className="hover:shadow-lg transition-shadow">
+          {/* Room Booking Hub */}
+          <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500 col-span-1 md:col-span-2 lg:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-teal-600" />
-                Room Booking
+                <MapPin className="w-5 h-5 text-blue-600" />
+                Room Booking Hub
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-4">
-                Reserve classrooms, labs, and meeting rooms
+                Complete room management: browse, schedule, and track bookings
               </p>
+              
+              {/* Quick Stats Dashboard */}
+              {systemStatus && (
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="p-2 bg-blue-50 rounded-lg text-center">
+                    <p className="text-lg font-bold text-blue-600">{systemStatus.total_rooms}</p>
+                    <p className="text-xs text-gray-600">Total Rooms</p>
+                  </div>
+                  <div className="p-2 bg-green-50 rounded-lg text-center">
+                    <p className="text-lg font-bold text-green-600">{systemStatus.available_rooms}</p>
+                    <p className="text-xs text-gray-600">Available</p>
+                  </div>
+                  <div className="p-2 bg-orange-50 rounded-lg text-center">
+                    <p className="text-lg font-bold text-orange-600">{myBookings.length}</p>
+                    <p className="text-xs text-gray-600">My Bookings</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Featured Available Rooms */}
+              {rooms.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Featured Rooms</h4>
+                  <div className="space-y-1">
+                    {rooms.slice(0, 2).map((room) => (
+                      <div key={room.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                        <div>
+                          <span className="font-medium text-sm">Room {room.room_number}</span>
+                          <p className="text-xs text-gray-500">{room.capacity} seats • {room.purpose}</p>
+                        </div>
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          room.status === 'available' ? 'bg-green-100 text-green-800' :
+                          room.status === 'occupied' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {room.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Next Booking Preview */}
+              {myBookings.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Next Booking</h4>
+                  <div className="p-3 bg-blue-50 rounded-lg">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-sm">Room {myBookings[0].room?.room_number}</p>
+                        <p className="text-xs text-gray-600">{myBookings[0].purpose}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500">{myBookings[0].booking_date}</p>
+                        <p className="text-xs font-medium text-blue-600">
+                          {RoomService.formatTime(myBookings[0].start_time)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Main Action Buttons */}
               <div className="space-y-2">
                 <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start"
+                  className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white"
                   onClick={() => navigate('/room-booking/available')}
                 >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Available Rooms
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Browse Available Rooms
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/room-booking/book')}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Book Room
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/room-booking/my-bookings')}
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  My Bookings
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start hover:bg-blue-50"
+                    onClick={() => navigate('/room-booking')}
+                  >
+                    <Clock className="w-4 h-4 mr-1" />
+                    Schedules
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="justify-start hover:bg-blue-50"
+                    onClick={() => navigate('/room-booking/my-bookings')}
+                  >
+                    <Eye className="w-4 h-4 mr-1" />
+                    My Bookings
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
