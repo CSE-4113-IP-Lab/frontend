@@ -10,6 +10,11 @@ import ViewNotice from "@/pages/Notice/ViewNotice";
 import CreateNotice from "@/pages/Notice/CreateNotice";
 import EditNotice from "@/pages/Notice/EditNotice";
 import Auth from "@/pages/Auth/Auth";
+import AssignmentCreate from "./pages/Assignments/AssignmentCreate";
+import Assignments from "./pages/Assignments/Assignments";
+import AssignmentDetails from "./pages/Assignments/AssignmentDetails";
+import AssignmentSubmission from "./pages/Assignments/AssignmentSubmission";
+import Grades from "./pages/Grades/Grades";
 
 import AssignmentCreate from "./pages/Assignments/AssignmentCreate";
 import Assignments from "./pages/Assignments/Assignments";
@@ -165,6 +170,8 @@ export const router = createBrowserRouter([
       { path: `assignments`, element: <Assignments /> },
       { path: `assignmentDetails/:id`, element: <AssignmentDetails /> },
       { path: `assignmentSubmissions/:id`, element: <AssignmentSubmission /> },
+
+      { path: `grades`, element: <Grades /> },
       {
         path: "test",
         element: <TestComponent />,
