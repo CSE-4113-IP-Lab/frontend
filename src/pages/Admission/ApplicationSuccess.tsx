@@ -40,21 +40,21 @@ export function ApplicationSuccess() {
   }, [countdown]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <motion.div 
         className="w-full max-w-2xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="overflow-hidden border-0 shadow-xl">
-          <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+        <Card className="overflow-hidden border-none shadow-md">
+          <div className="bg-[#14244c] p-6 text-white">
             <div className="flex flex-col items-center text-center">
-              <div className="bg-white/20 p-3 rounded-full mb-4">
-                <CheckCircle className="h-10 w-10" />
+              <div className="bg-[#ecb31d] p-3 rounded-full mb-4">
+                <CheckCircle className="h-10 w-10 text-[#14244c]" />
               </div>
               <h1 className="text-3xl font-bold mb-2">Application Submitted Successfully!</h1>
-              <p className="text-green-100 max-w-lg">
+              <p className="text-gray-200 max-w-lg">
                 Thank you for choosing our institution. We've received your application and will review it shortly.
               </p>
             </div>

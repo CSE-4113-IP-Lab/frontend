@@ -102,10 +102,10 @@ export function ApplicationForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+          <h1 className="text-4xl font-bold text-[#14244c] sm:text-5xl mb-2">
             Admission Application
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -113,10 +113,10 @@ export function ApplicationForm() {
           </p>
         </div>
         
-        <Card className="overflow-hidden border-0 shadow-xl">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+        <Card className="overflow-hidden border-none shadow-md">
+          <div className="bg-[#14244c] p-6 text-white">
             <h2 className="text-xl font-bold">Application Details</h2>
-            <p className="text-blue-100 text-sm mt-1">
+            <p className="text-gray-200 text-sm mt-1">
               Please fill out the form below to apply for admission
             </p>
           </div>
