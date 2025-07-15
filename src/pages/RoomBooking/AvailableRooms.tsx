@@ -1,49 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import Card from '../../components/Card';
-import { RoomService, type Room, type AvailableRoomsParams, type BookRoomRequest } from '../../services/roomService';
-import { setTestToken } from '../../utils/auth';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Search, Calendar, MapPin, Users, Clock } from 'lucide-react';
+import { RoomService, type Room, type AvailableRoomsRequest } from '@/services/roomService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AvailableRoomsProps {}
 
 const AvailableRooms: React.FC<AvailableRoomsProps> = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [availableRooms, setAvailableRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchParams, setSearchParams] = useState<AvailableRoomsParams>({
-    start_datetime: '',
-    end_datetime: '',
+  const [searchParams, setSearchParams] = useState<AvailableRoomsRequest>({
+    booking_date: '',
+    start_time: '',
+    end_time: '',
     purpose: '',
     capacity: undefined
   });
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const [bookingData, setBookingData] = useState<BookRoomRequest>({
-    room_id: 0,
-    purpose: '',
-    start_datetime: '',
-    duration_hours: 1,
-    duration_minutes: 0,
-    notes: ''
-  });
-  const [bookingLoading, setBookingLoading] = useState(false);
 
-  // Load all rooms on component mount
+  // Check authentication
   useEffect(() => {
-    // Set test token for development
-    const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJ0YWhzaW5AaG90LmNvbSIsInJvbGUiOiJmYWN1bHR5IiwiZXhwIjoxNzUyNDU2NDc1fQ.PhzVW9ot9OwU-eZBa1ymjC53ZRc8f6m2-sJyhRPhS5s';
-    localStorage.setItem('accessToken', testToken);
+    if (!isAuthenticated || !user) {
+      navigate('/auth');
+      return;
+    }
     
     loadAllRooms();
-  }, []);
+  }, [isAuthenticated, user, navigate]);
 
   const loadAllRooms = async () => {
     try {
       setLoading(true);
       const roomsData = await RoomService.getAllRooms({ 
         skip: 0, 
-        limit: 100
+        limit: 100,
+        status: 'available'
       });
       setRooms(roomsData);
       setError(null);
@@ -56,85 +53,98 @@ const AvailableRooms: React.FC<AvailableRoomsProps> = () => {
   };
 
   const searchAvailableRooms = async () => {
-    if (!searchParams.start_datetime || !searchParams.end_datetime) {
-      alert('Please select both start and end date/time');
+    const validationError = validateSearchForm();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     try {
-      setLoading(true);
-      const availableRooms = await RoomService.getAvailableRooms(searchParams);
-      setRooms(availableRooms);
+      setSearching(true);
       setError(null);
-    } catch (err) {
-      setError('Failed to search available rooms');
+      const response = await RoomService.searchAvailableRooms(searchParams);
+      setAvailableRooms(response.available_rooms);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.detail || 'Failed to search rooms';
+      setError(errorMessage);
       console.error('Error searching rooms:', err);
     } finally {
-      setLoading(false);
+      setSearching(false);
     }
   };
 
-  const handleInputChange = (field: keyof AvailableRoomsParams, value: string | number | undefined) => {
+  const validateSearchForm = (): string | null => {
+    if (!searchParams.booking_date) return 'Please select booking date';
+    if (!searchParams.start_time) return 'Please select start time';
+    if (!searchParams.end_time) return 'Please select end time';
+    
+    const bookingDate = new Date(searchParams.booking_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const oneWeekFromNow = new Date(today);
+    oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+    
+    if (bookingDate < today) return 'Booking date cannot be in the past';
+    if (bookingDate >= oneWeekFromNow) return 'Booking date must be within the next 7 days';
+    
+    const [startHour, startMinute] = searchParams.start_time.split(':').map(Number);
+    const [endHour, endMinute] = searchParams.end_time.split(':').map(Number);
+    
+    if (startHour < 8 || startHour >= 20) {
+      return 'Start time must be between 8:00 AM and 8:00 PM';
+    }
+    
+    if (endHour < 8 || endHour > 20) {
+      return 'End time must be between 8:00 AM and 8:00 PM';
+    }
+    
+    const startMinutes = startHour * 60 + startMinute;
+    const endMinutes = endHour * 60 + endMinute;
+    
+    if (endMinutes <= startMinutes) {
+      return 'End time must be after start time';
+    }
+    
+    // Check if times are 30-minute aligned
+    if (startMinute % 30 !== 0 || endMinute % 30 !== 0) {
+      return 'Times must be in 30-minute slots (e.g., 9:00, 9:30, 10:00)';
+    }
+    
+    return null;
+  };
+
+  const handleInputChange = (field: keyof AvailableRoomsRequest, value: string | number | undefined) => {
     setSearchParams(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const openBookingModal = (room: Room) => {
-    setSelectedRoom(room);
-    setBookingData(prev => ({
-      ...prev,
-      room_id: room.id
-    }));
-    setShowBookingModal(true);
-  };
-
-  const closeBookingModal = () => {
-    setShowBookingModal(false);
-    setSelectedRoom(null);
-    setBookingData({
-      room_id: 0,
-      purpose: '',
-      start_datetime: '',
-      duration_hours: 1,
-      duration_minutes: 0,
-      notes: ''
+  const bookRoom = (roomId: number) => {
+    const queryParams = new URLSearchParams({
+      room_id: roomId.toString(),
+      ...(searchParams.booking_date && { booking_date: searchParams.booking_date }),
+      ...(searchParams.start_time && { start_time: searchParams.start_time }),
+      ...(searchParams.end_time && { end_time: searchParams.end_time })
     });
+    navigate(`/room-booking/book?${queryParams.toString()}`);
   };
 
-  const handleBookingSubmit = async () => {
-    if (!bookingData.purpose || !bookingData.start_datetime) {
-      alert('Please fill in all required fields');
-      return;
+  // Generate time options in 30-minute increments
+  const generateTimeOptions = () => {
+    const options = [];
+    for (let hour = 8; hour <= 20; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        if (hour === 20 && minute > 0) break; // Don't go past 20:00
+        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        options.push(timeString);
+      }
     }
-
-    try {
-      setBookingLoading(true);
-      await RoomService.bookRoom(bookingData);
-      alert('Room booked successfully!');
-      closeBookingModal();
-      // Refresh the room list
-      loadAllRooms();
-    } catch (err) {
-      alert('Failed to book room. Please try again.');
-      console.error('Error booking room:', err);
-    } finally {
-      setBookingLoading(false);
-    }
+    return options;
   };
 
-  const handleBookingInputChange = (field: keyof BookRoomRequest, value: string | number) => {
-    setBookingData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const formatDateTime = (dateTime: string) => {
-    if (!dateTime) return '';
-    return new Date(dateTime).toLocaleString();
-  };
+  const timeOptions = generateTimeOptions();
 
   if (loading) {
     return (
@@ -142,7 +152,7 @@ const AvailableRooms: React.FC<AvailableRoomsProps> = () => {
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Available Rooms</h1>
           <div className="flex justify-center">
-            <div className="text-lg">Loading rooms...</div>
+            <div className="text-lg">Loading...</div>
           </div>
         </div>
       </div>
@@ -152,258 +162,251 @@ const AvailableRooms: React.FC<AvailableRoomsProps> = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Available Rooms</h1>
-        
-        {/* Search Filters */}
-        <Card className="mb-8">
-          <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Search Available Rooms</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Start Date & Time
-                </label>
-                <input
-                  type="datetime-local"
-                  value={searchParams.start_datetime}
-                  onChange={(e) => handleInputChange('start_datetime', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  End Date & Time
-                </label>
-                <input
-                  type="datetime-local"
-                  value={searchParams.end_datetime}
-                  onChange={(e) => handleInputChange('end_datetime', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Purpose (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g., Meeting, Class"
-                  value={searchParams.purpose || ''}
-                  onChange={(e) => handleInputChange('purpose', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Min Capacity (Optional)
-                </label>
-                <input
-                  type="number"
-                  placeholder="e.g., 20"
-                  value={searchParams.capacity || ''}
-                  onChange={(e) => handleInputChange('capacity', e.target.value ? parseInt(e.target.value) : undefined)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-            
-            <div className="flex gap-4 mt-4">
-              <button
-                onClick={searchAvailableRooms}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Search Available Rooms
-              </button>
-              <button
-                onClick={loadAllRooms}
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-              >
-                Show All Rooms
-              </button>
-            </div>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Available Rooms</h1>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate('/room-booking/my-bookings')}>
+              My Bookings
+            </Button>
+            <Button onClick={() => navigate('/room-booking/book')}>
+              Book Room
+            </Button>
           </div>
-        </Card>
+        </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
             <p className="text-red-600">{error}</p>
           </div>
         )}
 
-        {/* Rooms Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rooms.map((room) => (
-            <Card key={room.id} className="hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{room.name}</h3>
-                    <p className="text-sm text-gray-600">Room {room.room_number}</p>
-                  </div>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    room.status === 'AVAILABLE' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {room.status}
-                  </span>
-                </div>
-                
-                <div className="space-y-2 mb-4">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Capacity:</span> {room.capacity} people
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Purpose:</span> {room.purpose}
-                  </p>
-                  {room.location && (
-                    <p className="text-sm text-gray-600">
-                      <span className="font-medium">Location:</span> {room.location}
-                    </p>
-                  )}
-                  {room.description && (
-                    <p className="text-sm text-gray-600">
-                      <span className="font-medium">Description:</span> {room.description}
-                    </p>
-                  )}
-                </div>
+        {/* Search Form */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5" />
+              Search Available Rooms
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={searchParams.booking_date}
+                  onChange={(e) => handleInputChange('booking_date', e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  max={new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
 
-                {/* Available Slots */}
-                {room.available_slots && room.available_slots.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Today's Available Slots:</h4>
-                    <div className="space-y-1">
-                      {room.available_slots.slice(0, 3).map((slot, index) => (
-                        <div key={index} className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded">
-                          {formatDateTime(slot.start_datetime)} - {formatDateTime(slot.end_datetime)}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Start Time <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={searchParams.start_time}
+                  onChange={(e) => handleInputChange('start_time', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select time</option>
+                  {timeOptions.slice(0, -1).map(time => (
+                    <option key={time} value={time}>{RoomService.formatTime(time)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Time <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={searchParams.end_time}
+                  onChange={(e) => handleInputChange('end_time', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select time</option>
+                  {timeOptions.slice(1).map(time => (
+                    <option key={time} value={time}>{RoomService.formatTime(time)}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Min Capacity
+                </label>
+                <input
+                  type="number"
+                  value={searchParams.capacity || ''}
+                  onChange={(e) => handleInputChange('capacity', e.target.value ? parseInt(e.target.value) : undefined)}
+                  placeholder="Any"
+                  min="1"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div className="flex items-end">
+                <Button 
+                  onClick={searchAvailableRooms} 
+                  disabled={searching}
+                  className="w-full"
+                >
+                  {searching ? 'Searching...' : 'Search'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Purpose (Optional)
+              </label>
+              <input
+                type="text"
+                value={searchParams.purpose || ''}
+                onChange={(e) => handleInputChange('purpose', e.target.value)}
+                placeholder="e.g., Meeting, Lecture"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Search Results */}
+        {availableRooms.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Search Results ({availableRooms.length} rooms available)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {availableRooms.map((room) => (
+                  <div key={room.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="font-semibold text-gray-900">Room {room.room_number}</h3>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                        Available
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MapPin className="w-4 h-4" />
+                        <span>{room.purpose}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Users className="w-4 h-4" />
+                        <span>{room.capacity} people</span>
+                      </div>
+                      {room.location && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <MapPin className="w-4 h-4" />
+                          <span>{room.location}</span>
                         </div>
-                      ))}
-                      {room.available_slots.length > 3 && (
-                        <p className="text-xs text-gray-500">+ {room.available_slots.length - 3} more slots</p>
                       )}
                     </div>
+
+                    {searchParams.booking_date && searchParams.start_time && searchParams.end_time && (
+                      <div className="bg-blue-50 p-3 rounded-md mb-4">
+                        <p className="text-sm text-blue-700">
+                          <Clock className="w-4 h-4 inline mr-1" />
+                          {RoomService.formatDate(searchParams.booking_date)}
+                          {' '}{RoomService.formatTime(searchParams.start_time)} - {RoomService.formatTime(searchParams.end_time)}
+                        </p>
+                      </div>
+                    )}
+
+                    <Button 
+                      onClick={() => bookRoom(room.id)}
+                      className="w-full"
+                    >
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Book This Room
+                    </Button>
                   </div>
-                )}
-
-                <button
-                  onClick={() => openBookingModal(room)}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  disabled={room.status !== 'AVAILABLE'}
-                >
-                  {room.status === 'AVAILABLE' ? 'Book Now' : 'Not Available'}
-                </button>
+                ))}
               </div>
-            </Card>
-          ))}
-        </div>
-
-        {rooms.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <div className="text-gray-500 text-lg">No rooms found</div>
-            <p className="text-gray-400 mt-2">Try adjusting your search criteria</p>
-          </div>
+            </CardContent>
+          </Card>
         )}
-      </div>
 
-      {/* Booking Modal */}
-      {showBookingModal && selectedRoom && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold mb-4">Book Room: {selectedRoom.room_number}</h3>
+        {/* All Rooms */}
+        <Card>
+          <CardHeader>
+            <CardTitle>All Available Rooms</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {rooms.map((room) => (
+                <div key={room.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-semibold text-gray-900">Room {room.room_number}</h3>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      room.status === 'available' ? 'bg-green-100 text-green-800' :
+                      room.status === 'occupied' ? 'bg-red-100 text-red-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {room.status}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <MapPin className="w-4 h-4" />
+                      <span>{room.purpose}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Users className="w-4 h-4" />
+                      <span>{room.capacity} people</span>
+                    </div>
+                    {room.location && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MapPin className="w-4 h-4" />
+                        <span>{room.location}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Clock className="w-4 h-4" />
+                      <span>{RoomService.formatTime(room.operating_start_time)} - {RoomService.formatTime(room.operating_end_time)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => bookRoom(room.id)}
+                      disabled={room.status !== 'available'}
+                      className="flex-1"
+                    >
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Book
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => navigate(`/room-booking/room/${room.id}`)}
+                      className="flex-1"
+                    >
+                      View
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
             
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Purpose *
-                </label>
-                <input
-                  type="text"
-                  value={bookingData.purpose}
-                  onChange={(e) => handleBookingInputChange('purpose', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Meeting, Class, etc."
-                />
+            {rooms.length === 0 && !loading && (
+              <div className="text-center py-12">
+                <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Rooms Available</h3>
+                <p className="text-gray-600">Check back later or contact administration.</p>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Date & Time *
-                </label>
-                <input
-                  type="datetime-local"
-                  value={bookingData.start_datetime}
-                  onChange={(e) => handleBookingInputChange('start_datetime', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Hours
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="12"
-                    value={bookingData.duration_hours}
-                    onChange={(e) => handleBookingInputChange('duration_hours', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Minutes
-                  </label>
-                  <select
-                    value={bookingData.duration_minutes}
-                    onChange={(e) => handleBookingInputChange('duration_minutes', parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value={0}>0</option>
-                    <option value={15}>15</option>
-                    <option value={30}>30</option>
-                    <option value={45}>45</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
-                </label>
-                <textarea
-                  value={bookingData.notes || ''}
-                  onChange={(e) => handleBookingInputChange('notes', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
-                  placeholder="Additional notes (optional)"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={closeBookingModal}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleBookingSubmit}
-                disabled={bookingLoading}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-              >
-                {bookingLoading ? 'Booking...' : 'Book Room'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

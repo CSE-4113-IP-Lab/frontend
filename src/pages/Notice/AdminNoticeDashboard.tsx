@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Archive, FileText, Plus, Calendar, TrendingUp } from "lucide-react";
-import { NoticeService } from "@/services/noticeservice";
+import { NoticeService } from "@/services/noticeService";
 
 interface ArchiveStats {
   total_posts: number;
@@ -17,10 +17,21 @@ export default function AdminNoticeDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<ArchiveStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
+    // Get user role from localStorage (consistent with Assignments component)
+    const role = localStorage.getItem("role");
+    setUserRole(role);
+
+    // Redirect non-admin users
+    if (role !== "admin") {
+      navigate("/notice");
+      return;
+    }
+
     loadStats();
-  }, []);
+  }, [navigate]);
 
   const loadStats = async () => {
     try {
@@ -33,6 +44,17 @@ export default function AdminNoticeDashboard() {
       setLoading(false);
     }
   };
+
+  // Show loading or redirect for non-admin users
+  if (userRole !== "admin") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Access Denied. Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

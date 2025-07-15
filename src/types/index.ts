@@ -20,6 +20,57 @@ export interface ExamScheduleItem {
   roomNo: string;
   level: "Undergraduate" | "Masters";
 }
+
+// New API response interface matching the API specification
+export interface ExamScheduleResponse {
+  course_id: number;
+  exam_date: string;
+  type: string;
+  start_time: string;
+  end_time: string;
+  room: string;
+  batch: string;
+  semester: number;
+  year: number;
+  id: number;
+  course: {
+    name: string;
+    course_code: string;
+    program_id: number;
+    teacher_id: number;
+    credits: number;
+    description: string;
+    semester: number;
+    year: number;
+    batch: string;
+    id: number;
+  };
+}
+
+export interface ExamScheduleCreateRequest {
+  course_id: number;
+  exam_date: string;
+  type: string;
+  start_time: string;
+  end_time: string;
+  room: string;
+  batch: string;
+  semester: number;
+  year: number;
+}
+
+export interface ExamScheduleFilters {
+  program_id?: number;
+  semester?: number;
+  year?: number;
+  batch?: string;
+  type?: string;
+  exam_date?: string;
+  room?: string;
+  course_id?: number;
+  skip?: number;
+  limit?: number;
+}
 export interface ClassScheduleItem {
   time: string;
   day: string;
