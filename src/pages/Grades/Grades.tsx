@@ -12,6 +12,8 @@ import Button from "../../components/Button";
 import FilterBar from "../../components/FilterBar";
 import LineChart from "@/components/LineChart";
 import axios from "axios";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const Grades: React.FC = () => {
   const [semesterFilter, setSemesterFilter] = useState<number | "all">("all");
@@ -25,6 +27,161 @@ const Grades: React.FC = () => {
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [totalCGPA, setTotalCGPA] = useState<number[]>([]);
   const [cgpa, setCgpa] = useState("");
+
+  const generateTranscriptData = () => {
+    const fields = ["incourse", "final", "other"];
+
+    return filtededCourses.map((course) => {
+      const courseId = course.id.toString();
+      const courseMarks = marksByCourse[courseId] || [];
+
+      // Build marks lookup
+      const marks: Record<string, { value: number; max: number }> = {};
+      courseMarks.forEach((entry: any) => {
+        marks[entry.type] = {
+          value: entry.marks_obtained,
+          max: entry.total_marks,
+        };
+      });
+
+      // Calculate total obtained (denominator is always 100)
+      let totalObtained = 0;
+      fields.forEach((field) => {
+        totalObtained += marks[field]?.value ?? 0;
+      });
+
+      const percentage = (totalObtained / 100) * 100;
+
+      // GPA & Grade
+      let gpa = 0;
+      let letter = "_";
+      if (percentage >= 80) {
+        gpa = 4.0;
+        letter = "A+";
+      } else if (percentage >= 75) {
+        gpa = 3.75;
+        letter = "A";
+      } else if (percentage >= 70) {
+        gpa = 3.5;
+        letter = "A-";
+      } else if (percentage >= 65) {
+        gpa = 3.25;
+        letter = "B+";
+      } else if (percentage >= 60) {
+        gpa = 3.0;
+        letter = "B";
+      } else if (percentage >= 55) {
+        gpa = 2.75;
+        letter = "B-";
+      } else if (percentage >= 50) {
+        gpa = 2.5;
+        letter = "C+";
+      } else if (percentage >= 45) {
+        gpa = 2.25;
+        letter = "C";
+      } else if (percentage >= 40) {
+        gpa = 2.0;
+        letter = "D";
+      } else {
+        gpa = 0;
+        letter = "F";
+      }
+
+      return {
+        course_code: course.course_code,
+        name: course.name,
+        credits: course.credits,
+        marks: marks, // { incourse, final, other } (some might be missing)
+        totalObtained,
+        letter,
+        gpa,
+      };
+    });
+  };
+
+  const generateTranscriptPDF = ({
+    name,
+    regNumber,
+    semester,
+    courseData,
+  }: {
+    name: string;
+    regNumber: string;
+    semester: string | number;
+    courseData: any[]; // This is your filteredCourses.map output combined with marks
+  }) => {
+    const doc = new jsPDF();
+
+    // Header
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Department of Computer Science & Engineering", 105, 20, {
+      align: "center",
+    });
+    doc.text("University of Dhaka", 105, 28, { align: "center" });
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `Student Name : ${name}      Registration Number : ${regNumber}`,
+      14,
+      38
+    );
+    doc.text(`Semester - ${semester} Results`, 14, 46);
+
+    // Table Header & Body
+    const headers = [
+      [
+        "COURSE",
+        "CREDITS",
+        "MIDTERM",
+        "FINAL",
+        "OTHER",
+        "TOTAL",
+        "GRADE",
+        "GPA",
+      ],
+    ];
+
+    const body = courseData.map((course) => [
+      `CSE - ${course.course_code}\n${course.name}`,
+      course.credits,
+      course.marks?.incourse
+        ? `${course.marks.incourse.value}/${course.marks.incourse.max}`
+        : "_",
+      course.marks?.final
+        ? `${course.marks.final.value}/${course.marks.final.max}`
+        : "_",
+      course.marks?.other
+        ? `${course.marks.other.value}/${course.marks.other.max}`
+        : "_",
+      `${course.totalObtained}/100`,
+      course.letter,
+      course.gpa?.toFixed(2),
+    ]);
+
+    // AutoTable
+    autoTable(doc, {
+      startY: 54,
+      head: headers,
+      body: body,
+      styles: {
+        halign: "center",
+        fontSize: 10,
+        textColor: 20,
+      },
+      headStyles: {
+        fillColor: [200, 200, 200], // light gray
+        textColor: 0,
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+    });
+
+    doc.save(`Transcript_Semester_${semester}_${name}.pdf`);
+  };
 
   useEffect(() => {
     const userRole = localStorage.getItem("role");
@@ -467,7 +624,32 @@ const Grades: React.FC = () => {
               <h2 className="text-xl font-bold uppercase text-primary-dark">
                 ACADEMIC PERFORMANCE
               </h2>
-              <Button size="sm" cornerStyle="br">
+              <Button
+                size="sm"
+                cornerStyle="br"
+                disabled={semesterFilter === "all"}
+                onClick={async () => {
+                  const userId = localStorage.getItem("id");
+                  const res = await axios.get(
+                    `${import.meta.env.VITE_SERVER_URL}/students/${userId}`,
+                    {
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem(
+                          "token"
+                        )}`,
+                        "ngrok-skip-browser-warning": "true",
+                      },
+                    }
+                  );
+                  generateTranscriptPDF({
+                    name: res.data.user.username,
+                    regNumber: res.data.registration_number,
+                    semester: semesterFilter,
+                    courseData: generateTranscriptData(),
+                  });
+                }}
+              >
                 <Download className="inline w-4 h-4 mr-2" />
                 DOWNLOAD TRANSCRIPT
               </Button>
