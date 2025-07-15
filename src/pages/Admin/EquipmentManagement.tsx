@@ -344,6 +344,19 @@ const EquipmentManagement: React.FC = () => {
     }
   };
 
+  const handleCancelRequest = async (requestId: number) => {
+    if (!confirm('Are you sure you want to cancel this request?')) return;
+    
+    try {
+      await equipmentService.cancelEquipmentRequest(requestId);
+      alert('Request cancelled successfully');
+      loadData();
+    } catch (error) {
+      console.error('Error cancelling request:', error);
+      alert('Failed to cancel request');
+    }
+  };
+
   // Helper functions
   const openEditDialog = (eq: Equipment) => {
     setEditingEquipment(eq);
@@ -588,6 +601,7 @@ const EquipmentManagement: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
+                          {/* Pending status actions */}
                           {request.status === 'pending' && (
                             <>
                               <Button
@@ -596,7 +610,8 @@ const EquipmentManagement: React.FC = () => {
                                 onClick={() => handleApproveRequest(request.id)}
                                 className="text-green-600 hover:bg-green-50"
                               >
-                                <CheckCircle className="w-4 h-4" />
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Approve
                               </Button>
                               <Button
                                 variant="outline"
@@ -604,29 +619,54 @@ const EquipmentManagement: React.FC = () => {
                                 onClick={() => handleRejectRequest(request.id)}
                                 className="text-red-600 hover:bg-red-50"
                               >
-                                <XCircle className="w-4 h-4" />
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Reject
                               </Button>
                             </>
                           )}
+                          
+                          {/* Approved status actions */}
                           {request.status === 'approved' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleHandoverEquipment(request.id)}
-                            >
-                              <HandHeart className="w-4 h-4 mr-1" />
-                              Handover
-                            </Button>
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleHandoverEquipment(request.id)}
+                                className="text-blue-600 hover:bg-blue-50"
+                              >
+                                <HandHeart className="w-4 h-4 mr-1" />
+                                Handover
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleCancelRequest(request.id)}
+                                className="text-red-600 hover:bg-red-50"
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Cancel
+                              </Button>
+                            </>
                           )}
+                          
+                          {/* Handover status actions */}
                           {request.status === 'handover' && (
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleReturnEquipment(request.id)}
+                              className="text-green-600 hover:bg-green-50"
                             >
                               <RotateCcw className="w-4 h-4 mr-1" />
                               Return
                             </Button>
+                          )}
+                          
+                          {/* No actions for completed, rejected, cancelled status */}
+                          {(request.status === 'completed' || request.status === 'rejected' || request.status === 'cancelled') && (
+                            <span className="text-sm text-gray-500 px-3 py-2">
+                              No actions available
+                            </span>
                           )}
                         </div>
                       </TableCell>
