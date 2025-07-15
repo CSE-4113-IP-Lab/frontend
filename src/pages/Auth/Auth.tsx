@@ -67,8 +67,8 @@ export default function Home() {
   }, []);
 
   const containerClass = mounted
-    ? `container ${isSignUpMode ? "sign-up-mode" : ""}`
-    : "container";
+    ? `container_1 ${isSignUpMode ? "sign-up-mode" : ""}`
+    : "container_1";
 
   const handleGoogleAuth = async (details: DecodedGoogleDetails) => {
     const postData = {
@@ -278,7 +278,7 @@ export default function Home() {
                   {(["student", "faculty"] as const).map((type) => (
                     <Button
                       key={type}
-                      variant="outline"
+                      variant={userRole == type ? "primary" : "outline"}
                       size="sm"
                       cornerStyle="tr"
                       className="capitalize text-xs"
@@ -402,7 +402,7 @@ export default function Home() {
                   {(["student", "faculty"] as const).map((type) => (
                     <Button
                       key={type}
-                      variant="outline"
+                      variant={userRole == type ? "primary" : "outline"}
                       size="sm"
                       cornerStyle="tr"
                       className="capitalize text-xs"

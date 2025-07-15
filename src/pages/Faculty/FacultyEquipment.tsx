@@ -10,7 +10,6 @@ import {
   Search, 
   Plus, 
   ArrowLeft,
-  Calendar,
   CheckCircle,
   Clock,
   XCircle,
@@ -35,6 +34,7 @@ export default function FacultyEquipmentPage() {
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [requestStatusFilter, setRequestStatusFilter] = useState<string>('all');
 
   // Check authentication and redirect if needed
   useEffect(() => {
@@ -76,6 +76,22 @@ export default function FacultyEquipmentPage() {
     item.type?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Count requests by status for filter buttons
+  const requestCounts = {
+    all: myRequests.length,
+    pending: myRequests.filter(req => req.status === 'pending').length,
+    approved: myRequests.filter(req => req.status === 'approved').length,
+    handover: myRequests.filter(req => req.status === 'handover').length,
+    completed: myRequests.filter(req => req.status === 'completed').length,
+    rejected: myRequests.filter(req => req.status === 'rejected').length,
+    cancelled: myRequests.filter(req => req.status === 'cancelled').length,
+  };
+
+  // Filter requests based on status filter
+  const filteredRequests = requestStatusFilter === 'all' 
+    ? myRequests 
+    : myRequests.filter(req => req.status === requestStatusFilter);
+
   // Handle equipment request
   const handleRequestEquipment = (item: Equipment) => {
     setSelectedEquipment(item);
@@ -99,20 +115,6 @@ export default function FacultyEquipmentPage() {
   const handleCloseModal = () => {
     setIsRequestModalOpen(false);
     setSelectedEquipment(null);
-  };
-
-  // Handle return equipment
-  const handleReturnEquipment = async (requestId: number) => {
-    if (!confirm('Confirm that you are returning this equipment in good condition?')) return;
-    
-    try {
-      await equipmentService.returnEquipment(requestId);
-      alert('Equipment returned successfully');
-      loadData();
-    } catch (error: any) {
-      console.error('Error returning equipment:', error);
-      alert(error.response?.data?.detail || 'Failed to return equipment');
-    }
   };
 
   // Handle cancel request
@@ -142,10 +144,10 @@ export default function FacultyEquipmentPage() {
     return variants[status as keyof typeof variants] || <Badge variant="outline">{status}</Badge>;
   };
 
-  // Filter current requests (not completed, cancelled, or rejected)
-  const currentRequests = myRequests.filter(req => 
-    !['completed', 'cancelled', 'rejected'].includes(req.status)
-  );
+  // Show all requests so faculty can see rejected, cancelled, and completed ones too
+  // const currentRequests = myRequests.filter(req => 
+  //   !['completed', 'cancelled', 'rejected'].includes(req.status)
+  // );
 
   if (loading) {
     return (
@@ -294,17 +296,70 @@ export default function FacultyEquipmentPage() {
                 </p>
               </div>
 
+              {/* Filter Buttons */}
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  variant={requestStatusFilter === 'all' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRequestStatusFilter('all')}
+                >
+                  All Requests ({requestCounts.all})
+                </Button>
+                <Button
+                  variant={requestStatusFilter === 'pending' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRequestStatusFilter('pending')}
+                >
+                  Pending ({requestCounts.pending})
+                </Button>
+                <Button
+                  variant={requestStatusFilter === 'approved' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRequestStatusFilter('approved')}
+                >
+                  Approved ({requestCounts.approved})
+                </Button>
+                <Button
+                  variant={requestStatusFilter === 'handover' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRequestStatusFilter('handover')}
+                >
+                  Collected ({requestCounts.handover})
+                </Button>
+                <Button
+                  variant={requestStatusFilter === 'completed' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRequestStatusFilter('completed')}
+                >
+                  Completed ({requestCounts.completed})
+                </Button>
+                <Button
+                  variant={requestStatusFilter === 'rejected' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRequestStatusFilter('rejected')}
+                >
+                  Rejected ({requestCounts.rejected})
+                </Button>
+                <Button
+                  variant={requestStatusFilter === 'cancelled' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRequestStatusFilter('cancelled')}
+                >
+                  Cancelled ({requestCounts.cancelled})
+                </Button>
+              </div>
+
               <div className="space-y-4">
-                {myRequests.length === 0 ? (
+                {filteredRequests.length === 0 ? (
                   <Card>
                     <CardContent className="p-8 text-center">
                       <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">No equipment requests found.</p>
-                      <p className="text-gray-400 text-sm mt-2">Start by browsing equipment and making your first request.</p>
+                      <p className="text-gray-500">No requests found for this filter.</p>
+                      <p className="text-gray-400 text-sm mt-2">Try a different filter or make your first request.</p>
                     </CardContent>
                   </Card>
                 ) : (
-                  myRequests.map((request) => (
+                  filteredRequests.map((request) => (
                     <Card key={request.id} className="border-l-4 border-l-blue-500">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -365,18 +420,15 @@ export default function FacultyEquipmentPage() {
                         </div>
                         
                         <div className="flex gap-2">
+                          {/* Faculty cannot return equipment - only admin can mark as returned */}
                           {request.status === 'handover' && (
-                            <Button 
-                              size="sm"
-                              onClick={() => handleReturnEquipment(request.id)}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <CheckCircle className="w-4 h-4 mr-1" />
-                              Return Equipment
-                            </Button>
+                            <div className="text-sm text-gray-500 px-3 py-2">
+                              Contact admin to return equipment
+                            </div>
                           )}
                           
-                          {(request.status === 'pending' || request.status === 'approved') && (
+                          {/* Cancel button - Faculty can only cancel approved requests */}
+                          {request.status === 'approved' && (
                             <Button 
                               size="sm"
                               variant="outline"
@@ -387,21 +439,18 @@ export default function FacultyEquipmentPage() {
                               Cancel Request
                             </Button>
                           )}
+                          
+                          {/* No actions for completed, rejected, cancelled requests */}
+                          {(request.status === 'completed' || request.status === 'rejected' || request.status === 'cancelled') && (
+                            <div className="text-sm text-gray-500 px-3 py-2">
+                              No actions available
+                            </div>
+                          )}
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))
-                )}
-                
-                {currentRequests.length === 0 && (
-                  <Card>
-                    <CardContent className="p-12 text-center">
-                      <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">No current equipment requests.</p>
-                      <p className="text-gray-400 text-sm mt-2">Browse equipment to make a new request for teaching or research.</p>
-                    </CardContent>
-                  </Card>
                 )}
               </div>
             </TabsContent>

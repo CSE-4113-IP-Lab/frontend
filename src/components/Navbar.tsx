@@ -9,9 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Search, Menu, X, ChevronRight, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 import { useAuth } from "@/contexts/AuthContext";
-
 
 interface NavbarProps {
   className?: string;
@@ -24,7 +22,6 @@ const navItems = [
   { label: "CONTACT", href: "/contact" },
   { label: "SCHEDULE", href: "/schedule" },
   { label: "RESOURCES", href: "/resources" },
-  { label: "ROOM BOOKING", href: "/room-booking" },
 ];
 
 const additionalNavItems = [
@@ -37,7 +34,6 @@ const additionalNavItems = [
 
 export function Navbar({ className }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -50,16 +46,6 @@ export function Navbar({ className }: NavbarProps) {
     navigate('/');
   };
 
-  // Add admin link for admin users
-  const navItemsWithAdmin = React.useMemo(() => {
-    const items = [...navItems];
-    if (isAuthenticated && user?.role === "admin") {
-      items.push({ label: "ADMIN", href: "/admin" });
-    }
-    return items;
-  }, [isAuthenticated, user?.role]);
-
-
   return (
     <nav
       className={cn("w-full", className)}
@@ -71,7 +57,7 @@ export function Navbar({ className }: NavbarProps) {
 
           {/* Center - Navigation Links */}
           <div className="hidden md:flex items-center justify-center space-x-8 flex-1">
-            {navItemsWithAdmin.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.label}
                 to={item.href}

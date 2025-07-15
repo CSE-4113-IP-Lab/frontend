@@ -7,13 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { 
   Tabs, 
   TabsContent, 
   TabsList, 
@@ -27,8 +20,6 @@ import {
   Package, 
   CheckCircle, 
   XCircle, 
-  HandHeart,
-  ArrowLeftRight,
   RotateCcw,
   ArrowLeft
 } from "lucide-react";
@@ -344,6 +335,19 @@ const EquipmentManagement: React.FC = () => {
     }
   };
 
+  const handleCancelRequest = async (requestId: number) => {
+    if (!confirm('Are you sure you want to cancel this request?')) return;
+    
+    try {
+      await equipmentService.cancelEquipmentRequest(requestId);
+      alert('Request cancelled successfully');
+      loadData();
+    } catch (error) {
+      console.error('Error cancelling request:', error);
+      alert('Failed to cancel request');
+    }
+  };
+
   // Helper functions
   const openEditDialog = (eq: Equipment) => {
     setEditingEquipment(eq);
@@ -390,6 +394,17 @@ const EquipmentManagement: React.FC = () => {
     
     return matchesStatus && matchesSearch;
   });
+
+  // Count requests by status for filter buttons
+  const requestCounts = {
+    all: requests.length,
+    pending: requests.filter(r => r.status === 'pending').length,
+    approved: requests.filter(r => r.status === 'approved').length,
+    handover: requests.filter(r => r.status === 'handover').length,
+    completed: requests.filter(r => r.status === 'completed').length,
+    rejected: requests.filter(r => r.status === 'rejected').length,
+    cancelled: requests.filter(r => r.status === 'cancelled').length,
+  };
 
   if (loading) {
     return (
@@ -527,120 +542,186 @@ const EquipmentManagement: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="requests" className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search requests..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={requestStatusFilter} onValueChange={setRequestStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="handover">Handed Over</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Filter Buttons */}
+          <div className="flex gap-2 flex-wrap">
+  <Button
+    variant={requestStatusFilter === 'all' ? 'default' : 'outline'}
+    size="sm"
+    onClick={() => setRequestStatusFilter('all')}
+  >
+    All Requests ({requestCounts.all})
+  </Button>
+  <Button
+    variant={requestStatusFilter === 'pending' ? 'default' : 'outline'}
+    size="sm"
+    onClick={() => setRequestStatusFilter('pending')}
+  >
+    Pending ({requestCounts.pending})
+  </Button>
+  <Button
+    variant={requestStatusFilter === 'approved' ? 'default' : 'outline'}
+    size="sm"
+    onClick={() => setRequestStatusFilter('approved')}
+  >
+    Approved ({requestCounts.approved})
+  </Button>
+  <Button
+    variant={requestStatusFilter === 'handover' ? 'default' : 'outline'}
+    size="sm"
+    onClick={() => setRequestStatusFilter('handover')}
+  >
+    Handed Over ({requestCounts.handover})
+  </Button>
+  <Button
+    variant={requestStatusFilter === 'completed' ? 'default' : 'outline'}
+    size="sm"
+    onClick={() => setRequestStatusFilter('completed')}
+  >
+    Completed ({requestCounts.completed})
+  </Button>
+  <Button
+    variant={requestStatusFilter === 'rejected' ? 'default' : 'outline'}
+    size="sm"
+    onClick={() => setRequestStatusFilter('rejected')}
+  >
+    Rejected ({requestCounts.rejected})
+  </Button>
+  <Button
+    variant={requestStatusFilter === 'cancelled' ? 'default' : 'outline'}
+    size="sm"
+    onClick={() => setRequestStatusFilter('cancelled')}
+  >
+    Cancelled ({requestCounts.cancelled})
+  </Button>
+</div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ArrowLeftRight className="w-5 h-5" />
-                Equipment Requests ({filteredRequests.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Equipment</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead>Requested By</TableHead>
-                    <TableHead>Purpose</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Request Date</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredRequests.map((request) => (
-                    <TableRow key={request.id}>
-                      <TableCell className="font-medium">
-                        {request.equipment?.name || 'Unknown'}
-                      </TableCell>
-                      <TableCell>{request.quantity}</TableCell>
-                      <TableCell>User ID: {request.user_id}</TableCell>
-                      <TableCell className="max-w-xs truncate">{request.purpose}</TableCell>
-                      <TableCell>{getStatusBadge(request.status)}</TableCell>
-                      <TableCell>
-                        {new Date(request.request_date).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          {request.status === 'pending' && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleApproveRequest(request.id)}
-                                className="text-green-600 hover:bg-green-50"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleRejectRequest(request.id)}
-                                className="text-red-600 hover:bg-red-50"
-                              >
-                                <XCircle className="w-4 h-4" />
-                              </Button>
-                            </>
+          {/* Requests Display - Card Format for Better Visibility */}
+          <div className="space-y-4">
+            {filteredRequests.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <div className="text-gray-500">No requests found</div>
+                </CardContent>
+              </Card>
+            ) : (
+              filteredRequests.map((request) => (
+                <Card key={request.id} className="border-l-4 border-l-red-500">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold text-lg">{request.equipment?.name || 'Unknown Equipment'}</h3>
+                          {getStatusBadge(request.status)}
+                        </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm text-gray-600 mb-3">
+                          <div>
+                            <span className="font-medium">Requester:</span> User #{request.user_id}
+                          </div>
+                          <div>
+                            <span className="font-medium">Quantity:</span> {request.quantity}
+                          </div>
+                          <div>
+                            <span className="font-medium">Requested:</span> {new Date(request.request_date).toLocaleDateString()}
+                          </div>
+                          <div>
+                            <span className="font-medium">Purpose:</span> {request.purpose}
+                          </div>
+                          {request.approved_date && (
+                            <div>
+                              <span className="font-medium">Approved:</span> {new Date(request.approved_date).toLocaleDateString()}
+                            </div>
                           )}
-                          {request.status === 'approved' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleHandoverEquipment(request.id)}
-                            >
-                              <HandHeart className="w-4 h-4 mr-1" />
-                              Handover
-                            </Button>
+                          {request.handover_date && (
+                            <div>
+                              <span className="font-medium">Handed Over:</span> {new Date(request.handover_date).toLocaleDateString()}
+                            </div>
                           )}
-                          {request.status === 'handover' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleReturnEquipment(request.id)}
-                            >
-                              <RotateCcw className="w-4 h-4 mr-1" />
-                              Return
-                            </Button>
+                          {request.return_date && (
+                            <div>
+                              <span className="font-medium">Returned:</span> {new Date(request.return_date).toLocaleDateString()}
+                            </div>
+                          )}
+                          {request.notes && (
+                            <div className="col-span-2 md:col-span-5">
+                              <span className="font-medium">Notes:</span> {request.notes}
+                            </div>
                           )}
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {filteredRequests.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  No requests found
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        {/* Pending status actions */}
+                        {request.status === 'pending' && (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() => handleApproveRequest(request.id)}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRejectRequest(request.id)}
+                              className="text-red-600 border-red-200 hover:bg-red-50"
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                        
+                        {/* Approved status actions */}
+                        {request.status === 'approved' && (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() => handleHandoverEquipment(request.id)}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Package className="w-4 h-4 mr-1" />
+                              Mark as Handed Over
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleCancelRequest(request.id)}
+                              className="text-red-600 border-red-200 hover:bg-red-50"
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Cancel
+                            </Button>
+                          </>
+                        )}
+                        
+                        {/* Handover status actions */}
+                        {request.status === 'handover' && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleReturnEquipment(request.id)}
+                            className="bg-purple-600 hover:bg-purple-700"
+                          >
+                            <RotateCcw className="w-4 h-4 mr-1" />
+                            Mark as Returned
+                          </Button>
+                        )}
+                        
+                        {/* No actions for completed, rejected, cancelled status */}
+                        {(request.status === 'completed' || request.status === 'rejected' || request.status === 'cancelled') && (
+                          <div className="text-sm text-gray-500 px-3 py-2">
+                            No actions available
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
         </TabsContent>
       </Tabs>
 
