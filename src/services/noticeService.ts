@@ -1,7 +1,8 @@
 import type { Post, PostCreate, PostUpdate } from "@/types";
 
-const API_ENDPOINT =
-  import.meta.env.API_ENDPOINT || "http://127.0.0.1:8000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+  ? `${import.meta.env.VITE_API_BASE_URL}/api/v1`
+  : "http://127.0.0.1:8000/api/v1";
 
 export class NoticeService {
   private static getAuthHeaders() {
@@ -13,8 +14,11 @@ export class NoticeService {
     };
   }
 
-  static async getNotices(): Promise<Post[]> {
-    const response = await fetch(`${API_ENDPOINT}/posts`, {
+  static async getNotices(includeArchived: boolean = false): Promise<Post[]> {
+    const url = `${API_BASE_URL}/posts${
+      includeArchived ? "?includeArchived=true" : ""
+    }`;
+    const response = await fetch(url, {
       headers: this.getAuthHeaders(),
     });
     if (!response.ok) {
@@ -24,7 +28,7 @@ export class NoticeService {
   }
 
   static async getNotice(id: number): Promise<Post> {
-    const response = await fetch(`${API_ENDPOINT}/posts/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
       headers: this.getAuthHeaders(),
     });
     if (!response.ok) {
@@ -34,7 +38,7 @@ export class NoticeService {
   }
 
   static async createNotice(notice: PostCreate): Promise<Post> {
-    const response = await fetch(`${API_ENDPOINT}/posts`, {
+    const response = await fetch(`${API_BASE_URL}/posts`, {
       method: "POST",
       headers: this.getAuthHeaders(),
       body: JSON.stringify(notice),
@@ -46,7 +50,7 @@ export class NoticeService {
   }
 
   static async updateNotice(id: number, notice: PostUpdate): Promise<Post> {
-    const response = await fetch(`${API_ENDPOINT}/posts/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
       method: "PUT",
       headers: this.getAuthHeaders(),
       body: JSON.stringify(notice),
@@ -58,7 +62,7 @@ export class NoticeService {
   }
 
   static async deleteNotice(id: number): Promise<void> {
-    const response = await fetch(`${API_ENDPOINT}/posts/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
       method: "DELETE",
       headers: this.getAuthHeaders(),
     });
@@ -79,7 +83,7 @@ export class NoticeService {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_ENDPOINT}/posts/${id}/attachments`, {
+    const response = await fetch(`${API_BASE_URL}/posts/${id}/attachments`, {
       method: "POST",
       headers,
       body: formData,
@@ -92,7 +96,7 @@ export class NoticeService {
 
   static async removeAttachment(postId: number, fileId: number): Promise<Post> {
     const response = await fetch(
-      `${API_ENDPOINT}/posts/${postId}/attachments/${fileId}`,
+      `${API_BASE_URL}/posts/${postId}/attachments/${fileId}`,
       {
         method: "DELETE",
         headers: this.getAuthHeaders(),
@@ -105,17 +109,18 @@ export class NoticeService {
   }
 
   static async getActiveNotices(): Promise<Post[]> {
-    const response = await fetch(`${API_ENDPOINT}/posts/active`, {
+    const response = await fetch(`${API_BASE_URL}/posts/active`, {
       headers: this.getAuthHeaders(),
     });
     if (!response.ok) {
-      throw new Error("Failed to fetch active notices");
+      // Fallback to regular posts endpoint if active endpoint doesn't exist
+      return this.getNotices(false);
     }
     return response.json();
   }
 
   static async getArchivedNotices(): Promise<Post[]> {
-    const response = await fetch(`${API_ENDPOINT}/posts/archived`, {
+    const response = await fetch(`${API_BASE_URL}/posts/archived`, {
       headers: this.getAuthHeaders(),
     });
     if (!response.ok) {
@@ -125,7 +130,7 @@ export class NoticeService {
   }
 
   static async getArchivedNotice(id: number): Promise<Post> {
-    const response = await fetch(`${API_ENDPOINT}/posts/archived/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/posts/archived/${id}`, {
       headers: this.getAuthHeaders(),
     });
     if (!response.ok) {
@@ -141,12 +146,32 @@ export class NoticeService {
     archive_days: number;
     archive_cutoff_date: string;
   }> {
-    const response = await fetch(`${API_ENDPOINT}/posts/stats/archive`, {
-      headers: this.getAuthHeaders(),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to fetch archive stats");
+    // Note: This endpoint might not exist in your API yet
+    // You may need to create it or use a combination of active/archived counts
+    try {
+      const response = await fetch(`${API_BASE_URL}/posts/stats/archive`, {
+        headers: this.getAuthHeaders(),
+      });
+      if (!response.ok) {
+        throw new Error("Stats endpoint not available");
+      }
+      return response.json();
+    } catch {
+      // Fallback: calculate stats from active and archived endpoints
+      const [activeNotices, archivedNotices] = await Promise.all([
+        this.getActiveNotices(),
+        this.getArchivedNotices(),
+      ]);
+
+      return {
+        total_posts: activeNotices.length + archivedNotices.length,
+        active_posts: activeNotices.length,
+        archived_posts: archivedNotices.length,
+        archive_days: 30, // Default value
+        archive_cutoff_date: new Date(
+          Date.now() - 30 * 24 * 60 * 60 * 1000
+        ).toISOString(),
+      };
     }
-    return response.json();
   }
 }

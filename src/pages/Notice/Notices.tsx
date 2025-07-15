@@ -25,9 +25,8 @@ export function NoticeBoardPage() {
 
   useEffect(() => {
     loadActiveNotices();
-    // In a real app, you'd get the user role from authentication context
-    // For now, we'll assume it's available in localStorage or context
-    const role = localStorage.getItem("userRole") as UserRole;
+    // Get user role from localStorage (consistent with Assignments component)
+    const role = localStorage.getItem("role") as UserRole;
     setUserRole(role);
   }, []);
 
@@ -139,7 +138,14 @@ export function NoticeBoardPage() {
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">NOTICES</h1>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">NOTICES</h1>
+              <p className="text-gray-600 leading-relaxed max-w-3xl">
+                Stay updated with important notices, announcements, and events.
+                Access current information and browse archived notices for
+                reference.
+              </p>
+            </div>
             <div className="flex gap-3">
               <Button
                 variant="outline"
@@ -158,6 +164,40 @@ export function NoticeBoardPage() {
               )}
             </div>
           </div>
+
+          {/* Admin Tools */}
+          {userRole === "admin" && (
+            <Card className="mb-8">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">
+                      ADMIN TOOLS
+                    </h2>
+                    <p className="text-gray-600">
+                      Create new notices, manage existing ones, and access
+                      administrative features.
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate("/admin")}
+                      className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      Admin Dashboard
+                    </Button>
+                    <Button
+                      onClick={handleCreateNotice}
+                      className="flex items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      Create Notice
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Filter Section */}
           <Card className="mb-6">
@@ -215,19 +255,28 @@ export function NoticeBoardPage() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b font-medium text-gray-700">
-                    <div className="col-span-6">Title</div>
+                  <div
+                    className={`grid gap-4 px-6 py-4 bg-gray-50 border-b font-medium text-gray-700 ${
+                      userRole === "admin" ? "grid-cols-10" : "grid-cols-12"
+                    }`}>
+                    <div className="col-span-5">Title</div>
                     <div className="col-span-2">Type</div>
                     <div className="col-span-2">Date</div>
                     <div className="col-span-2">Attachments</div>
+                    {userRole === "admin" && (
+                      <div className="col-span-2">Actions</div>
+                    )}
                   </div>
 
                   {filteredNotices.map((notice) => (
                     <div
                       key={notice.id}
-                      className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => handleNoticeClick(notice.id)}>
-                      <div className="col-span-6">
+                      className={`grid gap-4 px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
+                        userRole === "admin" ? "grid-cols-10" : "grid-cols-12"
+                      }`}>
+                      <div
+                        className="col-span-5 cursor-pointer"
+                        onClick={() => handleNoticeClick(notice.id)}>
                         <span className="text-gray-900 hover:text-blue-600 font-medium">
                           {notice.title}
                         </span>
@@ -263,6 +312,49 @@ export function NoticeBoardPage() {
                           )}
                         </span>
                       </div>
+                      {userRole === "admin" && (
+                        <div className="col-span-2">
+                          <div className="flex gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/notice/${notice.id}/edit`);
+                              }}
+                              className="px-2 py-1 h-auto text-xs">
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                if (
+                                  window.confirm(
+                                    "Are you sure you want to delete this notice?"
+                                  )
+                                ) {
+                                  try {
+                                    await NoticeService.deleteNotice(notice.id);
+                                    loadActiveNotices(); // Reload the notices
+                                  } catch (error) {
+                                    console.error(
+                                      "Error deleting notice:",
+                                      error
+                                    );
+                                    alert(
+                                      "Failed to delete notice. Please try again."
+                                    );
+                                  }
+                                }
+                              }}
+                              className="px-2 py-1 h-auto text-xs">
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </>

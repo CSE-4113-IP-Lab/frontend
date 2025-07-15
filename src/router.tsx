@@ -28,6 +28,9 @@ import {
   StudentRoute,
   FacultyRoute,
 } from "@/components/ProtectedRoute";
+
+import ApiTest from "@/pages/ApiTest";
+
 import {
   AvailableRooms,
   BookRoom,
@@ -36,6 +39,8 @@ import {
 } from "@/pages/RoomBooking";
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
+import CreateSchedule from "./pages/Schedule/classSchedule/CreateSchedule";
+import EditSchedule from "./pages/Schedule/classSchedule/EditSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
 import ArchivedEvents from "./pages/Event/ArchivedEvents";
 import EventPage from "./pages/Event/EventPage";
@@ -43,8 +48,11 @@ import UpcomingEvents from "./pages/Event/UpcomingEvents";
 import EventDetails from "./pages/Event/EventDetails";
 import TestComponent from "./pages/Test/TestComponent";
 import CourseList from "./pages/Courses/CourseList";
+import CourseCreate from "./pages/Courses/CourseCreate";
+import CourseEdit from "./pages/Courses/CourseEdit";
 import ProgramOutlines from "./pages/Programs/ProgramOutlines";
-import SchedulePage from "./pages/Schedule/schedule";
+import ProgramCreate from "./pages/Programs/ProgramCreate";
+import ProgramEdit from "./pages/Programs/ProgramEdit";
 import ErrorPage from "./ErrorPage";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminCourseManagement from "./pages/Admin/AdminCourseManagement";
@@ -180,16 +188,64 @@ export const router = createBrowserRouter([
         element: <CourseList />,
       },
       {
+        path: "courses/create",
+        element: (
+          <AdminRoute>
+            <CourseCreate />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "courses/edit/:id",
+        element: (
+          <AdminRoute>
+            <CourseEdit />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "schedule",
+        element: <ClassSchedule />,
+      },
+      {
         path: "class-schedule",
         element: <ClassSchedule />,
       },
       {
-        path: "schedule",
-        element: <SchedulePage />,
+        path: "schedule/create",
+        element: (
+          <AdminRoute>
+            <CreateSchedule />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "schedule/edit/:id",
+        element: (
+          <AdminRoute>
+            <EditSchedule />
+          </AdminRoute>
+        ),
       },
       {
         path: "programs",
         element: <ProgramOutlines />,
+      },
+      {
+        path: "programs/create",
+        element: (
+          <AdminRoute>
+            <ProgramCreate />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "programs/edit/:id",
+        element: (
+          <AdminRoute>
+            <ProgramEdit />
+          </AdminRoute>
+        ),
       },
       {
         path: "admin",
