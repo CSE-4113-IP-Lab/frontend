@@ -40,10 +40,53 @@ export interface ScheduleEntry {
   room: string;
 }
 
+// Backend API response types
+export interface ClassScheduleResponse {
+  id: number;
+  course_id: number;
+  day_of_week: DayOfWeek;
+  start_time: string; // Format: "HH:MM"
+  end_time: string; // Format: "HH:MM"
+  room?: string;
+  batch?: string;
+  semester?: number;
+  year?: number;
+  is_active: number;
+  course?: CourseResponse;
+}
+
+export interface CourseResponse {
+  id: number;
+  name: string;
+  course_code?: string;
+  program_id: number;
+  teacher_id?: number;
+  credits: number;
+  description?: string;
+  semester?: number;
+  year?: number;
+  batch?: string;
+}
+
+export const DayOfWeek = {
+  MONDAY: "monday",
+  TUESDAY: "tuesday",
+  WEDNESDAY: "wednesday",
+  THURSDAY: "thursday",
+  FRIDAY: "friday",
+  SATURDAY: "saturday",
+  SUNDAY: "sunday",
+} as const;
+
+export type DayOfWeek = (typeof DayOfWeek)[keyof typeof DayOfWeek];
+
 export interface FilterState {
   batch: string;
   semester: string;
-  level: string;
+  year: string;
+  room: string;
+  day_of_week: string;
+  program_id: string;
 }
 
 export interface TimeSlot {
@@ -109,3 +152,6 @@ export const UserRole = {
 } as const;
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
+// Agent and Chat types
+export type { ChatMessage, AgentResponse, ChatSession } from "./agent";
