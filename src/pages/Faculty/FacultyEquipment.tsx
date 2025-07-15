@@ -365,6 +365,7 @@ export default function FacultyEquipmentPage() {
                         </div>
                         
                         <div className="flex gap-2">
+                          {/* Return equipment if handed over */}
                           {request.status === 'handover' && (
                             <Button 
                               size="sm"
@@ -376,7 +377,8 @@ export default function FacultyEquipmentPage() {
                             </Button>
                           )}
                           
-                          {(request.status === 'pending' || request.status === 'approved') && (
+                          {/* Cancel button - Faculty can only cancel approved requests */}
+                          {request.status === 'approved' && (
                             <Button 
                               size="sm"
                               variant="outline"

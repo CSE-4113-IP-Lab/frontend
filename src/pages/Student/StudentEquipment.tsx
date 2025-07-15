@@ -339,7 +339,8 @@ export default function StudentEquipmentPage() {
                             )}
                           </div>
                           <div className="flex flex-col gap-2 ml-4">
-                            {request.status === 'pending' && (
+                            {/* Students can cancel both pending and approved requests */}
+                            {(request.status === 'pending' || request.status === 'approved') && (
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -350,6 +351,8 @@ export default function StudentEquipmentPage() {
                                 Cancel
                               </Button>
                             )}
+                            
+                            {/* Return equipment if handed over */}
                             {request.status === 'handover' && (
                               <Button
                                 variant="outline"
