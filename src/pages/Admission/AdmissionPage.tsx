@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { admissionService, type AdmissionTimeline } from '../../services/admissionService';
 import { format, parseISO } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Clock, BookOpen, ArrowRight, RefreshCw, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, BookOpen, ArrowRight, RefreshCw, FileText } from 'lucide-react';
 import { Alert, AlertDescription, AlertIcon } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
@@ -17,7 +17,7 @@ const AdmissionPage = () => {
   const [timelines, setTimelines] = useState<AdmissionTimeline[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const loadTimelines = async () => {
@@ -86,7 +86,7 @@ const AdmissionPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <motion.div 
           className="w-full max-w-md"
           initial={{ opacity: 0, y: 20 }}
@@ -103,9 +103,8 @@ const AdmissionPage = () => {
           </Alert>
           <div className="mt-6 text-center">
             <Button 
-              variant="outline" 
+              className="inline-flex items-center gap-2 bg-[#14244c] hover:bg-[#ecb31d] text-white hover:text-[#14244c] transition-colors cursor-pointer"
               onClick={() => window.location.reload()}
-              className="inline-flex items-center gap-2"
             >
               <RefreshCw className="h-4 w-4" />
               Try Again
@@ -118,10 +117,10 @@ const AdmissionPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-4">
+            <h1 className="text-4xl font-bold text-[#14244c] mb-4">
               Admission Timelines
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -177,10 +176,10 @@ const AdmissionPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+          <h1 className="text-4xl font-bold text-[#14244c] sm:text-5xl sm:tracking-tight lg:text-6xl">
             Admission Process
           </h1>
           <p className="mt-5 max-w-xl mx-auto text-xl text-gray-600">
@@ -188,193 +187,238 @@ const AdmissionPage = () => {
           </p>
         </div>
 
-        {/* Admission Requirements Section */}
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
-          <div className="px-4 py-5 sm:px-6">
-            <h2 className="text-lg leading-6 font-medium text-gray-900">
-              Admission Requirements
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">
-              General requirements for undergraduate admission
-            </p>
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <div className="p-3 bg-[#14244c]/10 rounded-lg">
+                <Calendar className="w-6 h-6 text-[#14244c]" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Open Programs</p>
+                <p className="text-2xl font-semibold text-[#14244c]">4</p>
+              </div>
+            </div>
           </div>
-          <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
-            <dl className="sm:divide-y sm:divide-gray-200">
-              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Eligibility</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  <ul className="list-disc pl-5 space-y-2">
-                    {admissionRequirements.map((requirement, index) => (
-                      <li key={index}>{requirement}</li>
-                    ))}
-                  </ul>
-                </dd>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <div className="p-3 bg-[#ecb31d]/10 rounded-lg">
+                <Clock className="w-6 h-6 text-[#ecb31d]" />
               </div>
-              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Required Documents</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  <ul className="list-disc pl-5 space-y-2">
-                    {requiredDocuments.map((doc, index) => (
-                      <li key={index}>{doc}</li>
-                    ))}
-                  </ul>
-                </dd>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Days Left</p>
+                <p className="text-2xl font-semibold text-[#14244c]">15</p>
               </div>
-            </dl>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <div className="p-3 bg-[#14244c]/10 rounded-lg">
+                <BookOpen className="w-6 h-6 text-[#14244c]" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Departments</p>
+                <p className="text-2xl font-semibold text-[#14244c]">6</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <div className="p-3 bg-[#ecb31d]/10 rounded-lg">
+                <FileText className="w-6 h-6 text-[#ecb31d]" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-500">Applications</p>
+                <p className="text-2xl font-semibold text-[#14244c]">124</p>
+              </div>
+            </div>
           </div>
         </div>
 
+        {/* Admission Requirements Section */}
+        <Card className="mb-8 border-none shadow-md">
+          <div className="px-6 py-5 border-b border-gray-200 bg-[#14244c] text-white rounded-t-lg">
+            <h2 className="text-lg font-medium">
+              Admission Requirements
+            </h2>
+            <p className="mt-1 text-sm text-gray-200">
+              General requirements for undergraduate admission
+            </p>
+          </div>
+          <CardContent className="divide-y divide-gray-200">
+            <div className="py-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <dt className="text-sm font-medium text-gray-500">Eligibility</dt>
+              <dd className="sm:col-span-2">
+                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
+                  {admissionRequirements.map((requirement, index) => (
+                    <li key={index}>{requirement}</li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+            <div className="py-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <dt className="text-sm font-medium text-gray-500">Required Documents</dt>
+              <dd className="sm:col-span-2">
+                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
+                  {requiredDocuments.map((doc, index) => (
+                    <li key={index}>{doc}</li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Admission Timeline Section */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Admission Timeline</h2>
+          <h2 className="text-2xl font-bold text-[#14244c] mb-6">Admission Timeline</h2>
           
-          {error ? (
-            <Alert variant="destructive" className="max-w-2xl mx-auto">
-              <AlertCircle className="h-5 w-5" />
-              <div className="ml-3">
-                <h3 className="text-sm font-medium">Error loading admission information</h3>
-                <div className="mt-1 text-sm">
-                  {error}
-                </div>
-              </div>
-            </Alert>
-          ) : timelines.length === 0 ? (
-            <div className="text-center py-12">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
+          <div className="space-y-6">
+            {timelines
+              .sort((a, b) => {
+                const aIsOpen = new Date(a.application_end_date) > new Date();
+                const bIsOpen = new Date(b.application_end_date) > new Date();
+                if (aIsOpen && !bIsOpen) return -1;
+                if (!aIsOpen && bIsOpen) return 1;
+                return new Date(b.application_end_date).getTime() - new Date(a.application_end_date).getTime();
+              })
+              .map((timeline) => (
+              <motion.div
+                key={timeline.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
               >
-                <path
-                  vectorEffect="non-scaling-stroke"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No admission information available</h3>
-              <p className="mt-1 text-sm text-gray-500">Check back later for updates on admission timelines.</p>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {timelines.map((timeline) => (
-                <Card key={timeline.id} className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white">
+                <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-all duration-300">
+                  <div className="bg-[#14244c] p-6 text-white">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h2 className="text-xl font-bold">Program {timeline.program_id}</h2>
-                        <p className="text-blue-100 text-sm">Admission Timeline</p>
+                        <h3 className="text-xl font-bold">Program {timeline.program_id}</h3>
+                        <p className="text-gray-200 text-sm mt-1">Admission Timeline</p>
                       </div>
-                      <Badge variant="secondary" className="bg-white/20 hover:bg-white/30">
+                      <Badge 
+                        variant="outline" 
+                        className={new Date(timeline.application_end_date) > new Date() 
+                          ? "bg-[#ecb31d] text-[#14244c] border-none" 
+                          : "bg-gray-200 text-gray-700 border-none"
+                        }
+                      >
                         {new Date(timeline.application_end_date) > new Date() ? 'Open' : 'Closed'}
                       </Badge>
                     </div>
                   </div>
-                  <CardContent className="pt-6 space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start space-x-3">
-                        <div className="bg-blue-100 p-2 rounded-full">
-                          <Calendar className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-500">Application Period</p>
-                          <p className="text-gray-900 font-medium">
-                            {formatDate(timeline.application_start_date)} - {formatDate(timeline.application_end_date)}
-                          </p>
+                  <CardContent className="p-6 bg-white">
+                    <div className="space-y-6">
+                      {/* Important Dates Section */}
+                      <div className="space-y-4">
+                        <h4 className="font-semibold text-[#14244c]">Timeline Details</h4>
+                        <div className="grid gap-4">
+                          {/* Application Period */}
+                          <div className="flex items-center text-gray-600">
+                            <Calendar className="w-5 h-5 mr-3 text-[#14244c]" />
+                            <div>
+                              <p className="text-sm font-medium">Application Period</p>
+                              <p className="text-sm">
+                                {formatDate(timeline.application_start_date)} - {formatDate(timeline.application_end_date)}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {/* Admission Exam Date */}
+                          <div className="flex items-center text-gray-600">
+                            <BookOpen className="w-5 h-5 mr-3 text-[#14244c]" />
+                            <div>
+                              <p className="text-sm font-medium">Admission Exam Date</p>
+                              <p className="text-sm">{formatDate(timeline.admission_exam_date)}</p>
+                            </div>
+                          </div>
+                          
+                          {/* Result Publication */}
+                          <div className="flex items-center text-gray-600">
+                            <FileText className="w-5 h-5 mr-3 text-[#ecb31d]" />
+                            <div>
+                              <p className="text-sm font-medium">Result Publication Date</p>
+                              <p className="text-sm">{formatDate(timeline.result_publication_date)}</p>
+                            </div>
+                          </div>
+                          
+                          {/* Confirmation Period */}
+                          <div className="flex items-center text-gray-600">
+                            <Clock className="w-5 h-5 mr-3 text-[#14244c]" />
+                            <div>
+                              <p className="text-sm font-medium">Admission Confirmation Period</p>
+                              <p className="text-sm">
+                                {formatDate(timeline.admission_confirmation_start_date)} - {formatDate(timeline.admission_confirmation_end_date)}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <div className="bg-yellow-100 p-2 rounded-full">
-                          <BookOpen className="h-5 w-5 text-yellow-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-500">Admission Exam</p>
-                          <p className="text-gray-900 font-medium">
-                            {formatDate(timeline.admission_exam_date)}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <div className="bg-green-100 p-2 rounded-full">
-                          <Clock className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-500">Result Publication</p>
-                          <p className="text-gray-900 font-medium">
-                            {formatDate(timeline.result_publication_date)}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start space-x-3">
-                        <div className="bg-purple-100 p-2 rounded-full">
-                          <Calendar className="h-5 w-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-500">Confirmation Period</p>
-                          <p className="text-gray-900 font-medium">
-                            {formatDate(timeline.admission_confirmation_start_date)} - {formatDate(timeline.admission_confirmation_end_date)}
-                          </p>
-                        </div>
+
+                      {/* Action Buttons */}
+                      <div className="pt-4 border-t border-gray-100 space-y-3">
+                        {user?.role === 'admin' ? (
+                          <Button
+                            className="w-full bg-[#14244c] hover:bg-[#ecb31d] text-white hover:text-[#14244c] transition-colors cursor-pointer"
+                            onClick={() => navigate(`/admission/edit/${timeline.id}`)}
+                          >
+                            Manage Timeline
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        ) : (
+                          <>
+                            <Button
+                              className={`w-full ${
+                                new Date(timeline.application_end_date) > new Date()
+                                  ? 'bg-[#14244c] hover:bg-[#ecb31d] text-white hover:text-[#14244c] transition-colors cursor-pointer font-semibold'
+                                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                              }`}                            onClick={() => {
+                              if (new Date(timeline.application_end_date) > new Date()) {
+                                navigate(`/admission/apply?program=${timeline.program_id}`);
+                              }
+                            }}
+                              disabled={new Date(timeline.application_end_date) <= new Date()}
+                            >
+                              {new Date(timeline.application_end_date) > new Date() ? (
+                                <>Apply Now <ArrowRight className="w-4 h-4 ml-2" /></>
+                              ) : (
+                                'Application Closed'
+                              )}
+                            </Button>
+                            {timeline.attachment && (
+                              <Button
+                                variant="outline"
+                                className="w-full border-[#14244c] text-[#14244c] hover:bg-[#ecb31d] hover:border-[#ecb31d] hover:text-white transition-colors cursor-pointer"
+                                onClick={() => window.open(timeline.attachment?.url, '_blank')}
+                              >
+                                <FileText className="w-4 h-4 mr-2" />
+                                View Detailed Schedule
+                              </Button>
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
-                    
-                    {timeline.attachment && (
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <a 
-                          href={timeline.attachment.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium group"
-                        >
-                          View Detailed Schedule
-                          <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </a>
-                      </div>
-                    )}
                   </CardContent>
-                  <div className="px-6 pb-6">
-                    {isAuthenticated ? (
-                      <Button 
-                        onClick={() => navigate('/admission/apply')}
-                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
-                      >
-                        Start Application
-                      </Button>
-                    ) : (
-                      <Button 
-                        onClick={() => navigate('/login', { state: { from: '/admission' } })}
-                        variant="outline"
-                        className="w-full border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300"
-                      >
-                        Login to Apply
-                      </Button>
-                    )}
-                  </div>
                 </Card>
-              ))}
-            </div>
-          )}
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Admin Button in Header */}
+      {/* Admin Controls */}
       {user?.role === 'admin' && (
-        <div className="text-center mb-8">
-          <Button 
-            asChild
-            variant="outline"
-            className="inline-flex items-center gap-2 border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300"
+        <div className="fixed bottom-6 right-6">
+          <Button
+            className="bg-[#14244c] hover:bg-[#ecb31d] text-white hover:text-[#14244c] shadow-lg transition-colors cursor-pointer"
+            onClick={() => navigate('/admission/manage')}
           >
-            <Link to="/admission/manage">
-              <Settings className="h-4 w-4" />
-              Manage Admission Timelines
-            </Link>
+            <Settings className="w-4 h-4 mr-2" />
+            Manage Admissions
           </Button>
         </div>
       )}

@@ -1,23 +1,26 @@
 import { GraduationCap, BookOpen, FileText, Clock, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 export function AdmissionRequirements() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Admission Requirements</h1>
+          <h1 className="text-4xl font-bold text-[#14244c] sm:text-5xl mb-4">Admission Requirements</h1>
           <p className="text-xl text-gray-600">
             Everything you need to know about applying to our programs
           </p>
         </div>
 
-        <div className="bg-white shadow overflow-hidden rounded-lg mb-12">
-          <div className="px-6 py-8 sm:p-10">
+        <Card className="border-none shadow-md overflow-hidden mb-12">
+          <div className="bg-[#14244c] px-6 py-5 text-white">
+            <h2 className="text-2xl font-bold">General Admission Requirements</h2>
+            <p className="text-gray-200 mt-2">Essential criteria for all applicants</p>
+          </div>
+          <CardContent className="px-6 py-8">
             <div className="prose prose-lg max-w-none">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">General Admission Requirements</h2>
-              
               <div className="space-y-8">
                 <div className="flex items-start">
                   <div className="flex-shrink-0 bg-blue-100 rounded-md p-2">
@@ -183,7 +186,7 @@ export function AdmissionRequirements() {
                 </ol>
               </div>
             </div>
-          </div>
+          </CardContent>
           
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
             <Link to="/admission/apply">
@@ -192,7 +195,7 @@ export function AdmissionRequirements() {
               </Button>
             </Link>
           </div>
-        </div>
+        </Card>
         
         <div className="bg-white shadow overflow-hidden rounded-lg">
           <div className="px-6 py-5 border-b border-gray-200">

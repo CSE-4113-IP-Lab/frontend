@@ -32,6 +32,7 @@ import { ApplicationForm } from "./pages/Admission/ApplicationForm";
 import { ApplicationSuccess } from "./pages/Admission/ApplicationSuccess";
 import { AdmissionRequirements } from "./pages/Admission/Requirements";
 import ManageTimeline from "./pages/Admission/ManageTimeline";
+import CreateTimeline from "./pages/Admission/CreateTimeline";
 import EditTimeline from "./pages/Admission/EditTimeline";
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
@@ -111,6 +112,14 @@ export const router = createBrowserRouter([
         element: (
           <AdminRoute>
             <ManageTimeline />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "/admission/create-timeline",
+        element: (
+          <AdminRoute>
+            <CreateTimeline />
           </AdminRoute>
         ),
       },
