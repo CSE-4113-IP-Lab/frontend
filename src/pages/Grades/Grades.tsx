@@ -14,19 +14,102 @@ import LineChart from "@/components/LineChart";
 import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useRef } from "react";
+
+type Marks = {
+  incourse: string | number;
+  final: string | number;
+  other: string | number;
+};
 
 const Grades: React.FC = () => {
   const [semesterFilter, setSemesterFilter] = useState<number | "all">("all");
   const [viewMode, setViewMode] = useState<"student" | "faculty" | "">("");
   const [stGrades, setStGrades] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
-  const [filteredStGrades, setFilteredStGrades] = useState<any[]>([]);
+  const [_, setFilteredStGrades] = useState<any[]>([]);
   const [filtededCourses, setFilteredCourses] = useState<any[]>([]);
   const [marksByCourse, setMarksByCourse] = useState<Record<string, any[]>>({});
   const [courseCompleted, setCourseCompleted] = useState<number>(0);
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [totalCGPA, setTotalCGPA] = useState<number[]>([]);
   const [cgpa, setCgpa] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState<any>("");
+  const [studentWithMarks, setStudentWithMarks] = useState<any[]>([]);
+  const [studentMarks, setStudentMarks] = useState<
+    Record<
+      number,
+      {
+        incourse: string;
+        final: string;
+        other: string;
+      }
+    >
+  >({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith(".csv")) {
+      alert("Only .csv files are allowed.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file); // 👈 field name is "file"
+
+    try {
+      console.log(selectedCourse);
+
+      const res = await axios.post(
+        `${
+          import.meta.env.VITE_SERVER_URL
+        }/marks/course/${selectedCourse}/csv?incourse=25&final=70&other=5`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "multipart/form-data",
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+      console.log("✅ CSV upload successful:", res.data);
+      alert("Marks uploaded successfully!");
+    } catch (error) {
+      console.error("❌ Upload error:", error);
+      alert("Upload failed. Please check the CSV format.");
+    } finally {
+      // Reset file input
+      e.target.value = "";
+    }
+  };
+
+  useEffect(() => {
+    const initialMarks: Record<
+      number,
+      { incourse: string; final: string; other: string }
+    > = {};
+
+    studentWithMarks.forEach((student) => {
+      const marks: { incourse: string; final: string; other: string } = {
+        incourse: "",
+        final: "",
+        other: "",
+      };
+
+      student.marks?.forEach((m: any) => {
+        marks[m.type as "incourse" | "final" | "other"] =
+          m.marks_obtained.toString();
+      });
+
+      initialMarks[student.student.id] = marks;
+    });
+
+    setStudentMarks(initialMarks);
+  }, [studentWithMarks]);
 
   const generateTranscriptData = () => {
     const fields = ["incourse", "final", "other"];
@@ -236,7 +319,14 @@ const Grades: React.FC = () => {
         setFilteredCourses(filterCourses);
 
         if (userRole === "faculty") {
+          if (filterCourses.length > 0) {
+            setSelectedCourse(filterCourses[0].id);
+          } else {
+            console.warn("No courses found for this faculty.");
+          }
         } else {
+          console.log("Fetching grades for student:", userId);
+
           const gradeResSt = await axios.get(
             `${import.meta.env.VITE_SERVER_URL}/marks/student/${userId}`,
             {
@@ -247,22 +337,25 @@ const Grades: React.FC = () => {
               },
             }
           );
+          console.log("Fetched grades:", gradeResSt.data);
           grades = gradeResSt.data;
           setStGrades(grades);
           setFilteredStGrades(grades);
+
+          const marksByCourse: Record<string, any[]> = {};
+          console.log("filtededCourses:", filterCourses);
+          console.log("Grades fetched:", grades);
+
+          for (const course of filterCourses) {
+            const courseId = course.id.toString();
+            marksByCourse[courseId] = grades.filter(
+              (mark: any) => mark.course_id?.toString() === courseId
+            );
+          }
+
+          console.log("Marks grouped by course_id:", marksByCourse);
+          setMarksByCourse(marksByCourse);
         }
-
-        const marksByCourse: Record<string, any[]> = {};
-
-        for (const course of filterCourses) {
-          const courseId = course.id.toString();
-          marksByCourse[courseId] = grades.filter(
-            (mark: any) => mark.course_id?.toString() === courseId
-          );
-        }
-
-        console.log("Marks grouped by course_id:", marksByCourse);
-        setMarksByCourse(marksByCourse);
       } catch (err) {
         console.error("Failed to fetch courses:", err);
       }
@@ -373,145 +466,71 @@ const Grades: React.FC = () => {
     }
   }, [totalCGPA, semesterFilter]);
 
-  const studentGrades = [
-    {
-      courseCode: "CSE 425",
-      courseName: "Artificial Intelligence",
-      semester: 7,
-      year: "2024-25",
-      instructor: "Dr. Mohammad Rahman",
-      credits: 3,
-      grades: {
-        midterm: 22,
-        final: 35,
-        assignments: 18,
-        quizzes: 8,
-        attendance: 5,
-        total: 88,
-        letterGrade: "A",
-        gpa: 4.0,
-      },
-      maxMarks: {
-        midterm: 25,
-        final: 40,
-        assignments: 20,
-        quizzes: 10,
-        attendance: 5,
-        total: 100,
-      },
-    },
-    {
-      courseCode: "CSE 301",
-      courseName: "Database Management Systems",
-      semester: 5,
-      year: "2023-24",
-      instructor: "Dr. Fatima Khan",
-      credits: 3,
-      grades: {
-        midterm: 20,
-        final: 32,
-        assignments: 16,
-        quizzes: 7,
-        attendance: 4,
-        total: 79,
-        letterGrade: "B+",
-        gpa: 3.5,
-      },
-      maxMarks: {
-        midterm: 25,
-        final: 40,
-        assignments: 20,
-        quizzes: 10,
-        attendance: 5,
-        total: 100,
-      },
-    },
-    {
-      courseCode: "CSE 201",
-      courseName: "Data Structures and Algorithms",
-      semester: 3,
-      year: "2022-23",
-      instructor: "Dr. Ahmed Hassan",
-      credits: 3,
-      grades: {
-        midterm: 23,
-        final: 36,
-        assignments: 19,
-        quizzes: 9,
-        attendance: 5,
-        total: 92,
-        letterGrade: "A+",
-        gpa: 4.0,
-      },
-      maxMarks: {
-        midterm: 25,
-        final: 40,
-        assignments: 20,
-        quizzes: 10,
-        attendance: 5,
-        total: 100,
-      },
-    },
-    {
-      courseCode: "CSE 401",
-      courseName: "Software Engineering",
-      semester: 8,
-      year: "2024-25",
-      instructor: "Dr. Sarah Ahmed",
-      credits: 3,
-      grades: {
-        midterm: 21,
-        final: 34,
-        assignments: 17,
-        quizzes: 8,
-        attendance: 5,
-        total: 85,
-        letterGrade: "A-",
-        gpa: 3.7,
-      },
-      maxMarks: {
-        midterm: 25,
-        final: 40,
-        assignments: 20,
-        quizzes: 10,
-        attendance: 5,
-        total: 100,
-      },
-    },
-  ];
+  useEffect(() => {
+    const fetchStMarks = async () => {
+      const userRole = localStorage.getItem("role");
+      if (userRole !== "faculty") return;
+      console.log("for faculty");
 
-  const facultyGradeInput = [
-    {
-      studentId: "2019-1-60-001",
-      studentName: "Ahmed Rahman",
-      courseCode: "CSE 425",
-      midterm: "",
-      final: "",
-      assignments: "",
-      quizzes: "",
-      attendance: "",
-    },
-    {
-      studentId: "2019-1-60-002",
-      studentName: "Fatima Khan",
-      courseCode: "CSE 425",
-      midterm: "22",
-      final: "",
-      assignments: "18",
-      quizzes: "8",
-      attendance: "5",
-    },
-    {
-      studentId: "2019-1-60-003",
-      studentName: "Mohammad Ali",
-      courseCode: "CSE 425",
-      midterm: "20",
-      final: "35",
-      assignments: "16",
-      quizzes: "7",
-      attendance: "4",
-    },
-  ];
+      console.log(selectedCourse, typeof selectedCourse);
+
+      const programId = courses.find(
+        (course) => course.id === Number(selectedCourse)
+      )?.program_id;
+
+      console.log(programId);
+
+      if (!programId) return;
+
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/programs/${programId}/students`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              "ngrok-skip-browser-warning": "true",
+            },
+          }
+        );
+
+        const students = res.data;
+        console.log("Fetched students:", students);
+
+        // Fetch marks for each student (returns an array of promises)
+        const marksPromises = students.map((student: any) =>
+          axios
+            .get(
+              `${
+                import.meta.env.VITE_SERVER_URL
+              }/marks/course/${selectedCourse}/student/${student.id}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  "ngrok-skip-browser-warning": "true",
+                },
+              }
+            )
+            .then((res) => ({
+              student,
+              marks: res.data,
+            }))
+        );
+
+        // Wait for all requests to complete
+        const studentWithMarks = await Promise.all(marksPromises);
+
+        // Optional: You can now process or group the data as needed
+        console.log("All student marks:", studentWithMarks);
+        setStudentWithMarks(studentWithMarks);
+      } catch (err) {
+        console.error("Failed to fetch student marks:", err);
+      }
+    };
+
+    fetchStMarks();
+  }, [courses, selectedCourse]);
 
   const semesterOptions = [
     { label: "All Semesters", value: "all" },
@@ -526,26 +545,6 @@ const Grades: React.FC = () => {
   ];
 
   const allLabels = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"];
-  const allData = [3.25, 3.4, 3.1, 3.6, 2.9, 3.7, 3.4, 2.8];
-
-  const filteredGrades = studentGrades.filter((grade) => {
-    if (semesterFilter == "all") return true;
-    return grade.semester == semesterFilter;
-  });
-
-  const calculateCGPA = () => {
-    const totalCredits = filteredGrades.reduce(
-      (sum, grade) => sum + grade.credits,
-      0
-    );
-    const totalGradePoints = filteredGrades.reduce(
-      (sum, grade) => sum + grade.grades.gpa * grade.credits,
-      0
-    );
-    return totalCredits > 0
-      ? (totalGradePoints / totalCredits).toFixed(2)
-      : "0.00";
-  };
 
   const getGradeColor = (letterGrade: string) => {
     const colors = {
@@ -859,10 +858,16 @@ const Grades: React.FC = () => {
             <label className="block text-sm font-bold text-primary-dark mb-2">
               SELECT COURSE
             </label>
-            <select className="w-full md:w-1/3 px-3 py-2 border border-gray-300 rounded-tl focus:outline-none focus:ring-2 focus:ring-primary-yellow focus:border-transparent">
-              <option>CSE 425 - Artificial Intelligence</option>
-              <option>CSE 301 - Database Management Systems</option>
-              <option>CSE 201 - Data Structures and Algorithms</option>
+            <select
+              value={selectedCourse}
+              onChange={(e) => setSelectedCourse(e.target.value)}
+              className="your-select-styles"
+            >
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.course_code} - {course.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -874,100 +879,269 @@ const Grades: React.FC = () => {
                     STUDENT
                   </th>
                   <th className="border border-gray-300 px-4 py-3 text-center font-bold text-sm text-primary-dark">
-                    MIDTERM (25)
+                    MIDTERM
                   </th>
                   <th className="border border-gray-300 px-4 py-3 text-center font-bold text-sm text-primary-dark">
-                    FINAL (40)
+                    FINAL
                   </th>
                   <th className="border border-gray-300 px-4 py-3 text-center font-bold text-sm text-primary-dark">
-                    ASSIGNMENTS (20)
+                    OTHER
                   </th>
                   <th className="border border-gray-300 px-4 py-3 text-center font-bold text-sm text-primary-dark">
-                    QUIZZES (10)
-                  </th>
-                  <th className="border border-gray-300 px-4 py-3 text-center font-bold text-sm text-primary-dark">
-                    ATTENDANCE (5)
-                  </th>
-                  <th className="border border-gray-300 px-4 py-3 text-center font-bold text-sm text-primary-dark">
-                    ACTIONS
+                    ACTION
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {facultyGradeInput.map((student, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="border border-gray-300 px-4 py-3">
-                      <div>
-                        <p className="font-bold text-primary-dark">
-                          {student.studentName}
-                        </p>
-                        <p className="text-sm text-text-secondary">
-                          {student.studentId}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="border border-gray-300 px-4 py-3 text-center">
-                      <input
-                        type="number"
-                        defaultValue={student.midterm}
-                        className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
-                        min="0"
-                        max="25"
-                      />
-                    </td>
-                    <td className="border border-gray-300 px-4 py-3 text-center">
-                      <input
-                        type="number"
-                        defaultValue={student.final}
-                        className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
-                        min="0"
-                        max="40"
-                      />
-                    </td>
-                    <td className="border border-gray-300 px-4 py-3 text-center">
-                      <input
-                        type="number"
-                        defaultValue={student.assignments}
-                        className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
-                        min="0"
-                        max="20"
-                      />
-                    </td>
-                    <td className="border border-gray-300 px-4 py-3 text-center">
-                      <input
-                        type="number"
-                        defaultValue={student.quizzes}
-                        className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
-                        min="0"
-                        max="10"
-                      />
-                    </td>
-                    <td className="border border-gray-300 px-4 py-3 text-center">
-                      <input
-                        type="number"
-                        defaultValue={student.attendance}
-                        className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
-                        min="0"
-                        max="5"
-                      />
-                    </td>
-                    <td className="border border-gray-300 px-4 py-3 text-center">
-                      <Button size="sm" cornerStyle="br">
-                        SAVE
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                {studentWithMarks.map((student, index) => {
+                  const studentId = student.student.id;
+                  const marks = studentMarks[studentId] || {
+                    incourse: "",
+                    final: "",
+                    other: "",
+                  };
+
+                  return (
+                    <tr key={index} className="hover:bg-gray-50">
+                      {/* Student Name & Registration Number */}
+                      <td className="border border-gray-300 px-4 py-3">
+                        <div>
+                          <p className="font-bold text-primary-dark">
+                            {student.student.user.username}
+                          </p>
+                          <p className="text-sm text-text-secondary">
+                            {student.student.registration_number}
+                          </p>
+                        </div>
+                      </td>
+
+                      {/* Incourse (Midterm) */}
+                      <td className="border border-gray-300 px-4 py-3 text-center">
+                        <input
+                          type="number"
+                          value={marks.incourse}
+                          onChange={(e) =>
+                            setStudentMarks((prev) => ({
+                              ...prev,
+                              [studentId]: {
+                                ...prev[studentId],
+                                incourse: e.target.value,
+                              },
+                            }))
+                          }
+                          className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                          min="0"
+                          max="25"
+                        />
+                      </td>
+
+                      {/* Final */}
+                      <td className="border border-gray-300 px-4 py-3 text-center">
+                        <input
+                          type="number"
+                          value={marks.final}
+                          onChange={(e) =>
+                            setStudentMarks((prev) => ({
+                              ...prev,
+                              [studentId]: {
+                                ...prev[studentId],
+                                final: e.target.value,
+                              },
+                            }))
+                          }
+                          className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                          min="0"
+                          max="40"
+                        />
+                      </td>
+
+                      {/* Other */}
+                      <td className="border border-gray-300 px-4 py-3 text-center">
+                        <input
+                          type="number"
+                          value={marks.other}
+                          onChange={(e) =>
+                            setStudentMarks((prev) => ({
+                              ...prev,
+                              [studentId]: {
+                                ...prev[studentId],
+                                other: e.target.value,
+                              },
+                            }))
+                          }
+                          className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm"
+                          min="0"
+                          max="20"
+                        />
+                      </td>
+
+                      {/* Save button (optional) */}
+                      <td className="border border-gray-300 px-4 py-3 text-center">
+                        <Button
+                          size="sm"
+                          cornerStyle="br"
+                          onClick={async () => {
+                            const studentId = student.student.id;
+                            const current: Marks = studentMarks[studentId];
+
+                            try {
+                              // Step 1: Fetch previous marks
+                              const res = await axios.get(
+                                `${
+                                  import.meta.env.VITE_SERVER_URL
+                                }/marks/course/${selectedCourse}/student/${studentId}`,
+                                {
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${localStorage.getItem(
+                                      "token"
+                                    )}`,
+                                    "ngrok-skip-browser-warning": "true",
+                                  },
+                                }
+                              );
+
+                              const prevMarks = res.data;
+                              const prevMap: Record<string, any> = {};
+                              prevMarks.forEach((entry: any) => {
+                                prevMap[entry.type] = entry;
+                              });
+
+                              const fields = [
+                                "incourse",
+                                "final",
+                                "other",
+                              ] as const;
+
+                              // 🔄 Collect promises instead of awaiting immediately
+                              const promises: Promise<any>[] = [];
+
+                              for (const field of fields) {
+                                const newVal = current[field];
+                                const prevEntry = prevMap[field];
+
+                                if (prevEntry && newVal === "") {
+                                  // DELETE
+                                  console.log("Deleting:", prevEntry);
+                                  promises.push(
+                                    axios.delete(
+                                      `${
+                                        import.meta.env.VITE_SERVER_URL
+                                      }/marks/${prevEntry.id}`,
+                                      {
+                                        headers: {
+                                          Authorization: `Bearer ${localStorage.getItem(
+                                            "token"
+                                          )}`,
+                                          "ngrok-skip-browser-warning": "true",
+                                        },
+                                      }
+                                    )
+                                  );
+                                } else if (
+                                  prevEntry &&
+                                  newVal !== "" &&
+                                  Number(newVal) !== prevEntry.marks_obtained
+                                ) {
+                                  // UPDATE
+                                  const payload = {
+                                    student_id: studentId,
+                                    course_id: parseInt(selectedCourse),
+                                    type: field,
+                                    marks_obtained: Number(newVal),
+                                    total_marks: prevEntry.total_marks,
+                                  };
+                                  console.log("Updating:", payload);
+                                  promises.push(
+                                    axios.put(
+                                      `${
+                                        import.meta.env.VITE_SERVER_URL
+                                      }/marks/${prevEntry.id}`,
+                                      payload,
+                                      {
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                          Authorization: `Bearer ${localStorage.getItem(
+                                            "token"
+                                          )}`,
+                                          "ngrok-skip-browser-warning": "true",
+                                        },
+                                      }
+                                    )
+                                  );
+                                } else if (!prevEntry && newVal !== "") {
+                                  // CREATE
+                                  const payload = {
+                                    student_id: studentId,
+                                    course_id: parseInt(selectedCourse),
+                                    type: field,
+                                    marks_obtained: Number(newVal),
+                                    total_marks:
+                                      field === "incourse"
+                                        ? 25
+                                        : field === "final"
+                                        ? 70
+                                        : 5,
+                                  };
+                                  console.log("Creating:", payload);
+                                  promises.push(
+                                    axios.post(
+                                      `${
+                                        import.meta.env.VITE_SERVER_URL
+                                      }/marks`,
+                                      payload,
+                                      {
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                          Authorization: `Bearer ${localStorage.getItem(
+                                            "token"
+                                          )}`,
+                                          "ngrok-skip-browser-warning": "true",
+                                        },
+                                      }
+                                    )
+                                  );
+                                }
+                              }
+
+                              // 🚀 Run all requests in parallel
+                              await Promise.all(promises);
+
+                              console.log(
+                                "✅ All marks synced for student:",
+                                studentId
+                              );
+                            } catch (error) {
+                              console.error("❌ Error syncing marks:", error);
+                            }
+                          }}
+                        >
+                          SAVE
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
-          <div className="flex justify-between items-center mt-6">
-            <Button variant="outline" cornerStyle="bl">
-              <Eye className="inline w-4 h-4 mr-2" />
-              PREVIEW GRADES
+          <div className="flex justify-end items-center mt-6">
+            <Button
+              cornerStyle="br"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              UPLOAD MARKS FROM CSV
             </Button>
-            <Button cornerStyle="br">PUBLISH ALL GRADES</Button>
+
+            {/* Hidden CSV file input */}
+            <input
+              type="file"
+              accept=".csv"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </div>
         </Card>
       )}
