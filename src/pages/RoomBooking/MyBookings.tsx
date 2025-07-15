@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../../components/Card';
 import { RoomService, type RoomBooking, type RoomBookingsParams } from '../../services/roomService';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface MyBookingsProps {}
 
 const MyBookings: React.FC<MyBookingsProps> = () => {
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [bookings, setBookings] = useState<RoomBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,13 +19,19 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
     limit: 50
   });
 
+  // Check authentication
   useEffect(() => {
-    // Set test token for development
-    const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJ0YWhzaW5AaG90LmNvbSIsInJvbGUiOiJmYWN1bHR5IiwiZXhwIjoxNzUyNDU2NDc1fQ.PhzVW9ot9OwU-eZBa1ymjC53ZRc8f6m2-sJyhRPhS5s';
-    localStorage.setItem('accessToken', testToken);
-    
-    loadBookings();
-  }, [filters]);
+    if (!isAuthenticated || !user) {
+      navigate('/auth');
+      return;
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadBookings();
+    }
+  }, [filters, isAuthenticated, user]);
 
   const loadBookings = async () => {
     try {
@@ -50,7 +60,7 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
       setBookings(prev => 
         prev.map(booking => 
           booking.id === bookingId 
-            ? { ...booking, status: 'CANCELLED' }
+            ? { ...booking, status: 'cancelled' as const }
             : booking
         )
       );
@@ -85,11 +95,12 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
   };
 
   const canCancelBooking = (booking: RoomBooking) => {
-    return booking.status === 'SCHEDULED' || booking.status === 'PENDING';
+    return booking.status === 'scheduled';
   };
 
   const isUpcoming = (booking: RoomBooking) => {
-    return new Date(booking.start_datetime) > new Date();
+    const bookingDateTime = new Date(`${booking.booking_date}T${booking.start_time}`);
+    return bookingDateTime > new Date();
   };
 
   if (loading) {
@@ -123,16 +134,15 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
                   value={filters.status || ''}
                   onChange={(e) => setFilters(prev => ({ 
                     ...prev, 
-                    status: (e.target.value as 'PENDING' | 'SCHEDULED' | 'ONGOING' | 'COMPLETED' | 'CANCELLED') || undefined 
+                    status: (e.target.value as 'scheduled' | 'ongoing' | 'completed' | 'cancelled') || undefined 
                   }))}
                   className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">All Statuses</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="SCHEDULED">Scheduled</option>
-                  <option value="ONGOING">Ongoing</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="CANCELLED">Cancelled</option>
+                  <option value="scheduled">Scheduled</option>
+                  <option value="ongoing">Ongoing</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
                 </select>
               </div>
               
@@ -169,7 +179,7 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {booking.room?.name || `Room ID: ${booking.room_id}`}
+                      {booking.room?.room_number || `Room ID: ${booking.room_id}`}
                     </h3>
                     <p className="text-sm text-gray-600">
                       Room {booking.room?.room_number || 'N/A'}
@@ -196,10 +206,10 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
                       <span className="font-medium">Purpose:</span> {booking.purpose}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <span className="font-medium">Start:</span> {formatDateTime(booking.start_datetime)}
+                      <span className="font-medium">Start:</span> {formatDateTime(`${booking.booking_date}T${booking.start_time}`)}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <span className="font-medium">End:</span> {formatDateTime(booking.end_datetime)}
+                      <span className="font-medium">End:</span> {formatDateTime(`${booking.booking_date}T${booking.end_time}`)}
                     </p>
                   </div>
                   

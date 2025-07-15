@@ -1,17 +1,20 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { useAuth } from '../../contexts/AuthContext';
 import Card from '../../components/Card';
 
 interface RoomBookingDashboardProps {}
 
 const RoomBookingDashboard: React.FC<RoomBookingDashboardProps> = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    // Set test token for development
-    const testToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJ0YWhzaW5AaG90LmNvbSIsInJvbGUiOiJmYWN1bHR5IiwiZXhwIjoxNzUyNDU2NDc1fQ.PhzVW9ot9OwU-eZBa1ymjC53ZRc8f6m2-sJyhRPhS5s';
-    localStorage.setItem('accessToken', testToken);
-  }, []);
+    if (!isAuthenticated || !user) {
+      navigate('/auth');
+      return;
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleNavigation = (path: string) => {
     navigate(path);

@@ -20,12 +20,15 @@ import Resources from "@/pages/Resources/Resources";
 import AdminResources from "@/pages/Resources/AdminResources";
 import StudentResources from "@/pages/Resources/StudentResources";
 import FacultyResources from "@/pages/Resources/FacultyResources";
+import RoomManagement from "@/pages/Resources/RoomManagement";
+import AddRoom from "@/pages/Resources/AddRoom";
 import EquipmentManagement from "@/pages/Admin/AdminEquipmentManagement";
 import StudentEquipmentPage from "@/pages/Student/StudentEquipment";
 import FacultyEquipmentPage from "@/pages/Faculty/FacultyEquipment";
 import { AdminRoute, StudentRoute, FacultyRoute } from "@/components/ProtectedRoute";
 import ApiTest from "@/pages/ApiTest";
 import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
+import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
 
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
@@ -242,6 +245,22 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "admin/room-management",
+        element: (
+          <AdminRoute>
+            <RoomManagement />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "admin/add-room",
+        element: (
+          <AdminRoute>
+            <AddRoom />
+          </AdminRoute>
+        ),
+      },
+      {
         path: "student/equipment",
         element: (
           <StudentRoute>
@@ -280,6 +299,10 @@ export const router = createBrowserRouter([
       {
         path: "room-booking/my-bookings",
         element: <MyBookings />,
+      },
+      {
+        path: "room-booking/test",
+        element: <RoomBookingTest />,
       },
       {
         path: "room-booking",
