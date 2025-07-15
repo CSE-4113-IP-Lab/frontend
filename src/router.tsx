@@ -71,6 +71,8 @@ import NewFacultyYearwise from "@/pages/FacultyInformation/NewFacultyYearwise";
 import FacultyByResearch from "@/pages/FacultyInformation/FacultyByResearch";
 import FacultyOnLeaveList from "@/pages/FacultyInformation/FacultyOnLeaveList";
 import ResearchGallery from "./services/ReseaechGallery";
+import { CreateSchedule, EditSchedule } from "./pages/Schedule/classSchedule";
+import SchedulePage from "./pages/Schedule/schedule";
 
 export const router = createBrowserRouter([
   {
@@ -247,24 +249,8 @@ export const router = createBrowserRouter([
         element: <CourseList />,
       },
       {
-        path: "courses/create",
-        element: (
-          <AdminRoute>
-            <CourseCreate />
-          </AdminRoute>
-        ),
-      },
-      {
-        path: "courses/edit/:id",
-        element: (
-          <AdminRoute>
-            <CourseEdit />
-          </AdminRoute>
-        ),
-      },
-      {
         path: "schedule",
-        element: <ClassSchedule />,
+        element: <SchedulePage />,
       },
       {
         path: "courses/create",
