@@ -23,9 +23,16 @@ import FacultyResources from "@/pages/Resources/FacultyResources";
 import EquipmentManagement from "@/pages/Admin/AdminEquipmentManagement";
 import StudentEquipmentPage from "@/pages/Student/StudentEquipment";
 import FacultyEquipmentPage from "@/pages/Faculty/FacultyEquipment";
-import { AdminRoute, StudentRoute, FacultyRoute } from "@/components/ProtectedRoute";
-import ApiTest from "@/pages/ApiTest";
+import { AdminRoute, StudentRoute, FacultyRoute } from "./components/ProtectedRoute";
 import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
+
+// Admission Pages
+import { AdmissionPage } from "./pages/Admission/index";
+import { ApplicationForm } from "./pages/Admission/ApplicationForm";
+import { ApplicationSuccess } from "./pages/Admission/ApplicationSuccess";
+import { AdmissionRequirements } from "./pages/Admission/Requirements";
+import ManageTimeline from "./pages/Admission/ManageTimeline";
+import EditTimeline from "./pages/Admission/EditTimeline";
 
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
@@ -66,6 +73,40 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
+      },
+      // Admission Routes
+      {
+        path: "/admission",
+        element: <AdmissionPage />,
+      },
+      {
+        path: "/admission/apply",
+        element: <ApplicationForm />,
+      },
+      {
+        path: "/admission/application-success",
+        element: <ApplicationSuccess />,
+      },
+      {
+        path: "/admission/requirements",
+        element: <AdmissionRequirements />,
+      },
+      // Admin-only admission routes
+      {
+        path: "/admission/manage",
+        element: (
+          <AdminRoute>
+            <ManageTimeline />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "/admission/edit/:id",
+        element: (
+          <AdminRoute>
+            <EditTimeline />
+          </AdminRoute>
+        ),
       },
       {
         path: "auth",
@@ -281,6 +322,8 @@ export const router = createBrowserRouter([
         path: "room-booking/my-bookings",
         element: <MyBookings />,
       },
+      
+
     ],
   },
 ]);
