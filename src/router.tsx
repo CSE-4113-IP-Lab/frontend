@@ -41,6 +41,8 @@ import {
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import CreateSchedule from "./pages/Schedule/classSchedule/CreateSchedule";
 import EditSchedule from "./pages/Schedule/classSchedule/EditSchedule";
+import CreateSchedule from "./pages/Schedule/classSchedule/CreateSchedule";
+import EditSchedule from "./pages/Schedule/classSchedule/EditSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
 import ArchivedEvents from "./pages/Event/ArchivedEvents";
 import EventPage from "./pages/Event/EventPage";
@@ -50,7 +52,11 @@ import TestComponent from "./pages/Test/TestComponent";
 import CourseList from "./pages/Courses/CourseList";
 import CourseCreate from "./pages/Courses/CourseCreate";
 import CourseEdit from "./pages/Courses/CourseEdit";
+import CourseCreate from "./pages/Courses/CourseCreate";
+import CourseEdit from "./pages/Courses/CourseEdit";
 import ProgramOutlines from "./pages/Programs/ProgramOutlines";
+import ProgramCreate from "./pages/Programs/ProgramCreate";
+import ProgramEdit from "./pages/Programs/ProgramEdit";
 import ProgramCreate from "./pages/Programs/ProgramCreate";
 import ProgramEdit from "./pages/Programs/ProgramEdit";
 import ErrorPage from "./ErrorPage";
@@ -150,7 +156,9 @@ export const router = createBrowserRouter([
       {
         path: "faculty/byresearch",
         element: <FacultyByResearch />,
+        element: <FacultyByResearch />,
       },
+
 
       {
         path: "exam-schedule",
@@ -208,6 +216,26 @@ export const router = createBrowserRouter([
         element: <ClassSchedule />,
       },
       {
+        path: "courses/create",
+        element: (
+          <AdminRoute>
+            <CourseCreate />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "courses/edit/:id",
+        element: (
+          <AdminRoute>
+            <CourseEdit />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "schedule",
+        element: <ClassSchedule />,
+      },
+      {
         path: "class-schedule",
         element: <ClassSchedule />,
       },
@@ -226,10 +254,40 @@ export const router = createBrowserRouter([
             <EditSchedule />
           </AdminRoute>
         ),
+        path: "schedule/create",
+        element: (
+          <AdminRoute>
+            <CreateSchedule />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "schedule/edit/:id",
+        element: (
+          <AdminRoute>
+            <EditSchedule />
+          </AdminRoute>
+        ),
       },
       {
         path: "programs",
         element: <ProgramOutlines />,
+      },
+      {
+        path: "programs/create",
+        element: (
+          <AdminRoute>
+            <ProgramCreate />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "programs/edit/:id",
+        element: (
+          <AdminRoute>
+            <ProgramEdit />
+          </AdminRoute>
+        ),
       },
       {
         path: "programs/create",
@@ -280,6 +338,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "resources/student",
         path: "resources/student",
         element: (
           <StudentRoute>
