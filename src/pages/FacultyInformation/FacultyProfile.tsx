@@ -112,6 +112,8 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
   const apiUrl = import.meta.env.VITE_ENDPOINT;
   const targetFacultyId = facultyId || id;
   const userRole = localStorage.getItem("role");
+  const identity =  localStorage.getItem("id");
+  const userEmail = localStorage.getItem("userEmail");
   console.log('User role:', userRole);
 
   
@@ -131,11 +133,20 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
       console.log('API URL:', apiUrl);
       console.log('Full request URL:', `${apiUrl}/faculties/${targetFacultyId}`);
 
+
+        // Get token from localStorage
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          throw new Error('No authentication token found. Please log in.');
+        }
+
       // Fetch faculty data
       const facultyResponse = await fetch(`${apiUrl}/faculties/${targetFacultyId}`, {
         headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJmQGdtYWlsLmNvbSIsInJvbGUiOiJmYWN1bHR5IiwiZXhwIjoxNzUyNDUzNzY1fQ.q_FzXT5PBLXHxGVgf4K1qwaeXelreawFpGtgOy41bVM`,
-          'Accept': 'application/json'
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
         }
       });
       
@@ -160,17 +171,12 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
           console.log('Fetching courses for faculty ID:', facultyData.id);
 
 
-        // Get token from localStorage
-        const token = localStorage.getItem('token');
-        
-        if (!token) {
-          throw new Error('No authentication token found. Please log in.');
-        }
 
           const coursesResponse = await fetch(`${apiUrl}/faculties/${facultyData.id}/courses`, {
             headers: {
               'Authorization': `Bearer ${token}`,
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true'
             }
           });
           
@@ -192,8 +198,9 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
           console.log('Fetching programs for faculty ID:', facultyData.id);
           const programsResponse = await fetch(`${apiUrl}/faculties/${facultyData.id}/programs`, {
             headers: {
-              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJmQGdtYWlsLmNvbSIsInJvbGUiOiJmYWN1bHR5IiwiZXhwIjoxNzUyNDUzNzY1fQ.q_FzXT5PBLXHxGVgf4K1qwaeXelreawFpGtgOy41bVM`,
-              'Accept': 'application/json'
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true'
             }
           });
           
@@ -223,7 +230,8 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
           const researchResponse = await fetch(`${apiUrl}/researchs/user/${facultyData.user_id}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true'
             }
           });
           
@@ -347,7 +355,17 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <button
+                  onClick={() => navigate('/faculty')}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 transition-colors duration-200 font-medium"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  Back to Faculty Overview
+        </button>
+
         {/* Hero Header Section */}
         <Card className="relative overflow-hidden mb-8 shadow-2xl border-0">
           <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900"></div>
@@ -438,9 +456,8 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
               
               {/* Action Button */}
 
-             
-
-              {(userRole ==="faculty" || userRole ==="admin") &&(
+              {(userRole ==="faculty" || userRole ==="admin")&& 
+              (userEmail === faculty.user.email) && (
               <div className="lg:self-start">
                 <Button
                   onClick={handleEditClick}

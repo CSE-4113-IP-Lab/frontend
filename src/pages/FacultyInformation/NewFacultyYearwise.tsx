@@ -71,7 +71,8 @@ const NewFacultyYearwise: React.FC = () => {
         const response = await fetch(`${apiUrl}/faculties?skip=0&limit=100`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
           }
         });
 
@@ -239,8 +240,10 @@ const NewFacultyYearwise: React.FC = () => {
 
                           {/* Faculty Info */}
                           <div className="space-y-1">
-                            <h3 className="text-lg font-bold text-red-600 mb-1">
-                              {faculty.user.username}
+                            <h3 className="text-xl font-bold mb-1"
+                                  style={{ color: "rgb(20, 36, 76)" }}
+                                >
+                                  {faculty.user.username}
                             </h3>
                             <p className="text-gray-700 text-sm leading-relaxed">
                               {faculty.designation}
