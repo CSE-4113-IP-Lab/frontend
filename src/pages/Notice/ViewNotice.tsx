@@ -118,7 +118,7 @@ export default function ViewNotice() {
           <p className="text-gray-600 mb-4">
             The notice you're looking for doesn't exist.
           </p>
-          <Button onClick={() => navigate("/notices")}>Back to Notices</Button>
+          <Button onClick={() => navigate("/notice")}>Back to Notices</Button>
         </div>
       </div>
     );
@@ -127,7 +127,7 @@ export default function ViewNotice() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-slate-800 text-white">
+      {/* <header className="bg-slate-800 text-white">
         <div className="flex items-center justify-between px-6 py-4">
           <nav className="flex items-center space-x-8">
             <a
@@ -157,7 +157,7 @@ export default function ViewNotice() {
             LOG OUT
           </Button>
         </div>
-      </header>
+      </header> */}
 
       {/* Main Content */}
       <main className="bg-orange-50 min-h-screen px-6 py-12">
@@ -166,7 +166,7 @@ export default function ViewNotice() {
           <Button
             variant="ghost"
             className="mb-6 p-0 h-auto text-gray-600 hover:text-gray-800"
-            onClick={() => navigate("/notices")}>
+            onClick={() => navigate("/notice")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Notices
           </Button>
@@ -222,13 +222,15 @@ export default function ViewNotice() {
               </h2>
               <div className="space-y-4">
                 {notice.attachments.map((attachment) => (
-                  <div
+                    <div
                     key={attachment.id}
                     className="flex items-center space-x-3 p-4 bg-white rounded border hover:bg-gray-50 cursor-pointer"
-                    onClick={() => window.open(attachment.url, "_blank")}>
+                    onClick={() => window.open(`${import.meta.env.VITE_SERVER_URL}/${attachment.url}`, "_blank")}>
                     <FileText className="w-5 h-5 text-gray-600" />
-                    <span className="text-gray-800">{attachment.filename}</span>
-                  </div>
+                    <span className="text-gray-800">{attachment.filename ||
+                              attachment.url.split("/").pop() ||
+                              "Download File"}</span>
+                    </div>
                 ))}
               </div>
             </div>
