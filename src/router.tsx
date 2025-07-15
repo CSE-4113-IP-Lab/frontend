@@ -77,6 +77,7 @@ import ActiveFacultyList from "@/pages/FacultyInformation/ActiveFacultyList";
 import NewFacultyYearwise from "@/pages/FacultyInformation/NewFacultyYearwise";
 import FacultyByResearch from "@/pages/FacultyInformation/FacultyByResearch";
 import FacultyOnLeaveList from "@/pages/FacultyInformation/FacultyOnLeaveList";
+import ResearchGallery from "./services/ReseaechGallery";
 
 export const router = createBrowserRouter([
   {
@@ -469,6 +470,10 @@ export const router = createBrowserRouter([
         path: "room-booking/my-bookings",
         element: <MyBookings />,
       },
+      {
+        path: "research-gallery",
+        element: <ResearchGallery isAdmin={false} />, // Change to true for admin view
+      }
     ],
   },
 ]);
