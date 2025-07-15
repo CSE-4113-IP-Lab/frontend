@@ -1,5 +1,5 @@
-import React from 'react';
-import Button from './Button';
+import React from "react";
+import Button from "./Button";
 
 interface FilterOption {
   label: string;
@@ -9,11 +9,16 @@ interface FilterOption {
 interface FilterBarProps {
   title: string;
   options: FilterOption[];
-  activeFilter: string;
-  onFilterChange: (value: string) => void;
+  activeFilter: string | number;
+  onFilterChange: any;
 }
 
-const FilterBar: React.FC<FilterBarProps> = ({ title, options, activeFilter, onFilterChange }) => {
+const FilterBar: React.FC<FilterBarProps> = ({
+  title,
+  options,
+  activeFilter,
+  onFilterChange,
+}) => {
   return (
     <div className="bg-secondary-gray p-4 mb-6">
       <h3 className="font-bold text-sm uppercase mb-3">{title}</h3>
@@ -21,7 +26,7 @@ const FilterBar: React.FC<FilterBarProps> = ({ title, options, activeFilter, onF
         {options.map((option) => (
           <Button
             key={option.value}
-            variant={activeFilter === option.value ? 'primary' : 'outline'}
+            variant={activeFilter === option.value ? "primary" : "outline"}
             size="sm"
             cornerStyle="tr"
             onClick={() => onFilterChange(option.value)}

@@ -62,6 +62,17 @@ const ClassSchedule: React.FC = () => {
     }
   }, []);
 
+  // Initialize user role from localStorage
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    setUserRole(role);
+
+    // Set default view mode based on role
+    if (role === "student" || role === "faculty") {
+      setViewMode("personal");
+    }
+  }, []);
+
   // Load initial data
   useEffect(() => {
     const loadData = async () => {
@@ -613,13 +624,13 @@ const ClassSchedule: React.FC = () => {
   }
 
   return (
-    <div className="px-4 pr-2 py-12">
+    <div className="w-full max-w-full">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold uppercase text-primary-dark mb-4">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold uppercase text-primary-dark mb-2 sm:mb-4">
           CLASS SCHEDULE
         </h1>
-        <p className="text-text-secondary leading-relaxed max-w-3xl">
+        <p className="text-sm sm:text-base text-text-secondary leading-relaxed max-w-3xl">
           View and manage weekly class schedules.{" "}
           {userRole === "admin"
             ? "Create new schedules, assign rooms, and manage timetables."
@@ -643,6 +654,7 @@ const ClassSchedule: React.FC = () => {
             </div>
             <Button
               cornerStyle="br"
+              className="bg-[#14244c] text-white hover:bg-[#1a2b5c] transition-colors"
               onClick={() => navigate("/schedule/create")}>
               <Plus className="inline w-4 h-4 mr-2" />
               CREATE SCHEDULE
@@ -689,11 +701,11 @@ const ClassSchedule: React.FC = () => {
           <h2 className="text-lg font-semibold text-primary-dark">FILTERS</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-4">
           <select
             value={filters.program_id || ""}
             onChange={(e) => handleFilterChange("program_id", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Programs</option>
             {filterOptions.programs.map((program) => (
               <option key={program.id} value={program.id}>
@@ -705,7 +717,7 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.batch || ""}
             onChange={(e) => handleFilterChange("batch", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Batches</option>
             {filterOptions.batches.map((batch) => (
               <option key={batch} value={batch}>
@@ -717,7 +729,7 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.semester || ""}
             onChange={(e) => handleFilterChange("semester", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Semesters</option>
             {filterOptions.semesters.map((semester) => (
               <option key={semester} value={semester}>
@@ -729,7 +741,7 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.year || ""}
             onChange={(e) => handleFilterChange("year", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Years</option>
             {filterOptions.years.map((year) => (
               <option key={year} value={year}>
@@ -741,7 +753,7 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.day_of_week || ""}
             onChange={(e) => handleFilterChange("day_of_week", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Days</option>
             {daysOfWeek.map((day) => (
               <option key={day} value={day}>
@@ -753,7 +765,7 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.room || ""}
             onChange={(e) => handleFilterChange("room", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Rooms</option>
             {filterOptions.rooms.map((room) => (
               <option key={room} value={room}>

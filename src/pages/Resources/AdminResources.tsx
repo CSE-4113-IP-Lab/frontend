@@ -7,18 +7,25 @@ import {
   Plus,
   Eye,
   CheckCircle,
-  Shield
+  Shield,
+  Calendar,
+  Clock,
+  MapPin
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { equipmentService } from "@/services/equipmentService";
+import { RoomService, type SystemStatus } from "@/services/roomService";
 
 export default function AdminResources() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState<number>(0);
+  const [todayBookingsCount, setTodayBookingsCount] = useState<number>(0);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Check authentication and redirect if needed
   useEffect(() => {
@@ -41,12 +48,21 @@ export default function AdminResources() {
     if (!isAuthenticated || !user) return;
     
     setLoading(true);
+    setError(null);
     try {
-      // Fetch pending requests count
+      // Fetch pending equipment requests count
       const requests = await equipmentService.getEquipmentRequests('pending');
       setPendingRequestsCount(requests.length);
+      
+      // Fetch room booking system status
+      const status = await RoomService.getSystemStatus();
+      setSystemStatus(status);
+      setTodayBookingsCount(status.today_bookings);
     } catch (error) {
       console.error('Error fetching admin data:', error);
+      setError('Failed to load dashboard data');
+      // Set fallback values
+      setTodayBookingsCount(0);
     } finally {
       setLoading(false);
     }
@@ -96,7 +112,7 @@ export default function AdminResources() {
               <CardTitle>Recent Management Activities</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
                     <h3 className="font-semibold text-gray-900">
@@ -131,12 +147,120 @@ export default function AdminResources() {
                     Add
                   </Button>
                 </div>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      {loading ? 'Loading...' : `${todayBookingsCount} Room Bookings Today`}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      View and manage today's room bookings
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate('/admin/room-management?tab=bookings&filter=today')}
+                  >
+                    <Calendar className="w-4 h-4 mr-1" />
+                    View
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      {loading ? 'Loading...' : `${systemStatus?.available_rooms || 0} Available Rooms`}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Out of {systemStatus?.total_rooms || 0} total rooms
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate('/admin/room-management')}
+                  >
+                    <MapPin className="w-4 h-4 mr-1" />
+                    Manage
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* System Statistics */}
+          {systemStatus && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Room Booking System Statistics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Today's Statistics */}
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h3 className="font-semibold text-gray-900 mb-2">Today's Usage</h3>
+                    {systemStatus.today ? (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Total Slots:</span>
+                          <span className="text-sm font-medium">{systemStatus.today.total_slots}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Booked:</span>
+                          <span className="text-sm font-medium">{systemStatus.today.booked_slots}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Available:</span>
+                          <span className="text-sm font-medium">{systemStatus.today.available_slots}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Utilization:</span>
+                          <span className="text-sm font-medium">{systemStatus.today.utilization_percent}%</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600">No data available</p>
+                    )}
+                  </div>
+
+                  {/* Week's Statistics */}
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <h3 className="font-semibold text-gray-900 mb-2">This Week's Usage</h3>
+                    {systemStatus.week ? (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Total Slots:</span>
+                          <span className="text-sm font-medium">{systemStatus.week.total_slots}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Booked:</span>
+                          <span className="text-sm font-medium">{systemStatus.week.booked_slots}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Available:</span>
+                          <span className="text-sm font-medium">{systemStatus.week.available_slots}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Utilization:</span>
+                          <span className="text-sm font-medium">{systemStatus.week.utilization_percent}%</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600">No data available</p>
+                    )}
+                  </div>
+                </div>
+                
+                {error && (
+                  <div className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg">
+                    {error}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Admin Resource Categories */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Equipment Management */}
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
@@ -179,6 +303,69 @@ export default function AdminResources() {
                   >
                     <Settings className="w-4 h-4 mr-2" />
                     Manage Inventory
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Room Booking Management */}
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  Room Booking Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">
+                  Manage rooms and booking schedules
+                </p>
+                <div className="space-y-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => navigate('/admin/room-management')}
+                  >
+                    <MapPin className="w-4 h-4 mr-2" />
+                    Manage Rooms
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => navigate('/admin/room-management?tab=schedule')}
+                  >
+                    <Clock className="w-4 h-4 mr-2" />
+                    View Schedules
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => navigate('/admin/room-management?tab=bookings')}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    View All Bookings
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={async () => {
+                      try {
+                        setLoading(true);
+                        await RoomService.initializeAllSlots();
+                        fetchAdminData(); // Refresh data
+                      } catch (error) {
+                        console.error('Error initializing slots:', error);
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Initialize Slots
                   </Button>
                 </div>
               </CardContent>

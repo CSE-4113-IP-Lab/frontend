@@ -2,19 +2,103 @@ import React, { useState, useEffect } from "react";
 import { examData } from "./examData";
 import SearchBar from "./SearchBar";
 import LevelFilter from "./LevelFilter";
+import ExamFilterBar from "./ExamFilterBar";
 import ExamTable from "./ExamTable";
-import type { ExamScheduleItem } from "../../../types";
+import type {
+  ExamScheduleItem,
+  ExamScheduleResponse,
+  ExamScheduleFilters,
+} from "../../../types";
 import { examScheduleService } from "../../../services/examScheduleService";
+import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import Button from "../../../components/Button";
+import { Plus } from "lucide-react";
 
 const ExamSchedule: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedLevel, setSelectedLevel] = useState<string>("All");
   const [examSchedules, setExamSchedules] = useState<ExamScheduleItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [usingFallback, setUsingFallback] = useState<boolean>(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"all" | "personal">("all");
+  const [isFiltering, setIsFiltering] = useState<boolean>(false);
+  const [advancedFilters, setAdvancedFilters] = useState<ExamScheduleFilters>({
+    semester: undefined,
+    year: undefined,
+    batch: "",
+    type: "",
+    room: "",
+    exam_date: "",
+  });
+
+  // Initialize user role from localStorage
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    setUserRole(role);
+
+    // Set default view mode based on role
+    if (role === "student" || role === "faculty") {
+      setViewMode("personal");
+    }
+  }, []);
+
+  // Handle filter changes for advanced filters
+  const handleFilterChange = (filterName: string, value: string) => {
+    setAdvancedFilters((prev) => ({
+      ...prev,
+      [filterName]:
+        value === ""
+          ? undefined
+          : filterName === "semester" || filterName === "year"
+          ? parseInt(value)
+          : value,
+    }));
+  };
+
+  // Clear all advanced filters and reload original data
+  const handleClearFilters = async () => {
+    setAdvancedFilters({
+      semester: undefined,
+      year: undefined,
+      batch: "",
+      type: "",
+      room: "",
+      exam_date: "",
+    });
+
+    // Reload original data when filters are cleared
+    try {
+      const token = localStorage.getItem("token");
+      let schedules: ExamScheduleItem[] = [];
+
+      if (
+        viewMode === "personal" &&
+        token &&
+        (userRole === "student" || userRole === "faculty")
+      ) {
+        const apiSchedules = await examScheduleService.getMyExamSchedule(token);
+        schedules = convertApiToLegacyFormat(apiSchedules);
+      } else if (userRole === "admin" && token) {
+        const apiSchedules = await examScheduleService.getAllExamSchedules(
+          token
+        );
+        schedules = convertApiToLegacyFormat(apiSchedules);
+      } else {
+        const apiSchedules = await examScheduleService.getPublicExamSchedules();
+        schedules = convertApiToLegacyFormat(apiSchedules);
+      }
+
+      setExamSchedules(schedules);
+      setUsingFallback(false);
+    } catch (err) {
+      console.warn("Failed to reload data after clearing filters:", err);
+    }
+  };
 
   // Load exam schedules from API with fallback to mock data
   useEffect(() => {
@@ -22,7 +106,33 @@ const ExamSchedule: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const schedules = await examScheduleService.getPublicExamSchedules();
+        const token = localStorage.getItem("token");
+
+        let schedules: ExamScheduleItem[] = [];
+
+        if (
+          viewMode === "personal" &&
+          token &&
+          (userRole === "student" || userRole === "faculty")
+        ) {
+          // Load personal exam schedule for students/faculty
+          const apiSchedules = await examScheduleService.getMyExamSchedule(
+            token
+          );
+          schedules = convertApiToLegacyFormat(apiSchedules);
+        } else if (userRole === "admin" && token) {
+          // Load all exam schedules for admin
+          const apiSchedules = await examScheduleService.getAllExamSchedules(
+            token
+          );
+          schedules = convertApiToLegacyFormat(apiSchedules);
+        } else {
+          // Load public exam schedules for everyone else or fallback
+          const apiSchedules =
+            await examScheduleService.getPublicExamSchedules();
+          schedules = convertApiToLegacyFormat(apiSchedules);
+        }
+
         setExamSchedules(schedules);
         setUsingFallback(false);
       } catch (err) {
@@ -38,8 +148,117 @@ const ExamSchedule: React.FC = () => {
       }
     };
 
-    loadExamSchedules();
-  }, []);
+    if (userRole !== null) {
+      loadExamSchedules();
+    }
+  }, [userRole, viewMode]);
+
+  // Handle filter changes separately to avoid flickering
+  useEffect(() => {
+    const timeoutId = setTimeout(async () => {
+      // Check if any filters are actually applied
+      const hasActiveFilters = Object.values(advancedFilters).some(
+        (value) => value !== undefined && value !== ""
+      );
+
+      if (!hasActiveFilters) {
+        return; // No filters applied, keep current data
+      }
+
+      try {
+        // Use a subtle loading indicator for filter operations
+        setIsFiltering(true);
+        setError(null);
+        const token = localStorage.getItem("token");
+
+        let schedules: ExamScheduleItem[] = [];
+
+        if (
+          viewMode === "personal" &&
+          token &&
+          (userRole === "student" || userRole === "faculty")
+        ) {
+          // Apply filters to personal exam schedule
+          const apiSchedules = await examScheduleService.getMyExamSchedule(
+            token,
+            advancedFilters
+          );
+          schedules = convertApiToLegacyFormat(apiSchedules);
+        } else if (userRole === "admin" && token) {
+          // Apply filters to all exam schedules for admin
+          const apiSchedules = await examScheduleService.getAllExamSchedules(
+            token,
+            advancedFilters
+          );
+          schedules = convertApiToLegacyFormat(apiSchedules);
+        } else {
+          // Apply filters to public exam schedules
+          const apiSchedules = await examScheduleService.getPublicExamSchedules(
+            advancedFilters
+          );
+          schedules = convertApiToLegacyFormat(apiSchedules);
+        }
+
+        setExamSchedules(schedules);
+        setUsingFallback(false);
+      } catch (err) {
+        console.warn("Failed to apply filters:", err);
+        setError("Failed to apply filters. Please try again.");
+      } finally {
+        setIsFiltering(false);
+      }
+    }, 300); // 300ms debounce
+
+    // Only apply filters if user role is set
+    if (userRole === null) {
+      clearTimeout(timeoutId);
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [advancedFilters, userRole, viewMode]);
+
+  // Helper function to convert API response to legacy format
+  const convertApiToLegacyFormat = (
+    apiSchedules: ExamScheduleResponse[]
+  ): ExamScheduleItem[] => {
+    return apiSchedules.map((schedule) => ({
+      id: schedule.id,
+      courseName: schedule.course?.name || "Unknown Course",
+      examDate: schedule.exam_date,
+      examTime: `${schedule.start_time} - ${schedule.end_time}`,
+      roomNo: schedule.room || "TBA",
+      level: schedule.course?.program_id === 1 ? "Undergraduate" : "Masters",
+    }));
+  };
+
+  // Handle delete exam schedule (admin only)
+  const handleDeleteExam = async (examId: number) => {
+    if (
+      !window.confirm("Are you sure you want to delete this exam schedule?")
+    ) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Authentication required");
+        return;
+      }
+
+      await examScheduleService.deleteExamSchedule(token, examId);
+
+      // Reload schedules after deletion
+      const apiSchedules = await examScheduleService.getAllExamSchedules(token);
+      const schedules = convertApiToLegacyFormat(apiSchedules);
+      setExamSchedules(schedules);
+
+      alert("Exam schedule deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete exam schedule:", error);
+      alert("Failed to delete exam schedule. Please try again.");
+    }
+  };
 
   // Filter exams by search term and selected level
   const filteredExams: ExamScheduleItem[] = examSchedules.filter((exam) => {
@@ -86,10 +305,50 @@ const ExamSchedule: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 bg-white shadow-lg rounded-lg">
-      <h1 className="text-4xl font-extrabold text-gray-900 mb-10 border-b-4 border-blue-900 pb-3 select-none">
-        Exam Schedules
-      </h1>
+    <div className="max-w-full mx-auto px-2 sm:px-6 py-6 bg-white shadow-lg rounded-lg overflow-hidden">
+      <div className="flex justify-between items-center mb-10 border-b-4 border-blue-900 pb-3">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 select-none">
+          Exam Schedules
+        </h1>
+
+        {/* Admin Controls */}
+        {userRole === "admin" && (
+          <div className="flex gap-3">
+            <Button
+              onClick={() => navigate("/admin/exam-schedules/create")}
+              className="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition duration-200">
+              <Plus size={20} />
+              Create Schedule
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* View Mode Toggle for Students/Faculty */}
+      {(userRole === "student" || userRole === "faculty") && (
+        <div className="mb-6 flex justify-center">
+          <div className="bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode("personal")}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition duration-200 ${
+                viewMode === "personal"
+                  ? "bg-blue-900 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}>
+              My Exams
+            </button>
+            <button
+              onClick={() => setViewMode("all")}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition duration-200 ${
+                viewMode === "all"
+                  ? "bg-blue-900 text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}>
+              All Exams
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Loading State */}
       {isLoading && (
@@ -122,6 +381,31 @@ const ExamSchedule: React.FC = () => {
 
       {!isLoading && (
         <>
+          {/* Advanced Filters */}
+          <ExamFilterBar
+            filters={{
+              semester: advancedFilters.semester?.toString() || "",
+              year: advancedFilters.year?.toString() || "",
+              batch: advancedFilters.batch || "",
+              type: advancedFilters.type || "",
+              room: advancedFilters.room || "",
+              exam_date: advancedFilters.exam_date || "",
+            }}
+            onFilterChange={handleFilterChange}
+            onClearFilters={handleClearFilters}
+            className="mb-6"
+          />
+
+          {/* Filtering Indicator */}
+          {isFiltering && (
+            <div className="mb-4 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <span className="ml-2 text-sm text-gray-600">
+                Applying filters...
+              </span>
+            </div>
+          )}
+
           <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between md:gap-6">
             <SearchBar
               searchTerm={searchTerm}
@@ -142,7 +426,18 @@ const ExamSchedule: React.FC = () => {
             />
           </div>
 
-          <ExamTable exams={filteredExams} onDownload={handleDownloadPDF} />
+          <ExamTable
+            exams={filteredExams}
+            onDownload={handleDownloadPDF}
+            userRole={userRole}
+            onEdit={
+              userRole === "admin"
+                ? (examId: number) =>
+                    navigate(`/admin/exam-schedules/edit/${examId}`)
+                : undefined
+            }
+            onDelete={userRole === "admin" ? handleDeleteExam : undefined}
+          />
 
           {/* Data Source Indicator */}
           <div className="mt-6 text-center text-sm text-gray-500">
