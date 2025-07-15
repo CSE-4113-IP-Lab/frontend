@@ -13,6 +13,7 @@ import AssignmentCreate from "./pages/Assignments/AssignmentCreate";
 import Assignments from "./pages/Assignments/Assignments";
 import AssignmentDetails from "./pages/Assignments/AssignmentDetails";
 import AssignmentSubmission from "./pages/Assignments/AssignmentSubmission";
+import Grades from "./pages/Grades/Grades";
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
@@ -102,6 +103,7 @@ export const router = createBrowserRouter([
       { path: `assignments`, element: <Assignments /> },
       { path: `assignmentDetails/:id`, element: <AssignmentDetails /> },
       { path: `assignmentSubmissions/:id`, element: <AssignmentSubmission /> },
+      { path: `grades`, element: <Grades /> },
     ],
   },
 ]);

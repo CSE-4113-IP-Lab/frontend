@@ -1,4 +1,4 @@
-.container {
+.container_1 {
   position: relative;
   min-width: calc(100vw - 20px);
   background-color: #fff;
@@ -146,7 +146,7 @@ form.sign-in-form {
   grid-template-columns: repeat(2, 1fr);
 }
 
-.container:before {
+.container_1:before {
   content: "";
   position: absolute;
   height: 2000px;

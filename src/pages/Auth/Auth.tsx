@@ -67,8 +67,8 @@ export default function Home() {
   }, []);
 
   const containerClass = mounted
-    ? `container ${isSignUpMode ? "sign-up-mode" : ""}`
-    : "container";
+    ? `container_1 ${isSignUpMode ? "sign-up-mode" : ""}`
+    : "container_1";
 
   const handleGoogleAuth = async (details: DecodedGoogleDetails) => {
     const postData = {
