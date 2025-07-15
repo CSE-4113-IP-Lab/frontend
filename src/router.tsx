@@ -10,11 +10,11 @@ import ViewNotice from "@/pages/Notice/ViewNotice";
 import CreateNotice from "@/pages/Notice/CreateNotice";
 import EditNotice from "@/pages/Notice/EditNotice";
 import Auth from "@/pages/Auth/Auth";
-
 import AssignmentCreate from "./pages/Assignments/AssignmentCreate";
 import Assignments from "./pages/Assignments/Assignments";
 import AssignmentDetails from "./pages/Assignments/AssignmentDetails";
 import AssignmentSubmission from "./pages/Assignments/AssignmentSubmission";
+import Grades from "./pages/Grades/Grades";
 
 import Resources from "@/pages/Resources/Resources";
 import AdminResources from "@/pages/Resources/AdminResources";
@@ -28,7 +28,9 @@ import {
   StudentRoute,
   FacultyRoute,
 } from "@/components/ProtectedRoute";
+
 import ApiTest from "@/pages/ApiTest";
+
 import {
   AvailableRooms,
   BookRoom,
@@ -175,6 +177,8 @@ export const router = createBrowserRouter([
       { path: `assignments`, element: <Assignments /> },
       { path: `assignmentDetails/:id`, element: <AssignmentDetails /> },
       { path: `assignmentSubmissions/:id`, element: <AssignmentSubmission /> },
+
+      { path: `grades`, element: <Grades /> },
       {
         path: "test",
         element: <TestComponent />,
