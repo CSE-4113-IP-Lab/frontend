@@ -38,18 +38,19 @@ export function Navbar({ className }: NavbarProps) {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    navigate('/auth');
+    navigate("/auth");
   };
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   return (
     <nav
       className={cn("w-full", className)}
-      style={{ backgroundColor: "#14244C" }}>
+      style={{ backgroundColor: "#14244C" }}
+    >
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           {/* Left side - Empty for spacing */}
@@ -61,7 +62,8 @@ export function Navbar({ className }: NavbarProps) {
               <Link
                 key={item.label}
                 to={item.href}
-                className="text-white hover:text-gray-300 px-3 py-2 text-sm font-medium tracking-wide transition-colors duration-200">
+                className="text-white hover:text-gray-300 px-3 py-2 text-sm font-medium tracking-wide transition-colors duration-200"
+              >
                 {item.label}
               </Link>
             ))}
@@ -73,7 +75,8 @@ export function Navbar({ className }: NavbarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="text-white hover:text-gray-300 hover:bg-white/10 h-8 w-8">
+              className="text-white hover:text-gray-300 hover:bg-white/10 h-8 w-8"
+            >
               <Search className="h-4 w-4" />
               <span className="sr-only">Search</span>
             </Button>
@@ -85,13 +88,14 @@ export function Navbar({ className }: NavbarProps) {
                   <Button
                     variant="outline"
                     className="hidden md:inline-flex text-sm px-6 py-1.5 h-8 font-medium border-0 rounded-sm items-center space-x-2"
-                    style={{ backgroundColor: "#ECB31D", color: "#14244C" }}>
+                    style={{ backgroundColor: "#ECB31D", color: "#14244C" }}
+                  >
                     <User className="h-4 w-4" />
                     <span>{user?.name || user?.email}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>
                     <User className="h-4 w-4 mr-2" />
                     Profile
                   </DropdownMenuItem>
@@ -106,7 +110,8 @@ export function Navbar({ className }: NavbarProps) {
                 variant="outline"
                 onClick={handleLogin}
                 className="hidden md:inline-flex text-sm px-6 py-1.5 h-8 font-medium border-0 rounded-sm"
-                style={{ backgroundColor: "#ECB31D", color: "#14244C" }}>
+                style={{ backgroundColor: "#ECB31D", color: "#14244C" }}
+              >
                 LOG IN
               </Button>
             )}
@@ -117,7 +122,8 @@ export function Navbar({ className }: NavbarProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-white hover:text-gray-300 hover:bg-white/10 h-8 w-8">
+                  className="text-white hover:text-gray-300 hover:bg-white/10 h-8 w-8"
+                >
                   {isOpen ? (
                     <X className="h-5 w-5" />
                   ) : (
@@ -132,7 +138,8 @@ export function Navbar({ className }: NavbarProps) {
                 style={{
                   backgroundColor: "#14244C",
                   borderColor: "#374151",
-                }}>
+                }}
+              >
                 {/* Mobile navigation items */}
                 <div className="md:hidden">
                   {/* User info when authenticated */}
@@ -142,9 +149,13 @@ export function Navbar({ className }: NavbarProps) {
                         <div className="w-full px-3 py-2">
                           <div className="flex items-center space-x-2">
                             <User className="h-4 w-4" />
-                            <span className="text-sm font-medium">{user?.name || user?.email}</span>
+                            <span className="text-sm font-medium">
+                              {user?.name || user?.email}
+                            </span>
                           </div>
-                          <div className="text-xs text-gray-300 mt-1">{user?.role?.toUpperCase()}</div>
+                          <div className="text-xs text-gray-300 mt-1">
+                            {user?.role?.toUpperCase()}
+                          </div>
                         </div>
                       </DropdownMenuItem>
                       <div className="border-t border-gray-600 my-1"></div>
@@ -153,10 +164,12 @@ export function Navbar({ className }: NavbarProps) {
                   {navItems.map((item) => (
                     <DropdownMenuItem
                       key={item.label}
-                      className="text-white hover:bg-white/10 focus:bg-white/10">
+                      className="text-white hover:bg-white/10 focus:bg-white/10"
+                    >
                       <Link
                         to={item.href}
-                        className="w-full block px-3 py-2 text-sm font-medium">
+                        className="w-full block px-3 py-2 text-sm font-medium"
+                      >
                         {item.label}
                       </Link>
                     </DropdownMenuItem>
@@ -164,10 +177,12 @@ export function Navbar({ className }: NavbarProps) {
                   {additionalNavItems.map((item) => (
                     <DropdownMenuItem
                       key={item.label}
-                      className="text-white hover:bg-white/10 focus:bg-white/10">
+                      className="text-white hover:bg-white/10 focus:bg-white/10"
+                    >
                       <Link
                         to={item.href}
-                        className="w-full block px-3 py-2 text-sm font-medium">
+                        className="w-full block px-3 py-2 text-sm font-medium"
+                      >
                         {item.label}
                       </Link>
                     </DropdownMenuItem>
@@ -178,7 +193,8 @@ export function Navbar({ className }: NavbarProps) {
                         variant="outline"
                         onClick={handleLogout}
                         className="w-full border-0 font-medium rounded-sm"
-                        style={{ backgroundColor: "#ECB31D", color: "#14244C" }}>
+                        style={{ backgroundColor: "#ECB31D", color: "#14244C" }}
+                      >
                         <LogOut className="h-4 w-4 mr-2" />
                         LOGOUT
                       </Button>
@@ -187,7 +203,8 @@ export function Navbar({ className }: NavbarProps) {
                         variant="outline"
                         onClick={handleLogin}
                         className="w-full border-0 font-medium rounded-sm"
-                        style={{ backgroundColor: "#ECB31D", color: "#14244C" }}>
+                        style={{ backgroundColor: "#ECB31D", color: "#14244C" }}
+                      >
                         LOG IN
                       </Button>
                     )}
@@ -199,7 +216,8 @@ export function Navbar({ className }: NavbarProps) {
                   {additionalNavItems.map((item) => (
                     <DropdownMenuItem
                       key={item.label}
-                      className="text-white hover:bg-white/10 focus:bg-white/10">
+                      className="text-white hover:bg-white/10 focus:bg-white/10"
+                    >
                       <Link to={item.href} className="w-full">
                         {item.label}
                       </Link>
@@ -238,7 +256,8 @@ export function Navbar({ className }: NavbarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-5 w-5 text-gray-600 hover:text-gray-800 p-0">
+              className="h-5 w-5 text-gray-600 hover:text-gray-800 p-0"
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>

@@ -17,6 +17,7 @@ import emailjs from "@emailjs/browser";
 import Otp from "@/components/Otp";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/Button";
+import { useAuth } from "@/contexts/AuthContext";
 
 type DecodedGoogleDetails = {
   email: string;
@@ -27,6 +28,7 @@ export default function Home() {
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useNavigate();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
 
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -40,6 +42,19 @@ export default function Home() {
     "student"
   );
   const [rememberMe, setRememberMe] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    // if (isAuthenticated) {
+    //   router("/resources");
+    //   return;
+    // }
+
+    const userEmail = localStorage.getItem("userEmail");
+    if (userEmail) {
+      setId(userEmail);
+    }
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     const userEmail = localStorage.getItem("userEmail");
@@ -86,6 +101,7 @@ export default function Home() {
         localStorage.setItem("id", response.data.used_id);
         localStorage.setItem("role", response.data.user_role);
         // setToastMessage("Google authentication successful");
+        setIsAuthenticated && setIsAuthenticated(true);
         router("/");
       }
     } catch (error) {
@@ -178,6 +194,7 @@ export default function Home() {
 
       if (response.status === 200) {
         console.log("Login successful", response.data);
+        setIsAuthenticated && setIsAuthenticated(true);
 
         localStorage.setItem("token", response.data.access_token);
         localStorage.setItem("id", response.data.user_id.toString());

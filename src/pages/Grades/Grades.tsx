@@ -22,7 +22,7 @@ type Marks = {
   other: string | number;
 };
 
-const Grades: React.FC = () => {
+const Grades = () => {
   const [semesterFilter, setSemesterFilter] = useState<number | "all">("all");
   const [viewMode, setViewMode] = useState<"student" | "faculty" | "">("");
   const [stGrades, setStGrades] = useState<any[]>([]);

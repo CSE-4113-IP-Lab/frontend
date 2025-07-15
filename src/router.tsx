@@ -14,7 +14,7 @@ import AssignmentCreate from "./pages/Assignments/AssignmentCreate";
 import Assignments from "./pages/Assignments/Assignments";
 import AssignmentDetails from "./pages/Assignments/AssignmentDetails";
 import AssignmentSubmission from "./pages/Assignments/AssignmentSubmission";
-import Grades from "./pages/Grades/Grades";
+import Grades from "@/pages/Grades/Grades";
 
 import Resources from "@/pages/Resources/Resources";
 import AdminResources from "@/pages/Resources/AdminResources";
@@ -217,27 +217,15 @@ export const router = createBrowserRouter([
       },
       {
         path: "resources/admin",
-        element: (
-          <AdminRoute>
-            <AdminResources />
-          </AdminRoute>
-        ),
+        element: <AdminResources />,
       },
       {
         path: "resources/student",
-        element: (
-          <StudentRoute>
-            <StudentResources />
-          </StudentRoute>
-        ),
+        element: <StudentResources />,
       },
       {
         path: "resources/faculty",
-        element: (
-          <FacultyRoute>
-            <FacultyResources />
-          </FacultyRoute>
-        ),
+        element: <FacultyResources />,
       },
       {
         path: "admin/equipment-management",

@@ -1,9 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-} from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { authService } from "@/services/authService";
 
@@ -26,6 +21,7 @@ interface AuthContextType {
   hasAnyRole: (roles: UserRole[]) => boolean;
   canAccessCourse: (courseCode: string) => boolean;
   loading: boolean;
+  setIsAuthenticated?: (isAuthenticated: boolean) => void; // Optional setter for isAuthenticated
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,14 +38,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     const currentUser = authService.getCurrentUser();
     if (currentUser && authService.isAuthenticated()) {
       // Get the stored email from localStorage (could be from login or signup)
-      const storedEmail = localStorage.getItem('email') || localStorage.getItem('userEmail') || '';
-      
+      const storedEmail =
+        localStorage.getItem("email") ||
+        localStorage.getItem("userEmail") ||
+        "";
+
       setUser({
         id: currentUser.id,
-        name: storedEmail.split('@')[0] || 'User', // Use email prefix as name
+        name: storedEmail.split("@")[0] || "User", // Use email prefix as name
         email: storedEmail,
         role: currentUser.role as UserRole,
-        token: currentUser.token
+        token: currentUser.token,
       });
       setIsAuthenticated(true);
     }
@@ -62,23 +61,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       setLoading(true);
       const response = await authService.login({ email, password });
       console.log("AuthContext: Login response received", response); // Debug log
-      
+
       const newUser: User = {
         id: response.user_id.toString(),
-        name: response.email.split('@')[0], // Use email prefix as name
+        name: response.email.split("@")[0], // Use email prefix as name
         email: response.email,
         role: response.user_role as UserRole,
-        token: response.access_token
+        token: response.access_token,
       };
-      
+
       console.log("AuthContext: Setting user", newUser); // Debug log
       setUser(newUser);
       setIsAuthenticated(true);
-      localStorage.setItem('email', response.email);
-      
+      localStorage.setItem("email", response.email);
+
       return true;
     } catch (error) {
-      console.error('AuthContext: Login failed:', error);
+      console.error("AuthContext: Login failed:", error);
       return false;
     } finally {
       setLoading(false);
@@ -113,6 +112,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     hasAnyRole,
     canAccessCourse,
     loading,
+    setIsAuthenticated, // Optional setter for isAuthenticated
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

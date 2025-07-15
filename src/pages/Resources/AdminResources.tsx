@@ -1,13 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  FileText, 
+import {
+  FileText,
   Search,
   Settings,
   Plus,
   Eye,
   CheckCircle,
-  Shield
+  Shield,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -16,37 +16,36 @@ import { equipmentService } from "@/services/equipmentService";
 
 export default function AdminResources() {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState<number>(0);
 
   // Check authentication and redirect if needed
   useEffect(() => {
-    console.log('AdminResources - Auth state:', { isAuthenticated, user });
-    if (!isAuthenticated || !user) {
-      console.log('Redirecting to auth - no user or not authenticated');
-      navigate('/auth');
-      return;
-    }
+    // if (!isAuthenticated) {
+    //   console.log("Redirecting to auth - no user or not authenticated");
+    //   navigate("/auth");
+    //   return;
+    // }
     // Allow any authenticated user to view admin resources for now
     // if (user.role !== 'admin') {
     //   console.log('Redirecting to auth - not admin role:', user.role);
     //   navigate('/auth');
     //   return;
     // }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, navigate]);
 
   // Fetch admin dashboard data
   const fetchAdminData = async () => {
-    if (!isAuthenticated || !user) return;
-    
+    if (!isAuthenticated) return;
+
     setLoading(true);
     try {
       // Fetch pending requests count
-      const requests = await equipmentService.getEquipmentRequests('pending');
+      const requests = await equipmentService.getEquipmentRequests("pending");
       setPendingRequestsCount(requests.length);
     } catch (error) {
-      console.error('Error fetching admin data:', error);
+      console.error("Error fetching admin data:", error);
     } finally {
       setLoading(false);
     }
@@ -65,9 +64,12 @@ export default function AdminResources() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">Admin Resources</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                  Admin Resources
+                </h1>
                 <p className="text-gray-600">
-                  Administrative tools and management interfaces for university operations.
+                  Administrative tools and management interfaces for university
+                  operations.
                 </p>
               </div>
             </div>
@@ -100,31 +102,41 @@ export default function AdminResources() {
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
                     <h3 className="font-semibold text-gray-900">
-                      {loading ? 'Loading...' : `${pendingRequestsCount} Equipment Requests Pending`}
+                      {loading
+                        ? "Loading..."
+                        : `${pendingRequestsCount} Equipment Requests Pending`}
                     </h3>
-                    <p className="text-sm text-gray-600">New requests awaiting approval</p>
+                    <p className="text-sm text-gray-600">
+                      New requests awaiting approval
+                    </p>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
-                    onClick={() => navigate('/admin/equipment-management?tab=requests&filter=pending')}
+                    onClick={() =>
+                      navigate(
+                        "/admin/equipment-management?tab=requests&filter=pending"
+                      )
+                    }
                   >
                     Review
                   </Button>
                 </div>
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h3 className="font-semibold text-gray-900">Add New Equipment</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      Add New Equipment
+                    </h3>
                     <p className="text-sm text-gray-600">
                       Click to add new equipment to inventory
                     </p>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => {
-                      sessionStorage.setItem('openAddDialog', 'true');
-                      navigate('/admin/equipment-management');
+                      sessionStorage.setItem("openAddDialog", "true");
+                      navigate("/admin/equipment-management");
                     }}
                   >
                     <Plus className="w-4 h-4 mr-1" />
@@ -150,32 +162,32 @@ export default function AdminResources() {
                   Manage all laboratory equipment
                 </p>
                 <div className="space-y-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full justify-start"
-                    onClick={() => navigate('/admin/equipment-management')}
+                    onClick={() => navigate("/admin/equipment-management")}
                   >
                     <Eye className="w-4 h-4 mr-2" />
                     View All Equipment
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full justify-start"
                     onClick={() => {
-                      sessionStorage.setItem('openAddDialog', 'true');
-                      navigate('/admin/equipment-management');
+                      sessionStorage.setItem("openAddDialog", "true");
+                      navigate("/admin/equipment-management");
                     }}
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Equipment
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full justify-start"
-                    onClick={() => navigate('/admin/equipment-management')}
+                    onClick={() => navigate("/admin/equipment-management")}
                   >
                     <Settings className="w-4 h-4 mr-2" />
                     Manage Inventory
@@ -197,29 +209,37 @@ export default function AdminResources() {
                   Review and approve equipment requests
                 </p>
                 <div className="space-y-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full justify-start"
-                    onClick={() => navigate('/admin/equipment-management?tab=requests&filter=pending')}
+                    onClick={() =>
+                      navigate(
+                        "/admin/equipment-management?tab=requests&filter=pending"
+                      )
+                    }
                   >
                     <Eye className="w-4 h-4 mr-2" />
                     Pending Requests
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full justify-start"
-                    onClick={() => navigate('/admin/equipment-management?tab=requests')}
+                    onClick={() =>
+                      navigate("/admin/equipment-management?tab=requests")
+                    }
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Approve Requests
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full justify-start"
-                    onClick={() => navigate('/admin/equipment-management?tab=requests')}
+                    onClick={() =>
+                      navigate("/admin/equipment-management?tab=requests")
+                    }
                   >
                     <FileText className="w-4 h-4 mr-2" />
                     Request History
@@ -241,15 +261,27 @@ export default function AdminResources() {
                   System administration and user management
                 </p>
                 <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <Eye className="w-4 h-4 mr-2" />
                     User Management
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <Settings className="w-4 h-4 mr-2" />
                     System Settings
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <FileText className="w-4 h-4 mr-2" />
                     System Logs
                   </Button>
