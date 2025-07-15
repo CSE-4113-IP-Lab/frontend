@@ -62,6 +62,17 @@ const ClassSchedule: React.FC = () => {
     }
   }, []);
 
+  // Initialize user role from localStorage
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    setUserRole(role);
+
+    // Set default view mode based on role
+    if (role === "student" || role === "faculty") {
+      setViewMode("personal");
+    }
+  }, []);
+
   // Load initial data
   useEffect(() => {
     const loadData = async () => {
@@ -123,6 +134,7 @@ const ClassSchedule: React.FC = () => {
           setSchedules(schedulesData);
         } catch (apiError) {
           console.warn("API failed, using fallback data:", apiError);
+
 
           // Fallback to mock data if API fails
           const mockSchedules: ClassScheduleResponse[] = [
@@ -241,10 +253,14 @@ const ClassSchedule: React.FC = () => {
             },
           ];
 
+
           setSchedules(mockSchedules);
           setPrograms(mockPrograms);
         }
       } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load schedules"
+        );
         setError(
           err instanceof Error ? err.message : "Failed to load schedules"
         );
@@ -511,6 +527,10 @@ const ClassSchedule: React.FC = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
+                    <span>
+                      {schedule.day_of_week.charAt(0).toUpperCase() +
+                        schedule.day_of_week.slice(1)}
+                    </span>
                     <span>
                       {schedule.day_of_week.charAt(0).toUpperCase() +
                         schedule.day_of_week.slice(1)}
