@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { User, Users, Calendar, UserCheck, UserX, Search } from 'lucide-react';
+import { useNavigate} from 'react-router-dom';
+import { User, Users, Calendar, UserCheck, UserX, Search, UserCircle } from 'lucide-react';
 
 interface Faculty {
   id: number;
@@ -27,6 +27,7 @@ interface Faculty {
 }
 
 const FacultyOverview: React.FC = () => {
+
   const navigate = useNavigate();
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,6 +35,7 @@ const FacultyOverview: React.FC = () => {
   const [activeSection, setActiveSection] = useState('all');
   
   const apiUrl = import.meta.env.VITE_ENDPOINT;
+  const userRole = localStorage.getItem("role");
 
   // Helper function to get image URL
   const getImageUrl = (image: { id: number; url: string } | null): string | null => {
@@ -61,7 +63,8 @@ const FacultyOverview: React.FC = () => {
         const response = await fetch(`${apiUrl}/faculties?skip=0&limit=100`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
           }
         });
 
@@ -90,6 +93,16 @@ const FacultyOverview: React.FC = () => {
   const handleSidebarNavigation = (section: string) => {
     setActiveSection(section);
     switch (section) {
+      case 'profile':
+        const userEmail = localStorage.getItem("userEmail");
+        if (userEmail) {
+          // Find the faculty with matching email
+          const currentFaculty = faculties.find(faculty => faculty.user.email === userEmail);
+          if (currentFaculty) {
+            navigate(`/faculty/profile/${currentFaculty.id}`);
+          }
+        }
+        break;
       case 'research':
         navigate('/faculty/byresearch'); 
         break;
@@ -175,6 +188,20 @@ const FacultyOverview: React.FC = () => {
                 <Users className="w-5 h-5" />
                 <span className="font-medium">All Faculty</span>
               </button>
+              
+              {userRole === "faculty" && (
+                <button
+                  onClick={() => handleSidebarNavigation('profile')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                    activeSection === 'profile' 
+                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <UserCircle className="w-5 h-5" />
+                  <span className="font-medium">My Profile</span>
+                </button>
+              )}
               
               <button
                 onClick={() => handleSidebarNavigation('research')}
@@ -283,9 +310,12 @@ const FacultyOverview: React.FC = () => {
 
                   {/* Faculty Info */}
                   <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-red-600 mb-1">
-                      {faculty.user.username}
-                    </h3>
+                    <h3 className="text-xl font-bold mb-1"
+                        style={{ color: "rgb(20, 36, 76)" }}
+                      >
+                         {faculty.user.username}
+                   </h3>
+                  
                     <p className="text-gray-700 text-sm leading-relaxed">
                       {faculty.designation}
                     </p>

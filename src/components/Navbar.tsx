@@ -17,11 +17,13 @@ interface NavbarProps {
 
 const navItems = [
   { label: "HOME", href: "/" },
+  { label: "FACULTY", href: "/faculty" },
   { label: "NOTICE", href: "/notice" },
   { label: "EVENT", href: "/event" },
   { label: "CONTACT", href: "/contact" },
   { label: "SCHEDULE", href: "/schedule" },
-  { label: "RESOURCES", href: "/resources" },
+  { label: "RESOURCES", href: "/resources" }
+
 ];
 
 const additionalNavItems = [
