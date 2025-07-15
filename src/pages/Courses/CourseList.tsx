@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Pencil, Trash } from "lucide-react";
+import Card from "../../components/Card";
+import Button from "../../components/Button";
 import {
   programService,
   type ProgramResponse,
@@ -17,6 +21,7 @@ interface CourseFilters {
 
 const CourseList: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [courses, setCourses] = useState<CourseResponse[]>([]);
   const [programs, setPrograms] = useState<ProgramResponse[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<CourseResponse | null>(
@@ -25,6 +30,7 @@ const CourseList: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [usingFallbackData, setUsingFallbackData] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<CourseFilters>({
     program_id: "",
@@ -37,6 +43,10 @@ const CourseList: React.FC = () => {
 
   // Load initial data
   useEffect(() => {
+    // Get user role from localStorage
+    const role = localStorage.getItem("role");
+    setUserRole(role);
+
     const loadData = async () => {
       try {
         setIsLoading(true);
@@ -200,29 +210,40 @@ const CourseList: React.FC = () => {
     }
 
     // Apply role-based filtering
-    if (user?.role === "student" && user?.courses) {
-      result = result.map((course) => ({
-        ...course,
-        isEnrolled: user.courses?.includes(course.course_code || ""),
-      }));
+    result = result.map((course) => ({
+      ...course,
+      isEnrolled: false, // Simplified - you can implement actual enrollment logic here
+    }));
 
-      if (filters.enrolled_only) {
-        result = result.filter(
-          (course) =>
-            "isEnrolled" in course &&
-            (course as CourseResponse & { isEnrolled: boolean }).isEnrolled
-        );
-      }
+    if (filters.enrolled_only) {
+      result = result.filter(
+        (course) =>
+          "isEnrolled" in course &&
+          (course as CourseResponse & { isEnrolled: boolean }).isEnrolled
+      );
     }
 
     return result;
-  }, [courses, filters, user]);
+  }, [courses, filters]);
 
   const handleFilterChange = (key: keyof CourseFilters, value: string) => {
     setFilters((prev) => ({
       ...prev,
       [key]: key === "enrolled_only" ? value === "true" : value,
     }));
+  };
+
+  const handleDeleteCourse = async (courseId: number) => {
+    try {
+      await programService.deleteCourse(courseId);
+      setCourses(courses.filter((c) => c.id !== courseId));
+      if (selectedCourse?.id === courseId) {
+        setSelectedCourse(null);
+      }
+    } catch (error) {
+      console.error("Failed to delete course:", error);
+      alert("Failed to delete course. Please try again.");
+    }
   };
 
   const CourseCard: React.FC<{
@@ -232,133 +253,164 @@ const CourseList: React.FC = () => {
 
     return (
       <div
-        className={`bg-white rounded-lg border p-6 hover:shadow-lg transition-all duration-200 cursor-pointer group ${
+        className={`bg-white rounded-lg border p-6 hover:shadow-lg transition-all duration-200 group ${
           course.isEnrolled ? "border-green-300 bg-green-50" : "border-gray-200"
-        }`}
-        onClick={() => setSelectedCourse(course)}>
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
-                {course.name}
-              </h3>
-              {course.isEnrolled && (
-                <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                  <svg
-                    className="w-3 h-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  Enrolled
-                </span>
-              )}
+        }`}>
+        <div
+          className="cursor-pointer"
+          onClick={() => setSelectedCourse(course)}>
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+                  {course.name}
+                </h3>
+                {course.isEnrolled && (
+                  <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    Enrolled
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                {course.course_code && (
+                  <span className="inline-block text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded font-mono">
+                    {course.course_code}
+                  </span>
+                )}
+                {program && (
+                  <span className="inline-block text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                    {program.name} ({program.type})
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2 mt-1">
-              {course.course_code && (
-                <span className="inline-block text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded font-mono">
-                  {course.course_code}
-                </span>
-              )}
-              {program && (
-                <span className="inline-block text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                  {program.name} ({program.type})
-                </span>
-              )}
+
+            <div className="text-right">
+              <div className="text-lg font-bold text-blue-600">
+                {course.credits}
+              </div>
+              <div className="text-xs text-gray-500">credits</div>
             </div>
           </div>
 
-          <div className="text-right">
-            <div className="text-lg font-bold text-blue-600">
-              {course.credits}
-            </div>
-            <div className="text-xs text-gray-500">credits</div>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {course.semester && (
+              <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                Semester {course.semester}
+              </span>
+            )}
+
+            {course.year && (
+              <span className="inline-flex items-center gap-1 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 14l9-5-9-5-9 5 9 5z"
+                  />
+                </svg>
+                Year {course.year}
+              </span>
+            )}
+
+            {course.batch && (
+              <span className="inline-flex items-center gap-1 text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+                Batch {course.batch}
+              </span>
+            )}
+          </div>
+
+          {course.description && (
+            <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
+              {course.description}
+            </p>
+          )}
+
+          <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+            <span className="text-xs text-gray-500">Click to view details</span>
+            <svg
+              className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          {course.semester && (
-            <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-              <svg
-                className="w-3 h-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              Semester {course.semester}
-            </span>
-          )}
-
-          {course.year && (
-            <span className="inline-flex items-center gap-1 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
-              <svg
-                className="w-3 h-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 14l9-5-9-5-9 5 9 5z"
-                />
-              </svg>
-              Year {course.year}
-            </span>
-          )}
-
-          {course.batch && (
-            <span className="inline-flex items-center gap-1 text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">
-              <svg
-                className="w-3 h-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              Batch {course.batch}
-            </span>
-          )}
-        </div>
-
-        {course.description && (
-          <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
-            {course.description}
-          </p>
+        {/* Admin Actions */}
+        {userRole === "admin" && (
+          <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/courses/edit/${course.id}`);
+              }}
+              className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+              <Pencil className="w-3 h-3" />
+              Edit
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (
+                  window.confirm("Are you sure you want to delete this course?")
+                ) {
+                  handleDeleteCourse(course.id);
+                }
+              }}
+              className="flex items-center gap-1 px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">
+              <Trash className="w-3 h-3" />
+              Delete
+            </button>
+          </div>
         )}
-
-        <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-          <span className="text-xs text-gray-500">Click to view details</span>
-          <svg
-            className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </div>
       </div>
     );
   };
@@ -471,13 +523,13 @@ const CourseList: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="px-4 pr-2 py-12">
       {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-extrabold text-gray-800">
-          📚 Course Catalog
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold uppercase text-primary-dark mb-4">
+          COURSE CATALOG
         </h1>
-        <p className="text-lg text-gray-500 mt-2">
+        <p className="text-text-secondary leading-relaxed max-w-3xl">
           {isAuthenticated
             ? `Browse courses ${
                 user?.role === "student"
@@ -486,23 +538,6 @@ const CourseList: React.FC = () => {
               }`
             : "Browse courses with detailed descriptions and requirements"}
         </p>
-        {user?.role === "student" && user?.courses && (
-          <div className="mt-4 inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-lg">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            You are enrolled in {user.courses.length} courses
-          </div>
-        )}
 
         {/* Data Source Indicator */}
         <div className="mt-4 text-xs text-gray-400">
@@ -531,10 +566,35 @@ const CourseList: React.FC = () => {
         </div>
       </div>
 
+      {/* Admin Tools */}
+      {userRole === "admin" && (
+        <Card cornerStyle="tl" className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-primary-dark mb-2">
+                ADMIN TOOLS
+              </h2>
+              <p className="text-text-secondary">
+                Create new courses, manage existing ones, and access
+                administrative features.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                cornerStyle="br"
+                onClick={() => navigate("/courses/create")}>
+                <Plus className="inline w-4 h-4 mr-2" />
+                CREATE COURSE
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Filters */}
-      <div className="mb-8 bg-white p-6 rounded-xl shadow border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          🔍 Filter Courses
+      <Card cornerStyle="tl" className="mb-8">
+        <h2 className="text-xl font-bold text-primary-dark mb-4">
+          FILTER COURSES
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
@@ -661,7 +721,7 @@ const CourseList: React.FC = () => {
             </button>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Loading State */}
       {isLoading && (

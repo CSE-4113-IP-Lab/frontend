@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Calendar, FileText, Archive } from "lucide-react";
 import { NoticeService } from "@/services/noticeService";
-import type { Post, PostType } from "@/types";
+import type { Post, PostType, UserRole } from "@/types";
 
 export default function ArchivedNotices() {
   const navigate = useNavigate();
@@ -23,24 +23,11 @@ export default function ArchivedNotices() {
   const [selectedDate, setSelectedDate] = useState<string>("all-dates");
 
   useEffect(() => {
+    // Note: Role-based features available for future enhancement
+    // const role = localStorage.getItem("role") as UserRole;
+
     loadArchivedNotices();
   }, []);
-
-  useEffect(() => {
-    filterNotices();
-  }, [notices, selectedType, selectedDate]);
-
-  const loadArchivedNotices = async () => {
-    try {
-      setLoading(true);
-      const archivedNotices = await NoticeService.getArchivedNotices();
-      setNotices(archivedNotices);
-    } catch (error) {
-      console.error("Error loading archived notices:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const filterNotices = useCallback(() => {
     let filtered = notices;
@@ -79,6 +66,22 @@ export default function ArchivedNotices() {
 
     setFilteredNotices(filtered);
   }, [notices, selectedType, selectedDate]);
+
+  useEffect(() => {
+    filterNotices();
+  }, [filterNotices]);
+
+  const loadArchivedNotices = async () => {
+    try {
+      setLoading(true);
+      const archivedNotices = await NoticeService.getArchivedNotices();
+      setNotices(archivedNotices);
+    } catch (error) {
+      console.error("Error loading archived notices:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getTypeColor = (type: PostType) => {
     switch (type) {
