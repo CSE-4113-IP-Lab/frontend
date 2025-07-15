@@ -25,10 +25,12 @@ import AddRoom from "@/pages/Resources/AddRoom";
 import EquipmentManagement from "@/pages/Admin/AdminEquipmentManagement";
 import StudentEquipmentPage from "@/pages/Student/StudentEquipment";
 import FacultyEquipmentPage from "@/pages/Faculty/FacultyEquipment";
-import { AdminRoute, StudentRoute, FacultyRoute } from "@/components/ProtectedRoute";
+import FacultyRoomBooking from "@/pages/Faculty/FacultyRoomBooking";
+import { AdminRoute, StudentRoute, FacultyRoute, AdminOrFacultyRoute } from "@/components/ProtectedRoute";
 import ApiTest from "@/pages/ApiTest";
 import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
 import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
+import RoomDetail from "@/pages/RoomBooking/RoomDetail";
 
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
@@ -277,6 +279,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "faculty/room-booking",
+        element: (
+          <FacultyRoute>
+            <FacultyRoomBooking />
+          </FacultyRoute>
+        ),
+      },
+      {
         path: "api-test",
         element: <ApiTestPage />,
       },
@@ -291,14 +301,18 @@ export const router = createBrowserRouter([
       {
         path: "room-booking/book",
         element: (
-          <FacultyRoute>
+          <AdminOrFacultyRoute>
             <BookRoom />
-          </FacultyRoute>
+          </AdminOrFacultyRoute>
         ),
       },
       {
         path: "room-booking/my-bookings",
         element: <MyBookings />,
+      },
+      {
+        path: "room-booking/room/:id",
+        element: <RoomDetail />,
       },
       {
         path: "room-booking/test",
@@ -315,9 +329,9 @@ export const router = createBrowserRouter([
       {
         path: "room-booking/book",
         element: (
-          <FacultyRoute>
+          <AdminOrFacultyRoute>
             <BookRoom />
-          </FacultyRoute>
+          </AdminOrFacultyRoute>
         ),
       },
       {

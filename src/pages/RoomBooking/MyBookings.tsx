@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Card from '../../components/Card';
 import { RoomService, type RoomBooking, type RoomBookingsParams } from '../../services/roomService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -122,7 +121,7 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">My Bookings</h1>
         
         {/* Filters */}
-        <Card className="mb-8">
+        <div className="bg-white shadow-sm rounded-lg border mb-8">
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-4">Filter Bookings</h2>
             <div className="flex gap-4">
@@ -156,7 +155,7 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Error Message */}
         {error && (
@@ -174,7 +173,7 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
         {/* Bookings List */}
         <div className="space-y-6">
           {bookings.map((booking) => (
-            <Card key={booking.id} className="hover:shadow-lg transition-shadow">
+            <div key={booking.id} className="bg-white shadow-sm rounded-lg border hover:shadow-lg transition-shadow">
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -255,17 +254,10 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
                         {actionLoading[booking.id] ? 'Cancelling...' : 'Cancel'}
                       </button>
                     )}
-                    
-                    <button
-                      onClick={() => window.location.href = `/room-booking/booking/${booking.id}`}
-                      className="px-3 py-1 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                    >
-                      View Details
-                    </button>
                   </div>
                 </div>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
 
