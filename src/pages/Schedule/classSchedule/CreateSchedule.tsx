@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  BookOpen,
-  Users,
-  Save,
-  X,
-  ArrowLeft,
-} from "lucide-react";
-import Card from "../../../components/Card";
+import { ArrowLeft, Plus } from "lucide-react";
 import Button from "../../../components/Button";
 import { scheduleService } from "../../../services/scheduleService";
 import type { CourseResponse, DayOfWeek } from "../../../types";
@@ -145,222 +135,237 @@ const CreateSchedule: React.FC = () => {
   };
 
   return (
-    <div className="px-4 pr-2 py-12">
-      {/* Header */}
-    <div className="mb-8 px-5">
-      <div className="flex items-center gap-4 mb-4">
+    <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="px-6 py-4 bg-[#14244c] text-white flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Create Class Schedule</h1>
           <Button
-            variant="outline"
-            cornerStyle="bl"
-            onClick={() => navigate("/schedule")}>
-            <ArrowLeft className="inline w-4 h-4 mr-2" />
-            BACK TO SCHEDULE
+            onClick={() => navigate("/schedule")}
+            className="bg-[#14244c] hover:bg-[#14244c] text-white px-4 py-2 rounded-lg flex items-center gap-2">
+            <ArrowLeft size={20} />
+            Back
           </Button>
-      </div>
-      <div className="flex items-center justify-between">
-        <div>
-        <h1 className="text-3xl font-bold uppercase text-primary-dark mb-4">
-          CREATE SCHEDULE
-        </h1>
-        <p className="text-text-secondary leading-relaxed max-w-3xl">
-          Create a new class schedule entry. Assign courses to specific time
-          slots, rooms, and batches for organized class management.
-        </p>
+        </div>
+
+        <div className="p-6">
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-800 text-sm">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Course Selection */}
+              <div>
+                <label
+                  htmlFor="course_id"
+                  className="block text-sm font-medium text-gray-700 mb-2">
+                  Course *
+                </label>
+                <select
+                  id="course_id"
+                  name="course_id"
+                  value={formData.course_id}
+                  onChange={(e) =>
+                    handleInputChange("course_id", e.target.value)
+                  }
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#14244c] focus:border-[#14244c]">
+                  <option value="">Select a course</option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.course_code} - {course.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Day of Week */}
+              <div>
+                <label
+                  htmlFor="day_of_week"
+                  className="block text-sm font-medium text-gray-700 mb-2">
+                  Day of Week *
+                </label>
+                <select
+                  id="day_of_week"
+                  name="day_of_week"
+                  value={formData.day_of_week}
+                  onChange={(e) =>
+                    handleInputChange("day_of_week", e.target.value)
+                  }
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#14244c] focus:border-[#14244c]">
+                  <option value="">Select day</option>
+                  {daysOfWeek.map((day) => (
+                    <option key={day.value} value={day.value}>
+                      {day.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Start Time */}
+              <div>
+                <label
+                  htmlFor="start_time"
+                  className="block text-sm font-medium text-gray-700 mb-2">
+                  Start Time *
+                </label>
+                <select
+                  id="start_time"
+                  name="start_time"
+                  value={formData.start_time}
+                  onChange={(e) =>
+                    handleInputChange("start_time", e.target.value)
+                  }
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#14244c] focus:border-[#14244c]">
+                  <option value="">Select start time</option>
+                  {timeSlots.map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* End Time */}
+              <div>
+                <label
+                  htmlFor="end_time"
+                  className="block text-sm font-medium text-gray-700 mb-2">
+                  End Time *
+                </label>
+                <select
+                  id="end_time"
+                  name="end_time"
+                  value={formData.end_time}
+                  onChange={(e) =>
+                    handleInputChange("end_time", e.target.value)
+                  }
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#14244c] focus:border-[#14244c]">
+                  <option value="">Select end time</option>
+                  {timeSlots.map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Room */}
+              <div>
+                <label
+                  htmlFor="room"
+                  className="block text-sm font-medium text-gray-700 mb-2">
+                  Room
+                </label>
+                <input
+                  type="text"
+                  id="room"
+                  name="room"
+                  value={formData.room}
+                  onChange={(e) => handleInputChange("room", e.target.value)}
+                  placeholder="e.g., Room 301, Lab 1"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                />
+              </div>
+
+              {/* Batch */}
+              <div>
+                <label
+                  htmlFor="batch"
+                  className="block text-sm font-medium text-gray-700 mb-2">
+                  Batch
+                </label>
+                <input
+                  type="text"
+                  id="batch"
+                  name="batch"
+                  value={formData.batch}
+                  onChange={(e) => handleInputChange("batch", e.target.value)}
+                  placeholder="e.g., 20, 21, 22"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                />
+              </div>
+
+              {/* Semester */}
+              <div>
+                <label
+                  htmlFor="semester"
+                  className="block text-sm font-medium text-gray-700 mb-2">
+                  Semester
+                </label>
+                <select
+                  id="semester"
+                  name="semester"
+                  value={formData.semester}
+                  onChange={(e) =>
+                    handleInputChange("semester", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#14244c] focus:border-[#14244c]">
+                  <option value="">Select semester</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
+                    <option key={sem} value={sem}>
+                      Semester {sem}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Year */}
+              <div>
+                <label
+                  htmlFor="year"
+                  className="block text-sm font-medium text-gray-700 mb-2">
+                  Year
+                </label>
+                <select
+                  id="year"
+                  name="year"
+                  value={formData.year}
+                  onChange={(e) => handleInputChange("year", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#14244c]focus:border-[#14244c]">
+                  <option value="">Select year</option>
+                  {[1, 2, 3, 4].map((year) => (
+                    <option key={year} value={year}>
+                      Year {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4 pt-6 border-t">
+              <Button
+                type="button"
+                onClick={() => navigate("/schedule")}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition duration-200">
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="bg-blue-900 hover:bg-blue-800 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition duration-200 disabled:opacity-50">
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    Create Schedule
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
         </div>
       </div>
-    </div>
-
-      {/* Error Display */}
-      {error && (
-        <Card cornerStyle="tl" className="mb-8">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="text-red-600 font-medium">Error</div>
-            <div className="text-red-500 text-sm mt-1">{error}</div>
-          </div>
-        </Card>
-      )}
-
-      {/* Form */}
-      <Card cornerStyle="tl">
-        <form onSubmit={handleSubmit} className="space-y-6 w-full p-2">
-          {/* Course Selection */}
-          <div className="space-y-2 w-full p-2">
-            <label className="block text-sm font-bold text-primary-dark mb-2 w-full p-2">
-              <BookOpen className="inline w-4 h-4 mr-2" />
-              COURSE *
-            </label>
-            <select
-              value={formData.course_id}
-              onChange={(e) => handleInputChange("course_id", e.target.value)}
-              className="w-full border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full p-2"
-              required>
-              <option value="">Select a course</option>
-              {courses.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.course_code} - {course.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Day and Time */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full p-2">
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                <Calendar className="inline w-4 h-4 mr-2" />
-                DAY OF WEEK *
-              </label>
-              <select
-                value={formData.day_of_week}
-                onChange={(e) =>
-                  handleInputChange("day_of_week", e.target.value)
-                }
-                className="w-full border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required>
-                <option value="">Select day</option>
-                {daysOfWeek.map((day) => (
-                  <option key={day.value} value={day.value}>
-                    {day.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                <Clock className="inline w-4 h-4 mr-2" />
-                START TIME *
-              </label>
-              <select
-                value={formData.start_time}
-                onChange={(e) =>
-                  handleInputChange("start_time", e.target.value)
-                }
-                className="w-full border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required>
-                <option value="">Select start time</option>
-                {timeSlots.map((time) => (
-                  <option key={time} value={time}>
-                    {time}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                <Clock className="inline w-4 h-4 mr-2" />
-                END TIME *
-              </label>
-              <select
-                value={formData.end_time}
-                onChange={(e) => handleInputChange("end_time", e.target.value)}
-                className="w-full border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required>
-                <option value="">Select end time</option>
-                {timeSlots.map((time) => (
-                  <option key={time} value={time}>
-                    {time}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Room and Batch Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-2">
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                <MapPin className="inline w-4 h-4 mr-2" />
-                ROOM
-              </label>
-              <input
-                type="text"
-                value={formData.room}
-                onChange={(e) => handleInputChange("room", e.target.value)}
-                placeholder="e.g., Room 301, Lab 1, Auditorium"
-                className="w-full border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                <Users className="inline w-4 h-4 mr-2" />
-                BATCH
-              </label>
-              <input
-                type="text"
-                value={formData.batch}
-                onChange={(e) => handleInputChange("batch", e.target.value)}
-                placeholder="e.g., 20, 21, 22"
-                className="w-full border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Academic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full p-2">
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                SEMESTER
-              </label>
-              <select
-                value={formData.semester}
-                onChange={(e) => handleInputChange("semester", e.target.value)}
-                className="w-full border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Select semester</option>
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                  <option key={sem} value={sem}>
-                    Semester {sem}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                YEAR
-              </label>
-              <select
-                value={formData.year}
-                onChange={(e) => handleInputChange("year", e.target.value)}
-                className="w-full border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Select year</option>
-                {[1, 2, 3, 4].map((year) => (
-                  <option key={year} value={year}>
-                    Year {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Form Actions */}
-          <div className="flex justify-end gap-4 pt-6 border-t border-gray-200 w-full p-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate("/schedule")}
-              disabled={isLoading}>
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-            <Button type="submit" cornerStyle="br" disabled={isLoading} className="bg-[#14244c] text-white hover:bg-[#ecb31d] cursor-pointer">
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Create Schedule
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-      </Card>
     </div>
   );
 };

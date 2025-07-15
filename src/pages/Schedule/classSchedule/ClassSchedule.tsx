@@ -397,92 +397,94 @@ const ClassSchedule: React.FC = () => {
 
   const renderScheduleGrid = () => {
     return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="border border-gray-200 p-3 text-left font-medium text-gray-700">
-                Time
-              </th>
-              {daysOfWeek.map((day) => (
-                <th
-                  key={day}
-                  className="border border-gray-200 p-3 text-left font-medium text-gray-700">
-                  {day.charAt(0).toUpperCase() + day.slice(1)}
+      <div className="w-full overflow-x-auto">
+        <div className="min-w-[800px]">
+          <table className="w-full border border-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="border border-gray-200 p-3 text-left font-medium text-gray-700">
+                  Time
                 </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {timeSlots.map((timeSlot) => (
-              <tr key={timeSlot} className="hover:bg-gray-50">
-                <td className="border border-gray-200 p-3 font-medium text-gray-700 bg-gray-50">
-                  {timeSlot}
-                </td>
-                {daysOfWeek.map((day) => {
-                  const schedule = schedules.find(
-                    (s) =>
-                      s.day_of_week === day &&
-                      `${s.start_time}-${s.end_time}` === timeSlot
-                  );
-
-                  return (
-                    <td
-                      key={`${day}-${timeSlot}`}
-                      className="border border-gray-200 p-2">
-                      {schedule?.course ? (
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 hover:bg-blue-100 transition-colors relative">
-                          <div className="font-semibold text-blue-900 text-sm">
-                            {schedule.course.course_code}
-                          </div>
-                          <div className="text-blue-700 text-xs mb-1">
-                            {schedule.course.name}
-                          </div>
-                          {schedule.room && (
-                            <div className="flex items-center gap-1 text-gray-600 text-xs mb-1">
-                              <MapPin className="w-3 h-3" />
-                              <span>{schedule.room}</span>
-                            </div>
-                          )}
-                          <div className="text-green-600 text-xs font-medium">
-                            {schedule.batch ? `Batch ${schedule.batch}` : ""}
-                            {schedule.semester
-                              ? ` • ${schedule.semester} Semester`
-                              : ""}
-                          </div>
-
-                          {/* Admin Actions */}
-                          {userRole === "admin" && (
-                            <div className="absolute top-1 right-1 flex gap-1">
-                              <button
-                                onClick={() =>
-                                  navigate(`/schedule/edit/${schedule.id}`)
-                                }
-                                className="p-1 bg-white rounded-full shadow-sm hover:bg-gray-50"
-                                title="Edit Schedule">
-                                <Pencil className="w-3 h-3 text-blue-600" />
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleDeleteSchedule(schedule.id)
-                                }
-                                className="p-1 bg-white rounded-full shadow-sm hover:bg-gray-50"
-                                title="Delete Schedule">
-                                <Trash className="w-3 h-3 text-red-600" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="h-20"></div>
-                      )}
-                    </td>
-                  );
-                })}
+                {daysOfWeek.map((day) => (
+                  <th
+                    key={day}
+                    className="border border-gray-200 p-3 text-left font-medium text-gray-700">
+                    {day.charAt(0).toUpperCase() + day.slice(1)}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {timeSlots.map((timeSlot) => (
+                <tr key={timeSlot} className="hover:bg-gray-50">
+                  <td className="border border-gray-200 p-3 font-medium text-gray-700 bg-gray-50">
+                    {timeSlot}
+                  </td>
+                  {daysOfWeek.map((day) => {
+                    const schedule = schedules.find(
+                      (s) =>
+                        s.day_of_week === day &&
+                        `${s.start_time}-${s.end_time}` === timeSlot
+                    );
+
+                    return (
+                      <td
+                        key={`${day}-${timeSlot}`}
+                        className="border border-gray-200 p-2">
+                        {schedule?.course ? (
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 hover:bg-blue-100 transition-colors relative">
+                            <div className="font-semibold text-blue-900 text-sm">
+                              {schedule.course.course_code}
+                            </div>
+                            <div className="text-blue-700 text-xs mb-1">
+                              {schedule.course.name}
+                            </div>
+                            {schedule.room && (
+                              <div className="flex items-center gap-1 text-gray-600 text-xs mb-1">
+                                <MapPin className="w-3 h-3" />
+                                <span>{schedule.room}</span>
+                              </div>
+                            )}
+                            <div className="text-green-600 text-xs font-medium">
+                              {schedule.batch ? `Batch ${schedule.batch}` : ""}
+                              {schedule.semester
+                                ? ` • ${schedule.semester} Semester`
+                                : ""}
+                            </div>
+
+                            {/* Admin Actions */}
+                            {userRole === "admin" && (
+                              <div className="absolute top-1 right-1 flex gap-1">
+                                <button
+                                  onClick={() =>
+                                    navigate(`/schedule/edit/${schedule.id}`)
+                                  }
+                                  className="p-1 bg-white rounded-full shadow-sm hover:bg-gray-50"
+                                  title="Edit Schedule">
+                                  <Pencil className="w-3 h-3 text-blue-600" />
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleDeleteSchedule(schedule.id)
+                                  }
+                                  className="p-1 bg-white rounded-full shadow-sm hover:bg-gray-50"
+                                  title="Delete Schedule">
+                                  <Trash className="w-3 h-3 text-red-600" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="h-20"></div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}{" "}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   };
@@ -613,13 +615,13 @@ const ClassSchedule: React.FC = () => {
   }
 
   return (
-    <div className="px-4 pr-2 py-12">
+    <div className="w-full max-w-full">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold uppercase text-primary-dark mb-4">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold uppercase text-primary-dark mb-2 sm:mb-4">
           CLASS SCHEDULE
         </h1>
-        <p className="text-text-secondary leading-relaxed max-w-3xl">
+        <p className="text-sm sm:text-base text-text-secondary leading-relaxed max-w-3xl">
           View and manage weekly class schedules.{" "}
           {userRole === "admin"
             ? "Create new schedules, assign rooms, and manage timetables."
@@ -643,6 +645,7 @@ const ClassSchedule: React.FC = () => {
             </div>
             <Button
               cornerStyle="br"
+              className="bg-[#14244c] text-white hover:bg-[#1a2b5c] transition-colors"
               onClick={() => navigate("/schedule/create")}>
               <Plus className="inline w-4 h-4 mr-2" />
               CREATE SCHEDULE
@@ -689,11 +692,11 @@ const ClassSchedule: React.FC = () => {
           <h2 className="text-lg font-semibold text-primary-dark">FILTERS</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-4">
           <select
             value={filters.program_id || ""}
             onChange={(e) => handleFilterChange("program_id", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Programs</option>
             {filterOptions.programs.map((program) => (
               <option key={program.id} value={program.id}>
@@ -705,7 +708,7 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.batch || ""}
             onChange={(e) => handleFilterChange("batch", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Batches</option>
             {filterOptions.batches.map((batch) => (
               <option key={batch} value={batch}>
@@ -717,7 +720,7 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.semester || ""}
             onChange={(e) => handleFilterChange("semester", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Semesters</option>
             {filterOptions.semesters.map((semester) => (
               <option key={semester} value={semester}>
@@ -729,7 +732,7 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.year || ""}
             onChange={(e) => handleFilterChange("year", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Years</option>
             {filterOptions.years.map((year) => (
               <option key={year} value={year}>
@@ -741,7 +744,7 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.day_of_week || ""}
             onChange={(e) => handleFilterChange("day_of_week", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Days</option>
             {daysOfWeek.map((day) => (
               <option key={day} value={day}>
@@ -753,7 +756,7 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.room || ""}
             onChange={(e) => handleFilterChange("room", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
             <option value="">All Rooms</option>
             {filterOptions.rooms.map((room) => (
               <option key={room} value={room}>

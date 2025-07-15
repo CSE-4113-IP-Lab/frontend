@@ -29,7 +29,7 @@ import {
   FacultyRoute,
 } from "@/components/ProtectedRoute";
 
-import ApiTest from "@/pages/ApiTest";
+// import ApiTest from "@/pages/ApiTest";
 
 import {
   AvailableRooms,
@@ -41,22 +41,23 @@ import {
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import CreateSchedule from "./pages/Schedule/classSchedule/CreateSchedule";
 import EditSchedule from "./pages/Schedule/classSchedule/EditSchedule";
-import CreateSchedule from "./pages/Schedule/classSchedule/CreateSchedule";
-import EditSchedule from "./pages/Schedule/classSchedule/EditSchedule";
+import SchedulePage from "./pages/Schedule/schedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
+import CreateExamSchedule from "./pages/Schedule/examSchedule/CreateExamSchedule";
+import EditExamSchedule from "./pages/Schedule/examSchedule/EditExamSchedule";
 import ArchivedEvents from "./pages/Event/ArchivedEvents";
 import EventPage from "./pages/Event/EventPage";
 import UpcomingEvents from "./pages/Event/UpcomingEvents";
 import EventDetails from "./pages/Event/EventDetails";
 import TestComponent from "./pages/Test/TestComponent";
 import CourseList from "./pages/Courses/CourseList";
-import CourseCreate from "./pages/Courses/CourseCreate";
-import CourseEdit from "./pages/Courses/CourseEdit";
+// import CourseCreate from "./pages/Courses/CourseCreate";
+// import CourseEdit from "./pages/Courses/CourseEdit";
 import CourseCreate from "./pages/Courses/CourseCreate";
 import CourseEdit from "./pages/Courses/CourseEdit";
 import ProgramOutlines from "./pages/Programs/ProgramOutlines";
-import ProgramCreate from "./pages/Programs/ProgramCreate";
-import ProgramEdit from "./pages/Programs/ProgramEdit";
+// import ProgramCreate from "./pages/Programs/ProgramCreate";
+// import ProgramEdit from "./pages/Programs/ProgramEdit";
 import ProgramCreate from "./pages/Programs/ProgramCreate";
 import ProgramEdit from "./pages/Programs/ProgramEdit";
 import ErrorPage from "./ErrorPage";
@@ -64,7 +65,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminCourseManagement from "./pages/Admin/AdminCourseManagement";
 import AdminScheduleManagement from "./pages/Admin/AdminScheduleManagement";
 import AdminProgramManagement from "./pages/Admin/AdminProgramManagement";
-import AdminExamScheduleManagement from "./pages/Admin/AdminExamScheduleManagement";
+
 import ApiTestPage from "./pages/ApiTest";
 
 //import { Notice } from "@/pages/Notice";
@@ -156,13 +157,28 @@ export const router = createBrowserRouter([
       {
         path: "faculty/byresearch",
         element: <FacultyByResearch />,
-        element: <FacultyByResearch />,
       },
 
 
       {
         path: "exam-schedule",
         element: <ExamSchedule />,
+      },
+      {
+        path: "admin/exam-schedules/create",
+        element: (
+          <AdminRoute>
+            <CreateExamSchedule />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "admin/exam-schedules/edit/:scheduleId",
+        element: (
+          <AdminRoute>
+            <EditExamSchedule />
+          </AdminRoute>
+        ),
       },
       {
         path: "archived-events",
@@ -213,7 +229,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "schedule",
-        element: <ClassSchedule />,
+        element: <SchedulePage />,
       },
       {
         path: "courses/create",
@@ -254,6 +270,8 @@ export const router = createBrowserRouter([
             <EditSchedule />
           </AdminRoute>
         ),
+      },
+      {
         path: "schedule/create",
         element: (
           <AdminRoute>
@@ -323,7 +341,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "admin/exam-schedules",
-        element: <AdminExamScheduleManagement />,
+        element: (
+          <AdminRoute>
+            <ExamSchedule />
+          </AdminRoute>
+        ),
       },
       {
         path: "resources",
@@ -338,7 +360,6 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "resources/student",
         path: "resources/student",
         element: (
           <StudentRoute>
