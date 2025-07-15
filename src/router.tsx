@@ -16,11 +16,6 @@ import AssignmentDetails from "./pages/Assignments/AssignmentDetails";
 import AssignmentSubmission from "./pages/Assignments/AssignmentSubmission";
 import Grades from "./pages/Grades/Grades";
 
-import AssignmentCreate from "./pages/Assignments/AssignmentCreate";
-import Assignments from "./pages/Assignments/Assignments";
-import AssignmentDetails from "./pages/Assignments/AssignmentDetails";
-import AssignmentSubmission from "./pages/Assignments/AssignmentSubmission";
-
 import Resources from "@/pages/Resources/Resources";
 import AdminResources from "@/pages/Resources/AdminResources";
 import StudentResources from "@/pages/Resources/StudentResources";
@@ -28,10 +23,17 @@ import FacultyResources from "@/pages/Resources/FacultyResources";
 import EquipmentManagement from "@/pages/Admin/AdminEquipmentManagement";
 import StudentEquipmentPage from "@/pages/Student/StudentEquipment";
 import FacultyEquipmentPage from "@/pages/Faculty/FacultyEquipment";
-import { AdminRoute, StudentRoute, FacultyRoute } from "@/components/ProtectedRoute";
-import ApiTest from "@/pages/ApiTest";
-import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
-
+import {
+  AdminRoute,
+  StudentRoute,
+  FacultyRoute,
+} from "@/components/ProtectedRoute";
+import {
+  AvailableRooms,
+  BookRoom,
+  MyBookings,
+  RoomBookingDashboard,
+} from "@/pages/RoomBooking";
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
@@ -61,7 +63,6 @@ import NewFacultyYearwise from "@/pages/FacultyInformation/NewFacultyYearwise";
 import FacultyByResearch from "@/pages/FacultyInformation/FacultyByResearch";
 import FacultyOnLeaveList from "@/pages/FacultyInformation/FacultyOnLeaveList";
 
-
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -85,7 +86,6 @@ export const router = createBrowserRouter([
         element: <NoticeBoardPage />,
       },
       {
-
         path: "notice/archived",
         element: <ArchivedNotices />,
       },
@@ -110,8 +110,8 @@ export const router = createBrowserRouter([
         element: <Contact />,
       },
 
-       // Faculty Routes
-       {
+      // Faculty Routes
+      {
         path: "faculty",
         element: <FacultyOverview />, // Faculty Information overall
       },
@@ -141,10 +141,9 @@ export const router = createBrowserRouter([
       },
       {
         path: "faculty/byresearch",
-        element: <FacultyByResearch/>
+        element: <FacultyByResearch />,
       },
-      
-  
+
       {
         path: "exam-schedule",
         element: <ExamSchedule />,
@@ -225,7 +224,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "resources/student", 
+        path: "resources/student",
         element: (
           <StudentRoute>
             <StudentResources />
