@@ -34,7 +34,6 @@ import { AdmissionRequirements } from "./pages/Admission/Requirements";
 import ManageTimeline from "./pages/Admission/ManageTimeline";
 import EditTimeline from "./pages/Admission/EditTimeline";
 
-
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import CreateSchedule from "./pages/Schedule/classSchedule/CreateSchedule";
 import EditSchedule from "./pages/Schedule/classSchedule/EditSchedule";
