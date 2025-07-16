@@ -36,7 +36,7 @@ export default function Resources() {
       console.log("Unknown role, defaulting to student resources");
       navigate("/resources/student");
     }
-  }, [isAuthenticated, loading, navigate]);
+  }, [loading, navigate]);
 
   // Show loading state while checking auth or redirecting
   if (loading) {

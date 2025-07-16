@@ -90,6 +90,7 @@ export default function Home() {
         localStorage.setItem("id", response.data.used_id);
         localStorage.setItem("role", response.data.user_role);
         localStorage.setItem("userRole", response.data.user_role);
+        localStorage.setItem("access_token", response.data.token);
         // setToastMessage("Google authentication successful");
         setIsAuthenticated && setIsAuthenticated(true);
         setAuthenticationFlag && setAuthenticationFlag(true);
@@ -189,6 +190,7 @@ export default function Home() {
         setAuthenticationFlag && setAuthenticationFlag(true);
 
         localStorage.setItem("token", response.data.access_token);
+        localStorage.setItem("access_token", response.data.token);
         localStorage.setItem("id", response.data.user_id.toString());
         localStorage.setItem("role", response.data.user_role);
         localStorage.setItem("userRole", response.data.user_role);

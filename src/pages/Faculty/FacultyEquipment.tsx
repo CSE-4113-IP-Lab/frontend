@@ -1,96 +1,100 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EquipmentRequestModal from "@/components/EquipmentRequestModal";
-import { 
-  Settings, 
-  Search, 
-  Plus, 
+import {
+  Settings,
+  Search,
+  Plus,
   ArrowLeft,
   CheckCircle,
   Clock,
   XCircle,
-  Eye
+  Eye,
 } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { equipmentService, type Equipment, type EquipmentRequest, type EquipmentRequestCreateInput } from '@/services/equipmentService';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  equipmentService,
+  type Equipment,
+  type EquipmentRequest,
+  type EquipmentRequestCreateInput,
+} from "@/services/equipmentService";
 
 export default function FacultyEquipmentPage() {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
-  
+  const { user, isAuthenticated, authenticationFlag } = useAuth();
+
   // Get tab from URL parameter
   const urlParams = new URLSearchParams(window.location.search);
-  const initialTab = urlParams.get('tab') || 'browse';
-  
+  const initialTab = urlParams.get("tab") || "browse";
+
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [myRequests, setMyRequests] = useState<EquipmentRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(
+    null
+  );
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [requestStatusFilter, setRequestStatusFilter] = useState<string>('all');
+  const [requestStatusFilter, setRequestStatusFilter] = useState<string>("all");
 
   // Check authentication and redirect if needed
-  useEffect(() => {
-    console.log('FacultyEquipment - Auth state:', { isAuthenticated, user });
-    // Authentication is already handled by FacultyRoute wrapper
-    // Just proceed with loading data
-  }, [isAuthenticated, user, navigate]);
 
   // Load equipment and requests
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (authenticationFlag) {
       loadData();
     }
-  }, [isAuthenticated, user]);
+  }, [authenticationFlag]);
 
   const loadData = async () => {
-    if (!isAuthenticated || !user) return;
-    
+    if (!authenticationFlag) return;
+
     try {
       setLoading(true);
       const [equipmentData, requestsData] = await Promise.all([
         equipmentService.getAllEquipment(),
-        equipmentService.getEquipmentRequests()
+        equipmentService.getEquipmentRequests(),
       ]);
       setEquipment(equipmentData);
       setMyRequests(requestsData);
     } catch (error) {
-      console.error('Error loading data:', error);
-      alert('Failed to load equipment data');
+      console.error("Error loading data:", error);
+      alert("Failed to load equipment data");
     } finally {
       setLoading(false);
     }
   };
 
   // Filter equipment based on search
-  const filteredEquipment = equipment.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.type?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEquipment = equipment.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.type?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Count requests by status for filter buttons
   const requestCounts = {
     all: myRequests.length,
-    pending: myRequests.filter(req => req.status === 'pending').length,
-    approved: myRequests.filter(req => req.status === 'approved').length,
-    handover: myRequests.filter(req => req.status === 'handover').length,
-    completed: myRequests.filter(req => req.status === 'completed').length,
-    rejected: myRequests.filter(req => req.status === 'rejected').length,
-    cancelled: myRequests.filter(req => req.status === 'cancelled').length,
+    pending: myRequests.filter((req) => req.status === "pending").length,
+    approved: myRequests.filter((req) => req.status === "approved").length,
+    handover: myRequests.filter((req) => req.status === "handover").length,
+    completed: myRequests.filter((req) => req.status === "completed").length,
+    rejected: myRequests.filter((req) => req.status === "rejected").length,
+    cancelled: myRequests.filter((req) => req.status === "cancelled").length,
   };
 
   // Filter requests based on status filter
-  const filteredRequests = requestStatusFilter === 'all' 
-    ? myRequests 
-    : myRequests.filter(req => req.status === requestStatusFilter);
+  const filteredRequests =
+    requestStatusFilter === "all"
+      ? myRequests
+      : myRequests.filter((req) => req.status === requestStatusFilter);
 
   // Handle equipment request
   const handleRequestEquipment = (item: Equipment) => {
@@ -102,11 +106,11 @@ export default function FacultyEquipmentPage() {
   const handleSubmitRequest = async (request: EquipmentRequestCreateInput) => {
     try {
       await equipmentService.createEquipmentRequest(request);
-      alert('Equipment request submitted successfully!');
+      alert("Equipment request submitted successfully!");
       loadData(); // Reload to update available quantities and requests
     } catch (error: any) {
-      console.error('Error creating request:', error);
-      alert(error.response?.data?.detail || 'Failed to submit request');
+      console.error("Error creating request:", error);
+      alert(error.response?.data?.detail || "Failed to submit request");
       throw error; // Re-throw to let modal handle it
     }
   };
@@ -119,33 +123,82 @@ export default function FacultyEquipmentPage() {
 
   // Handle cancel request
   const handleCancelRequest = async (requestId: number) => {
-    if (!confirm('Are you sure you want to cancel this request?')) return;
-    
+    if (!confirm("Are you sure you want to cancel this request?")) return;
+
     try {
       await equipmentService.cancelEquipmentRequest(requestId);
-      alert('Request cancelled successfully');
+      alert("Request cancelled successfully");
       loadData();
     } catch (error: any) {
-      console.error('Error cancelling request:', error);
-      alert(error.response?.data?.detail || 'Failed to cancel request');
+      console.error("Error cancelling request:", error);
+      alert(error.response?.data?.detail || "Failed to cancel request");
     }
   };
 
   // Get status badge variant
   const getStatusBadge = (status: string) => {
     const variants = {
-      pending: <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200"><Clock className="w-3 h-3 mr-1" />Pending</Badge>,
-      approved: <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200"><CheckCircle className="w-3 h-3 mr-1" />Approved</Badge>,
-      rejected: <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>,
-      handover: <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200"><Settings className="w-3 h-3 mr-1" />Collected</Badge>,
-      completed: <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200"><CheckCircle className="w-3 h-3 mr-1" />Completed</Badge>,
-      cancelled: <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200"><XCircle className="w-3 h-3 mr-1" />Cancelled</Badge>
+      pending: (
+        <Badge
+          variant="outline"
+          className="bg-yellow-50 text-yellow-700 border-yellow-200"
+        >
+          <Clock className="w-3 h-3 mr-1" />
+          Pending
+        </Badge>
+      ),
+      approved: (
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200"
+        >
+          <CheckCircle className="w-3 h-3 mr-1" />
+          Approved
+        </Badge>
+      ),
+      rejected: (
+        <Badge variant="destructive">
+          <XCircle className="w-3 h-3 mr-1" />
+          Rejected
+        </Badge>
+      ),
+      handover: (
+        <Badge
+          variant="outline"
+          className="bg-blue-50 text-blue-700 border-blue-200"
+        >
+          <Settings className="w-3 h-3 mr-1" />
+          Collected
+        </Badge>
+      ),
+      completed: (
+        <Badge
+          variant="outline"
+          className="bg-gray-50 text-gray-700 border-gray-200"
+        >
+          <CheckCircle className="w-3 h-3 mr-1" />
+          Completed
+        </Badge>
+      ),
+      cancelled: (
+        <Badge
+          variant="outline"
+          className="bg-red-50 text-red-700 border-red-200"
+        >
+          <XCircle className="w-3 h-3 mr-1" />
+          Cancelled
+        </Badge>
+      ),
     };
-    return variants[status as keyof typeof variants] || <Badge variant="outline">{status}</Badge>;
+    return (
+      variants[status as keyof typeof variants] || (
+        <Badge variant="outline">{status}</Badge>
+      )
+    );
   };
 
   // Show all requests so faculty can see rejected, cancelled, and completed ones too
-  // const currentRequests = myRequests.filter(req => 
+  // const currentRequests = myRequests.filter(req =>
   //   !['completed', 'cancelled', 'rejected'].includes(req.status)
   // );
 
@@ -171,7 +224,7 @@ export default function FacultyEquipmentPage() {
               <div className="flex items-center gap-4">
                 <Button
                   variant="outline"
-                  onClick={() => navigate('/resources/faculty')}
+                  onClick={() => navigate("/resources/faculty")}
                   className="flex items-center gap-2"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -183,17 +236,24 @@ export default function FacultyEquipmentPage() {
                     Faculty Equipment
                   </h1>
                   <p className="text-gray-600 mt-2">
-                    Browse and request laboratory equipment for teaching and research
+                    Browse and request laboratory equipment for teaching and
+                    research
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-6"
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="browse">Browse Equipment</TabsTrigger>
-              <TabsTrigger value="current">My Requests ({myRequests.length})</TabsTrigger>
+              <TabsTrigger value="current">
+                My Requests ({myRequests.length})
+              </TabsTrigger>
             </TabsList>
 
             {/* Browse Equipment Tab */}
@@ -219,15 +279,28 @@ export default function FacultyEquipmentPage() {
               {/* Equipment Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEquipment.map((item) => (
-                  <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                  <Card
+                    key={item.id}
+                    className="hover:shadow-lg transition-shadow"
+                  >
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
                         <span className="text-lg">{item.name}</span>
-                        <Badge 
-                          variant={item.available_quantity > 0 ? "secondary" : "destructive"}
-                          className={item.available_quantity === 0 ? "bg-red-600 text-white border-red-600 hover:bg-red-700" : ""}
+                        <Badge
+                          variant={
+                            item.available_quantity > 0
+                              ? "secondary"
+                              : "destructive"
+                          }
+                          className={
+                            item.available_quantity === 0
+                              ? "bg-red-600 text-white border-red-600 hover:bg-red-700"
+                              : ""
+                          }
                         >
-                          {item.available_quantity > 0 ? 'Available' : 'Not Available'}
+                          {item.available_quantity > 0
+                            ? "Available"
+                            : "Not Available"}
                         </Badge>
                       </CardTitle>
                     </CardHeader>
@@ -235,22 +308,32 @@ export default function FacultyEquipmentPage() {
                       <div className="space-y-3">
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
-                            <span className="font-medium text-gray-600">Type:</span>
+                            <span className="font-medium text-gray-600">
+                              Type:
+                            </span>
                             <div className="text-gray-900">{item.type}</div>
                           </div>
                           <div>
-                            <span className="font-medium text-gray-600">Available:</span>
-                            <div className="text-gray-900">{item.available_quantity} / {item.quantity}</div>
+                            <span className="font-medium text-gray-600">
+                              Available:
+                            </span>
+                            <div className="text-gray-900">
+                              {item.available_quantity} / {item.quantity}
+                            </div>
                           </div>
                         </div>
-                        
+
                         {item.description && (
                           <div>
-                            <span className="font-medium text-gray-600 text-sm">Description:</span>
-                            <p className="text-gray-700 text-sm mt-1 line-clamp-2">{item.description}</p>
+                            <span className="font-medium text-gray-600 text-sm">
+                              Description:
+                            </span>
+                            <p className="text-gray-700 text-sm mt-1 line-clamp-2">
+                              {item.description}
+                            </p>
                           </div>
                         )}
-                        
+
                         <div className="flex gap-2 pt-2">
                           <Button
                             size="sm"
@@ -269,14 +352,18 @@ export default function FacultyEquipmentPage() {
                     </CardContent>
                   </Card>
                 ))}
-                
+
                 {filteredEquipment.length === 0 && (
                   <div className="col-span-full">
                     <Card>
                       <CardContent className="p-12 text-center">
                         <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-500">No equipment found matching your search.</p>
-                        <p className="text-gray-400 text-sm mt-2">Try a different search term or browse all equipment.</p>
+                        <p className="text-gray-500">
+                          No equipment found matching your search.
+                        </p>
+                        <p className="text-gray-400 text-sm mt-2">
+                          Try a different search term or browse all equipment.
+                        </p>
                       </CardContent>
                     </Card>
                   </div>
@@ -289,7 +376,9 @@ export default function FacultyEquipmentPage() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-blue-600" />
-                  <h3 className="font-medium text-blue-900">My Equipment Requests</h3>
+                  <h3 className="font-medium text-blue-900">
+                    My Equipment Requests
+                  </h3>
                 </div>
                 <p className="text-blue-700 text-sm mt-1">
                   Track all your equipment requests and their current status.
@@ -299,51 +388,65 @@ export default function FacultyEquipmentPage() {
               {/* Filter Buttons */}
               <div className="flex gap-2 flex-wrap">
                 <Button
-                  variant={requestStatusFilter === 'all' ? 'default' : 'outline'}
+                  variant={
+                    requestStatusFilter === "all" ? "default" : "outline"
+                  }
                   size="sm"
-                  onClick={() => setRequestStatusFilter('all')}
+                  onClick={() => setRequestStatusFilter("all")}
                 >
                   All Requests ({requestCounts.all})
                 </Button>
                 <Button
-                  variant={requestStatusFilter === 'pending' ? 'default' : 'outline'}
+                  variant={
+                    requestStatusFilter === "pending" ? "default" : "outline"
+                  }
                   size="sm"
-                  onClick={() => setRequestStatusFilter('pending')}
+                  onClick={() => setRequestStatusFilter("pending")}
                 >
                   Pending ({requestCounts.pending})
                 </Button>
                 <Button
-                  variant={requestStatusFilter === 'approved' ? 'default' : 'outline'}
+                  variant={
+                    requestStatusFilter === "approved" ? "default" : "outline"
+                  }
                   size="sm"
-                  onClick={() => setRequestStatusFilter('approved')}
+                  onClick={() => setRequestStatusFilter("approved")}
                 >
                   Approved ({requestCounts.approved})
                 </Button>
                 <Button
-                  variant={requestStatusFilter === 'handover' ? 'default' : 'outline'}
+                  variant={
+                    requestStatusFilter === "handover" ? "default" : "outline"
+                  }
                   size="sm"
-                  onClick={() => setRequestStatusFilter('handover')}
+                  onClick={() => setRequestStatusFilter("handover")}
                 >
                   Collected ({requestCounts.handover})
                 </Button>
                 <Button
-                  variant={requestStatusFilter === 'completed' ? 'default' : 'outline'}
+                  variant={
+                    requestStatusFilter === "completed" ? "default" : "outline"
+                  }
                   size="sm"
-                  onClick={() => setRequestStatusFilter('completed')}
+                  onClick={() => setRequestStatusFilter("completed")}
                 >
                   Completed ({requestCounts.completed})
                 </Button>
                 <Button
-                  variant={requestStatusFilter === 'rejected' ? 'default' : 'outline'}
+                  variant={
+                    requestStatusFilter === "rejected" ? "default" : "outline"
+                  }
                   size="sm"
-                  onClick={() => setRequestStatusFilter('rejected')}
+                  onClick={() => setRequestStatusFilter("rejected")}
                 >
                   Rejected ({requestCounts.rejected})
                 </Button>
                 <Button
-                  variant={requestStatusFilter === 'cancelled' ? 'default' : 'outline'}
+                  variant={
+                    requestStatusFilter === "cancelled" ? "default" : "outline"
+                  }
                   size="sm"
-                  onClick={() => setRequestStatusFilter('cancelled')}
+                  onClick={() => setRequestStatusFilter("cancelled")}
                 >
                   Cancelled ({requestCounts.cancelled})
                 </Button>
@@ -354,103 +457,129 @@ export default function FacultyEquipmentPage() {
                   <Card>
                     <CardContent className="p-8 text-center">
                       <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">No requests found for this filter.</p>
-                      <p className="text-gray-400 text-sm mt-2">Try a different filter or make your first request.</p>
+                      <p className="text-gray-500">
+                        No requests found for this filter.
+                      </p>
+                      <p className="text-gray-400 text-sm mt-2">
+                        Try a different filter or make your first request.
+                      </p>
                     </CardContent>
                   </Card>
                 ) : (
                   filteredRequests.map((request) => (
-                    <Card key={request.id} className="border-l-4 border-l-blue-500">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-lg">{request.equipment?.name}</h3>
-                            {getStatusBadge(request.status)}
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
-                            <div>
-                              <span className="font-medium">Quantity:</span> {request.quantity}
+                    <Card
+                      key={request.id}
+                      className="border-l-4 border-l-blue-500"
+                    >
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-semibold text-lg">
+                                {request.equipment?.name}
+                              </h3>
+                              {getStatusBadge(request.status)}
                             </div>
-                            <div>
-                              <span className="font-medium">Requested:</span> {new Date(request.request_date).toLocaleDateString()}
-                            </div>
-                            <div>
-                              <span className="font-medium">Purpose:</span> {request.purpose}
-                            </div>
-                            {request.approved_date && (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
                               <div>
-                                <span className="font-medium">Approved:</span> {new Date(request.approved_date).toLocaleDateString()}
+                                <span className="font-medium">Quantity:</span>{" "}
+                                {request.quantity}
+                              </div>
+                              <div>
+                                <span className="font-medium">Requested:</span>{" "}
+                                {new Date(
+                                  request.request_date
+                                ).toLocaleDateString()}
+                              </div>
+                              <div>
+                                <span className="font-medium">Purpose:</span>{" "}
+                                {request.purpose}
+                              </div>
+                              {request.approved_date && (
+                                <div>
+                                  <span className="font-medium">Approved:</span>{" "}
+                                  {new Date(
+                                    request.approved_date
+                                  ).toLocaleDateString()}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Status-specific messages */}
+                            {request.status === "pending" && (
+                              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mt-3">
+                                <p className="text-yellow-800 text-sm font-medium">
+                                  ⏳ Request pending review by administration.
+                                  Faculty requests typically receive faster
+                                  approval.
+                                </p>
+                              </div>
+                            )}
+
+                            {request.status === "approved" && (
+                              <div className="bg-green-50 border border-green-200 rounded-md p-3 mt-3">
+                                <p className="text-green-800 text-sm font-medium">
+                                  ✓ Request approved! Please collect your
+                                  equipment from the lab during working hours.
+                                </p>
+                              </div>
+                            )}
+
+                            {request.status === "handover" && (
+                              <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mt-3">
+                                <p className="text-blue-800 text-sm font-medium">
+                                  📋 Equipment collected! Please return it in
+                                  good condition when finished.
+                                </p>
+                              </div>
+                            )}
+
+                            {request.notes && (
+                              <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mt-3">
+                                <p className="text-gray-800 text-sm">
+                                  <span className="font-medium">
+                                    Admin Notes:
+                                  </span>{" "}
+                                  {request.notes}
+                                </p>
                               </div>
                             )}
                           </div>
-                          
-                          {/* Status-specific messages */}
-                          {request.status === 'pending' && (
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mt-3">
-                              <p className="text-yellow-800 text-sm font-medium">
-                                ⏳ Request pending review by administration. Faculty requests typically receive faster approval.
-                              </p>
-                            </div>
-                          )}
-                          
-                          {request.status === 'approved' && (
-                            <div className="bg-green-50 border border-green-200 rounded-md p-3 mt-3">
-                              <p className="text-green-800 text-sm font-medium">
-                                ✓ Request approved! Please collect your equipment from the lab during working hours.
-                              </p>
-                            </div>
-                          )}
-                          
-                          {request.status === 'handover' && (
-                            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mt-3">
-                              <p className="text-blue-800 text-sm font-medium">
-                                📋 Equipment collected! Please return it in good condition when finished.
-                              </p>
-                            </div>
-                          )}
 
-                          {request.notes && (
-                            <div className="bg-gray-50 border border-gray-200 rounded-md p-3 mt-3">
-                              <p className="text-gray-800 text-sm">
-                                <span className="font-medium">Admin Notes:</span> {request.notes}
-                              </p>
-                            </div>
-                          )}
+                          <div className="flex gap-2">
+                            {/* Faculty cannot return equipment - only admin can mark as returned */}
+                            {request.status === "handover" && (
+                              <div className="text-sm text-gray-500 px-3 py-2">
+                                Contact admin to return equipment
+                              </div>
+                            )}
+
+                            {/* Cancel button - Faculty can only cancel approved requests */}
+                            {request.status === "approved" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleCancelRequest(request.id)}
+                                className="text-red-600 border-red-200 hover:bg-red-50"
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Cancel Request
+                              </Button>
+                            )}
+
+                            {/* No actions for completed, rejected, cancelled requests */}
+                            {(request.status === "completed" ||
+                              request.status === "rejected" ||
+                              request.status === "cancelled") && (
+                              <div className="text-sm text-gray-500 px-3 py-2">
+                                No actions available
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        
-                        <div className="flex gap-2">
-                          {/* Faculty cannot return equipment - only admin can mark as returned */}
-                          {request.status === 'handover' && (
-                            <div className="text-sm text-gray-500 px-3 py-2">
-                              Contact admin to return equipment
-                            </div>
-                          )}
-                          
-                          {/* Cancel button - Faculty can only cancel approved requests */}
-                          {request.status === 'approved' && (
-                            <Button 
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleCancelRequest(request.id)}
-                              className="text-red-600 border-red-200 hover:bg-red-50"
-                            >
-                              <XCircle className="w-4 h-4 mr-1" />
-                              Cancel Request
-                            </Button>
-                          )}
-                          
-                          {/* No actions for completed, rejected, cancelled requests */}
-                          {(request.status === 'completed' || request.status === 'rejected' || request.status === 'cancelled') && (
-                            <div className="text-sm text-gray-500 px-3 py-2">
-                              No actions available
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+                      </CardContent>
+                    </Card>
+                  ))
                 )}
               </div>
             </TabsContent>

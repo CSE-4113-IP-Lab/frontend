@@ -20,7 +20,7 @@ interface CourseFilters {
 }
 
 const CourseList: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { authenticationFlag } = useAuth();
   const navigate = useNavigate();
   const [courses, setCourses] = useState<CourseResponse[]>([]);
   const [programs, setPrograms] = useState<ProgramResponse[]>([]);
@@ -255,10 +255,12 @@ const CourseList: React.FC = () => {
       <div
         className={`bg-white rounded-lg border p-6 hover:shadow-lg transition-all duration-200 group ${
           course.isEnrolled ? "border-green-300 bg-green-50" : "border-gray-200"
-        }`}>
+        }`}
+      >
         <div
           className="cursor-pointer"
-          onClick={() => setSelectedCourse(course)}>
+          onClick={() => setSelectedCourse(course)}
+        >
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <div className="flex items-center gap-2">
@@ -271,7 +273,8 @@ const CourseList: React.FC = () => {
                       className="w-3 h-3"
                       fill="none"
                       stroke="currentColor"
-                      viewBox="0 0 24 24">
+                      viewBox="0 0 24 24"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -312,7 +315,8 @@ const CourseList: React.FC = () => {
                   className="w-3 h-3"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24">
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -330,7 +334,8 @@ const CourseList: React.FC = () => {
                   className="w-3 h-3"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24">
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -348,7 +353,8 @@ const CourseList: React.FC = () => {
                   className="w-3 h-3"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24">
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -373,7 +379,8 @@ const CourseList: React.FC = () => {
               className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors"
               fill="none"
               stroke="currentColor"
-              viewBox="0 0 24 24">
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -392,7 +399,8 @@ const CourseList: React.FC = () => {
                 e.stopPropagation();
                 navigate(`/courses/edit/${course.id}`);
               }}
-              className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+              className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+            >
               <Pencil className="w-3 h-3" />
               Edit
             </button>
@@ -405,7 +413,8 @@ const CourseList: React.FC = () => {
                   handleDeleteCourse(course.id);
                 }
               }}
-              className="flex items-center gap-1 px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">
+              className="flex items-center gap-1 px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
+            >
               <Trash className="w-3 h-3" />
               Delete
             </button>
@@ -435,12 +444,14 @@ const CourseList: React.FC = () => {
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors">
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
               <svg
                 className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
-                viewBox="0 0 24 24">
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -514,7 +525,8 @@ const CourseList: React.FC = () => {
           <div className="text-red-500 text-sm">{error}</div>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+          >
             Retry
           </button>
         </div>
@@ -530,9 +542,9 @@ const CourseList: React.FC = () => {
           COURSE CATALOG
         </h1>
         <p className="text-text-secondary leading-relaxed max-w-3xl">
-          {isAuthenticated
+          {authenticationFlag
             ? `Browse courses ${
-                user?.role === "student"
+                userRole === "student"
                   ? "and track your enrollment"
                   : "and manage academic content"
               }`
@@ -550,7 +562,8 @@ const CourseList: React.FC = () => {
                     className="w-3 h-3"
                     fill="none"
                     stroke="currentColor"
-                    viewBox="0 0 24 24">
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -582,7 +595,8 @@ const CourseList: React.FC = () => {
             <div className="flex gap-3">
               <Button
                 cornerStyle="br"
-                onClick={() => navigate("/courses/create")}>
+                onClick={() => navigate("/courses/create")}
+              >
                 <Plus className="inline w-4 h-4 mr-2" />
                 CREATE COURSE
               </Button>
@@ -618,7 +632,8 @@ const CourseList: React.FC = () => {
             <select
               value={filters.program_id}
               onChange={(e) => handleFilterChange("program_id", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
               <option value="">All Programs</option>
               {programs.map((program) => (
                 <option key={program.id} value={program.id}>
@@ -635,7 +650,8 @@ const CourseList: React.FC = () => {
             <select
               value={filters.semester}
               onChange={(e) => handleFilterChange("semester", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
               <option value="">All Semesters</option>
               <option value="1">Semester 1</option>
               <option value="2">Semester 2</option>
@@ -649,7 +665,8 @@ const CourseList: React.FC = () => {
             <select
               value={filters.year}
               onChange={(e) => handleFilterChange("year", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
               <option value="">All Years</option>
               <option value="1">Year 1</option>
               <option value="2">Year 2</option>
@@ -665,7 +682,8 @@ const CourseList: React.FC = () => {
             <select
               value={filters.batch}
               onChange={(e) => handleFilterChange("batch", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
               <option value="">All Batches</option>
               <option value="2021">2021</option>
               <option value="2022">2022</option>
@@ -675,7 +693,7 @@ const CourseList: React.FC = () => {
             </select>
           </div>
 
-          {user?.role === "student" && (
+          {userRole === "student" && (
             <div className="flex items-end">
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
@@ -716,7 +734,8 @@ const CourseList: React.FC = () => {
                   enrolled_only: false,
                 })
               }
-              className="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+              className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+            >
               Clear Filters
             </button>
           )}

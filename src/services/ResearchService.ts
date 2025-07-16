@@ -1,5 +1,3 @@
-import apiClient from "./apiClient";
-
 // Types
 export interface Supervisor {
   username: string;
@@ -56,9 +54,11 @@ export interface CreateResearchData {
 
 // API Service
 class ResearchService {
-  private baseUrl = '/api/v1';
+  private baseUrl = import.meta.env.VITE_SERVER_URL;
 
-  async getResearchContributions(filters: ResearchFilters = {}): Promise<ResearchContribution[]> {
+  async getResearchContributions(
+    filters: ResearchFilters = {}
+  ): Promise<ResearchContribution[]> {
     try {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
@@ -67,44 +67,44 @@ class ResearchService {
         }
       });
 
-      const response = await apiClient.get(`/researchs?${params}`, {
+      const response = await fetch(`${this.baseUrl}/researchs?${params}`, {
         headers: {
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.getToken()}`,
+          "Content-Type": "application/json",
         },
       });
 
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error('Failed to fetch research contributions');
+      if (!response.ok) {
+        throw new Error("Failed to fetch research contributions");
       }
-      console.log(response)
-      return response.data;
-      
+
+      return await response.json();
     } catch (error) {
-      console.warn('Using dummy data due to API error:', error);
+      console.warn("Using dummy data due to API error:", error);
       return this.getDummyData();
     }
   }
 
   async getResearchById(id: number): Promise<ResearchContribution> {
     try {
-      const response = await apiClient.get(`/researchs/${id}`, {
+      const response = await fetch(`${this.baseUrl}/researchs/${id}`, {
         headers: {
-          'Authorization': `Bearer ${this.getToken()}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.getToken()}`,
+          "Content-Type": "application/json",
         },
       });
 
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error('Failed to fetch research contribution');
+      if (!response.ok) {
+        throw new Error("Failed to fetch research contribution");
       }
 
-      return response.data;
+      return await response.json();
     } catch (error) {
-      console.warn('Using dummy data due to API error:', error);
+      console.warn("Using dummy data due to API error:", error);
       const dummyData = this.getDummyData();
-      const contribution = dummyData.find(c => c.id === id);
+      const contribution = dummyData.find((c) => c.id === id);
       if (!contribution) {
-        throw new Error('Research contribution not found');
+        throw new Error("Research contribution not found");
       }
       return contribution;
     }
@@ -112,41 +112,45 @@ class ResearchService {
 
   async getResearchByUser(userId: number): Promise<ResearchContribution[]> {
     try {
-      const response = await apiClient.get(`/researchs/user/${userId}`, {
+      const response = await fetch(`${this.baseUrl}/researchs/user/${userId}`, {
         headers: {
-          'Authorization': `Bearer ${this.getToken()}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.getToken()}`,
+          "Content-Type": "application/json",
         },
       });
 
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error('Failed to fetch user research contributions');
+      if (!response.ok) {
+        throw new Error("Failed to fetch user research contributions");
       }
 
-      return response.data;
+      return await response.json();
     } catch (error) {
-      console.warn('Using dummy data due to API error:', error);
+      console.warn("Using dummy data due to API error:", error);
       const dummyData = this.getDummyData();
-      return dummyData.filter(c => c.user_id === userId);
+      return dummyData.filter((c) => c.user_id === userId);
     }
   }
 
-  async createResearch(data: CreateResearchData): Promise<ResearchContribution> {
+  async createResearch(
+    data: CreateResearchData
+  ): Promise<ResearchContribution> {
     try {
-      const response = await apiClient.post(`/researchs`,data, {
+      const response = await fetch(`${this.baseUrl}/researchs`, {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${this.getToken()}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.getToken()}`,
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify(data),
       });
 
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error('Failed to create research contribution');
+      if (!response.ok) {
+        throw new Error("Failed to create research contribution");
       }
 
-      return response.data;
+      return await response.json();
     } catch (error) {
-      console.warn('Simulating research creation due to API error:', error);
+      console.warn("Simulating research creation due to API error:", error);
       // Simulate successful creation
       return {
         ...data,
@@ -161,7 +165,7 @@ class ResearchService {
           id: data.supervisor_id,
           is_verified: 1,
           image_id: 1,
-          image: { id: 1, url: "/api/placeholder/40/40" }
+          image: { id: 1, url: "/api/placeholder/40/40" },
         },
         user: {
           username: "Current User",
@@ -172,54 +176,59 @@ class ResearchService {
           id: 1,
           is_verified: 1,
           image_id: 1,
-          image: { id: 1, url: "/api/placeholder/40/40" }
-        }
+          image: { id: 1, url: "/api/placeholder/40/40" },
+        },
       };
     }
   }
 
-  async updateResearch(id: number, data: Partial<CreateResearchData>): Promise<ResearchContribution> {
+  async updateResearch(
+    id: number,
+    data: Partial<CreateResearchData>
+  ): Promise<ResearchContribution> {
     try {
-      const response = await apiClient.put(`/researchs/${id}`, {
+      const response = await fetch(`${this.baseUrl}/researchs/${id}`, {
+        method: "PUT",
         headers: {
-          'Authorization': `Bearer ${this.getToken()}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.getToken()}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
 
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error('Failed to update research contribution');
+      if (!response.ok) {
+        throw new Error("Failed to update research contribution");
       }
 
-      return response.data;
+      return await response.json();
     } catch (error) {
-      console.warn('Simulating research update due to API error:', error);
+      console.warn("Simulating research update due to API error:", error);
       throw error;
     }
   }
 
   async deleteResearch(id: number): Promise<void> {
     try {
-      const response = await apiClient.delete(`/researchs/${id}`, {
+      const response = await fetch(`${this.baseUrl}/researchs/${id}`, {
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${this.getToken()}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.getToken()}`,
+          "Content-Type": "application/json",
         },
       });
 
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error('Failed to delete research contribution');
+      if (!response.ok) {
+        throw new Error("Failed to delete research contribution");
       }
     } catch (error) {
-      console.warn('Simulating research deletion due to API error:', error);
+      console.warn("Simulating research deletion due to API error:", error);
       // Simulate successful deletion
     }
   }
 
   private getToken(): string {
     // Get token from localStorage, sessionStorage, or context
-    return localStorage.getItem('accessToken') || 'dummy-token';
+    return localStorage.getItem("token") || "dummy-token";
   }
 
   private getDummyData(): ResearchContribution[] {
@@ -228,7 +237,8 @@ class ResearchService {
         id: 1,
         type: "Grant",
         title: "Developing AI-driven solutions for sustainable agriculture",
-        description: "Research focused on implementing artificial intelligence technologies to improve sustainable farming practices and crop yield optimization.",
+        description:
+          "Research focused on implementing artificial intelligence technologies to improve sustainable farming practices and crop yield optimization.",
         date: "2023",
         institution: "Agricultural Research Institute",
         journal: "National Science Foundation",
@@ -244,7 +254,7 @@ class ResearchService {
           id: 1,
           is_verified: 1,
           image_id: 1,
-          image: { id: 1, url: "/api/placeholder/40/40" }
+          image: { id: 1, url: "/api/placeholder/40/40" },
         },
         user: {
           username: "Research Assistant",
@@ -255,14 +265,15 @@ class ResearchService {
           id: 1,
           is_verified: 1,
           image_id: 1,
-          image: { id: 1, url: "/api/placeholder/40/40" }
-        }
+          image: { id: 1, url: "/api/placeholder/40/40" },
+        },
       },
       {
         id: 2,
         type: "Fellowship",
         title: "Postdoctoral Fellowship in AI Ethics",
-        description: "Advanced research in ethical implications of artificial intelligence in healthcare and education sectors.",
+        description:
+          "Advanced research in ethical implications of artificial intelligence in healthcare and education sectors.",
         date: "2023",
         institution: "Institute for Ethical AI",
         journal: "Center for AI Ethics",
@@ -278,7 +289,7 @@ class ResearchService {
           id: 2,
           is_verified: 1,
           image_id: 2,
-          image: { id: 2, url: "/api/placeholder/40/40" }
+          image: { id: 2, url: "/api/placeholder/40/40" },
         },
         user: {
           username: "Research Fellow",
@@ -289,14 +300,15 @@ class ResearchService {
           id: 2,
           is_verified: 1,
           image_id: 2,
-          image: { id: 2, url: "/api/placeholder/40/40" }
-        }
+          image: { id: 2, url: "/api/placeholder/40/40" },
+        },
       },
       {
         id: 3,
         type: "Publication",
         title: "AI for Sustainable Agriculture: A Review",
-        description: "Comprehensive review of current AI applications in sustainable farming and future research directions.",
+        description:
+          "Comprehensive review of current AI applications in sustainable farming and future research directions.",
         date: "2023",
         institution: "University Research Center",
         journal: "Journal of Sustainable Agriculture",
@@ -312,7 +324,7 @@ class ResearchService {
           id: 1,
           is_verified: 1,
           image_id: 1,
-          image: { id: 1, url: "/api/placeholder/40/40" }
+          image: { id: 1, url: "/api/placeholder/40/40" },
         },
         user: {
           username: "Research Author",
@@ -323,14 +335,15 @@ class ResearchService {
           id: 3,
           is_verified: 1,
           image_id: 3,
-          image: { id: 3, url: "/api/placeholder/40/40" }
-        }
+          image: { id: 3, url: "/api/placeholder/40/40" },
+        },
       },
       {
         id: 4,
         type: "Grant",
         title: "Enhancing cybersecurity in IoT devices",
-        description: "Research project aimed at developing advanced security protocols for Internet of Things devices in smart home environments.",
+        description:
+          "Research project aimed at developing advanced security protocols for Internet of Things devices in smart home environments.",
         date: "2022",
         institution: "Cybersecurity Research Lab",
         journal: "Cybersecurity Research Initiative",
@@ -346,7 +359,7 @@ class ResearchService {
           id: 3,
           is_verified: 1,
           image_id: 3,
-          image: { id: 3, url: "/api/placeholder/40/40" }
+          image: { id: 3, url: "/api/placeholder/40/40" },
         },
         user: {
           username: "Security Researcher",
@@ -357,14 +370,15 @@ class ResearchService {
           id: 4,
           is_verified: 1,
           image_id: 4,
-          image: { id: 4, url: "/api/placeholder/40/40" }
-        }
+          image: { id: 4, url: "/api/placeholder/40/40" },
+        },
       },
       {
         id: 5,
         type: "Fellowship",
         title: "Research Fellowship in Cybersecurity",
-        description: "Advanced fellowship program focusing on cybersecurity research and development in enterprise environments.",
+        description:
+          "Advanced fellowship program focusing on cybersecurity research and development in enterprise environments.",
         date: "2022",
         institution: "Center for Cybersecurity Studies",
         journal: "Cybersecurity Foundation",
@@ -380,7 +394,7 @@ class ResearchService {
           id: 4,
           is_verified: 1,
           image_id: 4,
-          image: { id: 4, url: "/api/placeholder/40/40" }
+          image: { id: 4, url: "/api/placeholder/40/40" },
         },
         user: {
           username: "Cybersecurity Fellow",
@@ -391,14 +405,15 @@ class ResearchService {
           id: 5,
           is_verified: 1,
           image_id: 5,
-          image: { id: 5, url: "/api/placeholder/40/40" }
-        }
+          image: { id: 5, url: "/api/placeholder/40/40" },
+        },
       },
       {
         id: 6,
         type: "Publication",
         title: "Cybersecurity in IoT: Challenges and Solutions",
-        description: "Research paper examining current cybersecurity challenges in IoT ecosystems and proposing innovative solutions.",
+        description:
+          "Research paper examining current cybersecurity challenges in IoT ecosystems and proposing innovative solutions.",
         date: "2022",
         institution: "Tech Security Institute",
         journal: "International Conference on IoT Security",
@@ -414,7 +429,7 @@ class ResearchService {
           id: 3,
           is_verified: 1,
           image_id: 3,
-          image: { id: 3, url: "/api/placeholder/40/40" }
+          image: { id: 3, url: "/api/placeholder/40/40" },
         },
         user: {
           username: "IoT Researcher",
@@ -425,9 +440,9 @@ class ResearchService {
           id: 6,
           is_verified: 1,
           image_id: 6,
-          image: { id: 6, url: "/api/placeholder/40/40" }
-        }
-      }
+          image: { id: 6, url: "/api/placeholder/40/40" },
+        },
+      },
     ];
   }
 }
