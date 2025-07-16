@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { equipmentService } from '../services/equipmentService';
-import type { Equipment, EquipmentRequest } from '../services/equipmentService';
-import { authService } from '../services/authService';
+import React, { useState, useEffect } from "react";
+import { equipmentService } from "../services/equipmentService";
+import type { Equipment, EquipmentRequest } from "../services/equipmentService";
+import { authService } from "../services/authService";
 
 const ApiTestPage: React.FC = () => {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [requests, setRequests] = useState<EquipmentRequest[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Test credentials
-  const [testEmail, setTestEmail] = useState('admin@example.com');
-  const [testPassword, setTestPassword] = useState('password123');
+  const [testEmail, setTestEmail] = useState("admin@example.com");
+  const [testPassword, setTestPassword] = useState("password123");
 
   useEffect(() => {
     setIsAuthenticated(authService.isAuthenticated());
@@ -20,11 +20,11 @@ const ApiTestPage: React.FC = () => {
 
   const handleLogin = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
       await authService.login({ email: testEmail, password: testPassword });
       setIsAuthenticated(true);
-      console.log('Login successful');
+      console.log("Login successful");
     } catch (err: any) {
       setError(`Login failed: ${err.response?.data?.detail || err.message}`);
     } finally {
@@ -41,18 +41,22 @@ const ApiTestPage: React.FC = () => {
 
   const fetchEquipment = async () => {
     if (!isAuthenticated) {
-      setError('Please login first');
+      setError("Please login first");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     try {
       const data = await equipmentService.getAllEquipment();
       setEquipment(data);
-      console.log('Equipment fetched:', data);
+      console.log("Equipment fetched:", data);
     } catch (err: any) {
-      setError(`Failed to fetch equipment: ${err.response?.data?.detail || err.message}`);
+      setError(
+        `Failed to fetch equipment: ${
+          err.response?.data?.detail || err.message
+        }`
+      );
     } finally {
       setLoading(false);
     }
@@ -60,18 +64,20 @@ const ApiTestPage: React.FC = () => {
 
   const fetchRequests = async () => {
     if (!isAuthenticated) {
-      setError('Please login first');
+      setError("Please login first");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     try {
       const data = await equipmentService.getEquipmentRequests();
       setRequests(data);
-      console.log('Requests fetched:', data);
+      console.log("Requests fetched:", data);
     } catch (err: any) {
-      setError(`Failed to fetch requests: ${err.response?.data?.detail || err.message}`);
+      setError(
+        `Failed to fetch requests: ${err.response?.data?.detail || err.message}`
+      );
     } finally {
       setLoading(false);
     }
@@ -79,25 +85,27 @@ const ApiTestPage: React.FC = () => {
 
   const addTestEquipment = async () => {
     if (!isAuthenticated) {
-      setError('Please login first');
+      setError("Please login first");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     try {
       const newEquipment = await equipmentService.addEquipment({
         name: `Test Equipment ${Date.now()}`,
-        description: 'Test equipment for API testing',
+        description: "Test equipment for API testing",
         quantity: 5,
-        category: 'Testing',
-        location: 'Lab 1',
-        condition: 'New'
+        category: "Testing",
+        location: "Lab 1",
+        condition: "New",
       });
-      console.log('Equipment added:', newEquipment);
+      console.log("Equipment added:", newEquipment);
       await fetchEquipment(); // Refresh the list
     } catch (err: any) {
-      setError(`Failed to add equipment: ${err.response?.data?.detail || err.message}`);
+      setError(
+        `Failed to add equipment: ${err.response?.data?.detail || err.message}`
+      );
     } finally {
       setLoading(false);
     }
@@ -105,22 +113,24 @@ const ApiTestPage: React.FC = () => {
 
   const createTestRequest = async (equipmentId: number) => {
     if (!isAuthenticated) {
-      setError('Please login first');
+      setError("Please login first");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     try {
       const newRequest = await equipmentService.createEquipmentRequest({
         equipment_id: equipmentId,
         quantity: 1,
-        purpose: 'Testing API integration'
+        purpose: "Testing API integration",
       });
-      console.log('Request created:', newRequest);
+      console.log("Request created:", newRequest);
       await fetchRequests(); // Refresh the list
     } catch (err: any) {
-      setError(`Failed to create request: ${err.response?.data?.detail || err.message}`);
+      setError(
+        `Failed to create request: ${err.response?.data?.detail || err.message}`
+      );
     } finally {
       setLoading(false);
     }
@@ -129,7 +139,7 @@ const ApiTestPage: React.FC = () => {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">API Integration Test</h1>
-      
+
       {/* Authentication Section */}
       <div className="bg-gray-100 p-4 rounded-lg mb-6">
         <h2 className="text-xl font-bold mb-4">Authentication</h2>
@@ -146,7 +156,9 @@ const ApiTestPage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Password:</label>
+              <label className="block text-sm font-medium mb-1">
+                Password:
+              </label>
               <input
                 type="password"
                 value={testPassword}
@@ -160,7 +172,7 @@ const ApiTestPage: React.FC = () => {
               disabled={loading}
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? "Logging in..." : "Login"}
             </button>
           </div>
         ) : (
@@ -184,9 +196,7 @@ const ApiTestPage: React.FC = () => {
       )}
 
       {/* Loading Indicator */}
-      {loading && (
-        <div className="text-blue-600 mb-4">Loading...</div>
-      )}
+      {loading && <div className="text-blue-600 mb-4">Loading...</div>}
 
       {/* API Test Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -215,10 +225,15 @@ const ApiTestPage: React.FC = () => {
 
       {/* Equipment List */}
       <div className="mb-6">
-        <h2 className="text-xl font-bold mb-4">Equipment ({equipment.length})</h2>
+        <h2 className="text-xl font-bold mb-4">
+          Equipment ({equipment.length})
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {equipment.map((item) => (
-            <div key={item.id} className="bg-white p-4 border rounded-lg shadow">
+            <div
+              key={item.id}
+              className="bg-white p-4 border rounded-lg shadow"
+            >
               <h3 className="font-bold">{item.name}</h3>
               <p className="text-sm text-gray-600">{item.description}</p>
               <p className="text-sm">
@@ -227,7 +242,9 @@ const ApiTestPage: React.FC = () => {
               <p className="text-sm">Location: {item.location}</p>
               <button
                 onClick={() => createTestRequest(item.id)}
-                disabled={!isAuthenticated || loading || item.available_quantity === 0}
+                disabled={
+                  !isAuthenticated || loading || item.available_quantity === 0
+                }
                 className="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 disabled:opacity-50"
               >
                 Request
@@ -239,23 +256,37 @@ const ApiTestPage: React.FC = () => {
 
       {/* Requests List */}
       <div>
-        <h2 className="text-xl font-bold mb-4">Equipment Requests ({requests.length})</h2>
+        <h2 className="text-xl font-bold mb-4">
+          Equipment Requests ({requests.length})
+        </h2>
         <div className="space-y-4">
           {requests.map((request) => (
-            <div key={request.id} className="bg-white p-4 border rounded-lg shadow">
+            <div
+              key={request.id}
+              className="bg-white p-4 border rounded-lg shadow"
+            >
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-bold">{request.equipment?.name}</h3>
-                  <p className="text-sm text-gray-600">Purpose: {request.purpose}</p>
+                  <p className="text-sm text-gray-600">
+                    Purpose: {request.purpose}
+                  </p>
                   <p className="text-sm">Quantity: {request.quantity}</p>
-                  <p className="text-sm">Date: {new Date(request.request_date).toLocaleDateString()}</p>
+                  <p className="text-sm">
+                    Date: {new Date(request.request_date).toLocaleDateString()}
+                  </p>
                 </div>
-                <span className={`px-2 py-1 rounded text-sm font-medium ${
-                  request.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                  request.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                  request.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
+                <span
+                  className={`px-2 py-1 rounded text-sm font-medium ${
+                    request.status === "APPROVED"
+                      ? "bg-green-100 text-green-800"
+                      : request.status === "PENDING"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : request.status === "REJECTED"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
+                >
                   {request.status}
                 </span>
               </div>

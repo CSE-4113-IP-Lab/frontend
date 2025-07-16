@@ -25,30 +25,21 @@ import StudentEquipmentPage from "@/pages/Student/StudentEquipment";
 import FacultyEquipmentPage from "@/pages/Faculty/FacultyEquipment";
 
 import FacultyRoomBooking from "@/pages/Faculty/FacultyRoomBooking";
-import { AdminRoute, StudentRoute, FacultyRoute, AdminOrFacultyRoute } from "@/components/ProtectedRoute";
-import ApiTest from "@/pages/ApiTest";
-import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
-import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
-import RoomDetail from "@/pages/RoomBooking/RoomDetail";
-
 import {
   AdminRoute,
   StudentRoute,
   FacultyRoute,
+  AdminOrFacultyRoute,
 } from "@/components/ProtectedRoute";
-
 import ApiTest from "@/pages/ApiTest";
-
-
 import {
   AvailableRooms,
   BookRoom,
   MyBookings,
   RoomBookingDashboard,
 } from "@/pages/RoomBooking";
-
-import { AdminRoute, StudentRoute, FacultyRoute } from "./components/ProtectedRoute";
-import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
+import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
+import RoomDetail from "@/pages/RoomBooking/RoomDetail";
 
 // Admission Pages
 import { AdmissionPage } from "./pages/Admission/index";
@@ -58,7 +49,6 @@ import { AdmissionRequirements } from "./pages/Admission/Requirements";
 import ManageTimeline from "./pages/Admission/ManageTimeline";
 import CreateTimeline from "./pages/Admission/CreateTimeline";
 import EditTimeline from "./pages/Admission/EditTimeline";
-
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import CreateSchedule from "./pages/Schedule/classSchedule/CreateSchedule";
@@ -103,6 +93,8 @@ import NewFacultyYearwise from "@/pages/FacultyInformation/NewFacultyYearwise";
 import FacultyByResearch from "@/pages/FacultyInformation/FacultyByResearch";
 import FacultyOnLeaveList from "@/pages/FacultyInformation/FacultyOnLeaveList";
 import ResearchGallery from "./services/ReseaechGallery";
+import AddRoom from "./pages/Resources/AddRoom";
+import RoomManagement from "./pages/Resources/RoomManagement";
 
 export const router = createBrowserRouter([
   {
@@ -227,7 +219,6 @@ export const router = createBrowserRouter([
         element: <FacultyByResearch />,
       },
 
-
       {
         path: "exam-schedule",
         element: <ExamSchedule />,
@@ -299,7 +290,7 @@ export const router = createBrowserRouter([
         path: "schedule",
         element: <ClassSchedule />,
       },
-      
+
       {
         path: "schedule/create",
         element: (
@@ -316,13 +307,12 @@ export const router = createBrowserRouter([
           </AdminRoute>
         ),
       },
-    
-     
+
       {
         path: "class-schedule",
         element: <ClassSchedule />,
       },
-      
+
       {
         path: "programs",
         element: <ProgramOutlines />,
@@ -536,7 +526,25 @@ export const router = createBrowserRouter([
       {
         path: "research-gallery",
         element: <ResearchGallery isAdmin={false} />, // Change to true for admin view
-      }
+      },
+
+      {
+        path: "admin/room-management",
+        element: (
+          <AdminRoute>
+            <RoomManagement />
+          </AdminRoute>
+        ),
+      },
+
+      {
+        path: "admin/add-room",
+        element: (
+          <AdminRoute>
+            <AddRoom />
+          </AdminRoute>
+        ),
+      },
     ],
   },
 ]);

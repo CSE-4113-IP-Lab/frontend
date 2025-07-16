@@ -135,7 +135,6 @@ const ClassSchedule: React.FC = () => {
         } catch (apiError) {
           console.warn("API failed, using fallback data:", apiError);
 
-
           // Fallback to mock data if API fails
           const mockSchedules: ClassScheduleResponse[] = [
             {
@@ -252,7 +251,6 @@ const ClassSchedule: React.FC = () => {
               is_active: 1,
             },
           ];
-
 
           setSchedules(mockSchedules);
           setPrograms(mockPrograms);
@@ -424,7 +422,8 @@ const ClassSchedule: React.FC = () => {
                 {daysOfWeek.map((day) => (
                   <th
                     key={day}
-                    className="border border-gray-200 p-3 text-left font-medium text-gray-700">
+                    className="border border-gray-200 p-3 text-left font-medium text-gray-700"
+                  >
                     {day.charAt(0).toUpperCase() + day.slice(1)}
                   </th>
                 ))}
@@ -446,7 +445,8 @@ const ClassSchedule: React.FC = () => {
                     return (
                       <td
                         key={`${day}-${timeSlot}`}
-                        className="border border-gray-200 p-2">
+                        className="border border-gray-200 p-2"
+                      >
                         {schedule?.course ? (
                           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 hover:bg-blue-100 transition-colors relative">
                             <div className="font-semibold text-blue-900 text-sm">
@@ -476,7 +476,8 @@ const ClassSchedule: React.FC = () => {
                                     navigate(`/schedule/edit/${schedule.id}`)
                                   }
                                   className="p-1 bg-white rounded-full shadow-sm hover:bg-gray-50"
-                                  title="Edit Schedule">
+                                  title="Edit Schedule"
+                                >
                                   <Pencil className="w-3 h-3 text-blue-600" />
                                 </button>
                                 <button
@@ -484,7 +485,8 @@ const ClassSchedule: React.FC = () => {
                                     handleDeleteSchedule(schedule.id)
                                   }
                                   className="p-1 bg-white rounded-full shadow-sm hover:bg-gray-50"
-                                  title="Delete Schedule">
+                                  title="Delete Schedule"
+                                >
                                   <Trash className="w-3 h-3 text-red-600" />
                                 </button>
                               </div>
@@ -497,7 +499,7 @@ const ClassSchedule: React.FC = () => {
                     );
                   })}
                 </tr>
-              ))}{" "}
+              ))}
             </tbody>
           </table>
         </div>
@@ -511,7 +513,8 @@ const ClassSchedule: React.FC = () => {
         {schedules.map((schedule) => (
           <div
             key={schedule.id}
-            className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+            className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+          >
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
@@ -570,14 +573,16 @@ const ClassSchedule: React.FC = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => navigate(`/schedule/edit/${schedule.id}`)}>
+                    onClick={() => navigate(`/schedule/edit/${schedule.id}`)}
+                  >
                     <Pencil className="w-3 h-3 mr-1" />
                     Edit
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleDeleteSchedule(schedule.id)}>
+                    onClick={() => handleDeleteSchedule(schedule.id)}
+                  >
                     <Trash className="w-3 h-3 mr-1" />
                     Delete
                   </Button>
@@ -625,7 +630,8 @@ const ClassSchedule: React.FC = () => {
             <div className="text-red-500 text-sm">{error}</div>
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            >
               Retry
             </button>
           </div>
@@ -666,7 +672,8 @@ const ClassSchedule: React.FC = () => {
             <Button
               cornerStyle="br"
               className="bg-[#14244c] text-white hover:bg-[#1a2b5c] transition-colors"
-              onClick={() => navigate("/schedule/create")}>
+              onClick={() => navigate("/schedule/create")}
+            >
               <Plus className="inline w-4 h-4 mr-2" />
               CREATE SCHEDULE
             </Button>
@@ -691,13 +698,15 @@ const ClassSchedule: React.FC = () => {
               <Button
                 variant={viewMode === "personal" ? "primary" : "outline"}
                 cornerStyle="bl"
-                onClick={() => setViewMode("personal")}>
+                onClick={() => setViewMode("personal")}
+              >
                 My Schedule
               </Button>
               <Button
                 variant={viewMode === "all" ? "primary" : "outline"}
                 cornerStyle="br"
-                onClick={() => setViewMode("all")}>
+                onClick={() => setViewMode("all")}
+              >
                 All Schedules
               </Button>
             </div>
@@ -716,7 +725,8 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.program_id || ""}
             onChange={(e) => handleFilterChange("program_id", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
+          >
             <option value="">All Programs</option>
             {filterOptions.programs.map((program) => (
               <option key={program.id} value={program.id}>
@@ -728,7 +738,8 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.batch || ""}
             onChange={(e) => handleFilterChange("batch", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
+          >
             <option value="">All Batches</option>
             {filterOptions.batches.map((batch) => (
               <option key={batch} value={batch}>
@@ -740,7 +751,8 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.semester || ""}
             onChange={(e) => handleFilterChange("semester", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
+          >
             <option value="">All Semesters</option>
             {filterOptions.semesters.map((semester) => (
               <option key={semester} value={semester}>
@@ -752,7 +764,8 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.year || ""}
             onChange={(e) => handleFilterChange("year", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
+          >
             <option value="">All Years</option>
             {filterOptions.years.map((year) => (
               <option key={year} value={year}>
@@ -764,7 +777,8 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.day_of_week || ""}
             onChange={(e) => handleFilterChange("day_of_week", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
+          >
             <option value="">All Days</option>
             {daysOfWeek.map((day) => (
               <option key={day} value={day}>
@@ -776,7 +790,8 @@ const ClassSchedule: React.FC = () => {
           <select
             value={filters.room || ""}
             onChange={(e) => handleFilterChange("room", e.target.value)}
-            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0">
+            className="border border-gray-300 rounded-tl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
+          >
             <option value="">All Rooms</option>
             {filterOptions.rooms.map((room) => (
               <option key={room} value={room}>
@@ -797,13 +812,15 @@ const ClassSchedule: React.FC = () => {
               <Button
                 size="sm"
                 variant={selectedView === "table" ? "primary" : "outline"}
-                onClick={() => setSelectedView("table")}>
+                onClick={() => setSelectedView("table")}
+              >
                 Grid
               </Button>
               <Button
                 size="sm"
                 variant={selectedView === "grid" ? "primary" : "outline"}
-                onClick={() => setSelectedView("grid")}>
+                onClick={() => setSelectedView("grid")}
+              >
                 List
               </Button>
             </div>
@@ -811,7 +828,8 @@ const ClassSchedule: React.FC = () => {
             <Button
               onClick={exportToPDF}
               cornerStyle="br"
-              className="flex items-center gap-2">
+              className="flex items-center gap-2"
+            >
               <Download className="w-4 h-4" />
               Export PDF
             </Button>
@@ -901,7 +919,8 @@ const ClassSchedule: React.FC = () => {
             <Button
               onClick={() => window.location.reload()}
               variant="outline"
-              className="mt-4">
+              className="mt-4"
+            >
               Retry
             </Button>
           </div>
