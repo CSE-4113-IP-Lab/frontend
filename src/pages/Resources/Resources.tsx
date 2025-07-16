@@ -5,39 +5,38 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function Resources() {
   const navigate = useNavigate();
-  const { user, isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   // Auto-redirect based on authenticated user role
   useEffect(() => {
-    console.log('Resources page - Auth state:', { isAuthenticated, user, loading });
-    
+    const role = localStorage.getItem("role");
     if (loading) {
       return; // Wait for auth to load
     }
-    
-    if (!isAuthenticated || !user) {
-      console.log('Not authenticated, redirecting to auth');
-      navigate('/auth');
-      return;
-    }
+
+    // if (!isAuthenticated) {
+    //   console.log("Not authenticated, redirecting to auth");
+    //   navigate("/auth");
+    //   return;
+    // }
 
     // Redirect to appropriate resources page based on user role
-    console.log('User role:', user.role);
-    if (user.role === 'admin') {
-      console.log('Redirecting to admin resources');
-      navigate('/resources/admin');
-    } else if (user.role === 'faculty') {
-      console.log('Redirecting to faculty resources');
-      navigate('/resources/faculty');
-    } else if (user.role === 'student') {
-      console.log('Redirecting to student resources');
-      navigate('/resources/student');
+    console.log("User role:", role);
+    if (role === "admin") {
+      console.log("Redirecting to admin resources");
+      navigate("/resources/admin");
+    } else if (role === "faculty") {
+      console.log("Redirecting to faculty resources");
+      navigate("/resources/faculty");
+    } else if (role === "student") {
+      console.log("Redirecting to student resources");
+      navigate("/resources/student");
     } else {
       // Default to student resources for other roles
-      console.log('Unknown role, defaulting to student resources');
-      navigate('/resources/student');
+      console.log("Unknown role, defaulting to student resources");
+      navigate("/resources/student");
     }
-  }, [user, isAuthenticated, loading, navigate]);
+  }, [isAuthenticated, loading, navigate]);
 
   // Show loading state while checking auth or redirecting
   if (loading) {
@@ -46,7 +45,9 @@ export default function Resources() {
         <main className="px-6 py-8">
           <div className="max-w-4xl mx-auto">
             <div className="mb-8 text-center">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">University Resources</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                University Resources
+              </h1>
               <p className="text-gray-600">
                 Loading your authentication status...
               </p>
@@ -69,7 +70,9 @@ export default function Resources() {
         <div className="max-w-4xl mx-auto">
           {/* Header Section */}
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">University Resources</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              University Resources
+            </h1>
             <p className="text-gray-600">
               Redirecting you to your role-specific resources...
             </p>

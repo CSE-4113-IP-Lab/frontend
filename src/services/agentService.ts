@@ -1,7 +1,7 @@
 import type { AgentResponse } from "@/types/agent";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+  import.meta.env.VITE_SERVER_URL || "http://localhost:8000";
 
 export const agentService = {
   async queryAgent(query: string): Promise<AgentResponse> {
@@ -11,6 +11,7 @@ export const agentService = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
       }
     );

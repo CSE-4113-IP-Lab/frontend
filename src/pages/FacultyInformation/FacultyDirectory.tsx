@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ChevronDown, Eye, Edit, Trash2, Users, Filter } from 'lucide-react';
+import { Search, ChevronDown, Eye, Edit, Users, Filter, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface FacultyMember {
@@ -31,11 +31,13 @@ const FacultyDirectory: React.FC = () => {
   const [selectedExpertise, setSelectedExpertise] = useState('');
   const [showDesignationDropdown, setShowDesignationDropdown] = useState(false);
   const [showExpertiseDropdown, setShowExpertiseDropdown] = useState(false);
+  const [expertiseOptions, setExpertiseOptions] = useState<string[]>([]);
 
   const apiUrl = import.meta.env.VITE_ENDPOINT;
 
   useEffect(() => {
     fetchFacultyData();
+    fetchExpertiseOptions();
   }, []);
 
   // Trigger search when filters change
@@ -66,9 +68,11 @@ const FacultyDirectory: React.FC = () => {
 
       const authHeaders: Record<string, string> = token ? {
         'Authorization': `Bearer ${token}`,
-        'accept': 'application/json'
+        'accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       } : {
-        'accept': 'application/json'
+        'accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       };
 
       console.log('Performing search...');
@@ -117,8 +121,18 @@ const FacultyDirectory: React.FC = () => {
             return false;
           }
           
-          // Note: Expertise filtering would need faculty expertise data to work properly
-          // For now, we'll skip expertise filtering in client-side mode
+          // Expertise filtering
+          if (selectedExpertise) {
+            const hasExpertise = (member as any).expertise && 
+              (Array.isArray((member as any).expertise) 
+                ? (member as any).expertise.includes(selectedExpertise)
+                : (member as any).expertise === selectedExpertise);
+            
+            if (!hasExpertise) {
+              console.log(`Member ${member.user.username} filtered out by expertise. Expected: "${selectedExpertise}", got: "${(member as any).expertise}"`);
+              return false;
+            }
+          }
           
           return true;
         });
@@ -139,6 +153,88 @@ const FacultyDirectory: React.FC = () => {
     }
   };
 
+  const fetchExpertiseOptions = async () => {
+    try {
+      // Get authentication token from localStorage
+      const token = localStorage.getItem('token') || 
+                   localStorage.getItem('accessToken') || 
+                   localStorage.getItem('access_token') || 
+                   localStorage.getItem('authToken');
+      
+      const authHeaders: Record<string, string> = token ? {
+        'Authorization': `Bearer ${token}`,
+        'accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+      } : {
+        'accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+      };
+
+      console.log('Fetching expertise options...');
+      
+      // Fetch all faculty data to extract unique expertise areas
+      const response = await fetch(`${apiUrl}/faculties?skip=0&limit=100`, {
+        headers: authHeaders
+      });
+      
+      if (response.ok) {
+        const facultyData = await response.json();
+        console.log('Faculty data loaded for expertise extraction:', facultyData.length, 'members');
+        
+        // Extract unique expertise areas from faculty data
+        const expertiseSet = new Set<string>();
+        
+        facultyData.forEach((faculty: any) => {
+          if (faculty.expertise && Array.isArray(faculty.expertise)) {
+            faculty.expertise.forEach((exp: string) => {
+              if (exp && exp.trim()) {
+                expertiseSet.add(exp.trim());
+              }
+            });
+          }
+          // Also check if expertise is a string (in case API returns it differently)
+          if (faculty.expertise && typeof faculty.expertise === 'string') {
+            expertiseSet.add(faculty.expertise.trim());
+          }
+        });
+        
+        const uniqueExpertise = Array.from(expertiseSet).sort();
+        console.log('Unique expertise areas found:', uniqueExpertise);
+        setExpertiseOptions(uniqueExpertise);
+      } else {
+        console.log('Failed to fetch expertise options, using fallback');
+        // Fallback to common expertise areas if API fails
+        setExpertiseOptions([
+          'Artificial Intelligence',
+          'Machine Learning',
+          'Data Science',
+          'Software Engineering',
+          'Computer Networks',
+          'Database Systems',
+          'Cybersecurity',
+          'Web Development',
+          'Mobile Development',
+          'Cloud Computing'
+        ]);
+      }
+    } catch (error) {
+      console.error('Error fetching expertise options:', error);
+      // Fallback to common expertise areas if fetch fails
+      setExpertiseOptions([
+        'Artificial Intelligence',
+        'Machine Learning',
+        'Data Science',
+        'Software Engineering',
+        'Computer Networks',
+        'Database Systems',
+        'Cybersecurity',
+        'Web Development',
+        'Mobile Development',
+        'Cloud Computing'
+      ]);
+    }
+  };
+
   const fetchFacultyData = async () => {
     try {
       setError(null);
@@ -151,9 +247,11 @@ const FacultyDirectory: React.FC = () => {
       
       const authHeaders: Record<string, string> = token ? {
         'Authorization': `Bearer ${token}`,
-        'accept': 'application/json'
+        'accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       } : {
-        'accept': 'application/json'
+        'accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       };
 
       console.log('Fetching faculty data...');
@@ -217,23 +315,6 @@ const FacultyDirectory: React.FC = () => {
     return [...new Set(allDesignations)].sort();
   }, [facultyData]);
 
-  const expertiseOptions = useMemo(() => {
-    // This would need to be fetched from API or derived from faculty data
-    // For now, return some common expertise areas
-    return [
-      'Artificial Intelligence',
-      'Machine Learning',
-      'Data Science',
-      'Software Engineering',
-      'Computer Networks',
-      'Database Systems',
-      'Cybersecurity',
-      'Web Development',
-      'Mobile Development',
-      'Cloud Computing'
-    ];
-  }, []);
-
   const filteredFaculty = useMemo(() => {
     // If we have search filters, the data should already be filtered (either server-side or client-side)
     // So we return the data as-is
@@ -295,18 +376,29 @@ const FacultyDirectory: React.FC = () => {
         
         {/* Header Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <Users className="w-8 h-8 text-gray-800" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Faculty Directory
-            </h1>
-          </div>
-          <p className="text-lg text-gray-600 mb-4">
-            Explore our team of faculty members at the Department of Computer Science and Engineering.
-          </p>
-          <div className="flex items-center gap-2 text-gray-500">
-            <Filter className="w-5 h-5" />
-            <span>Use filters and search to find specific faculty members</span>
+
+          <button
+            onClick={() => navigate('/faculty')}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 transition-colors duration-200 font-medium"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Faculty Overview
+          </button>
+
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Users className="w-8 h-8 text-gray-800" />
+              <h1 className="text-3xl font-bold text-gray-900">
+                Faculty Directory
+              </h1>
+            </div>
+            <p className="text-lg text-gray-600 mb-4">
+              Explore our team of faculty members at the Department of Computer Science and Engineering.
+            </p>
+            <div className="flex items-center justify-center gap-2 text-gray-500">
+              <Filter className="w-5 h-5" />
+              <span>Use filters and search to find specific faculty members</span>
+            </div>
           </div>
         </div>
 

@@ -75,6 +75,7 @@ const generateRandomModules = (total: number) => {
 const AssignmentDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [requirements, setRequirements] = useState<string[]>([""]);
 
   const [assignment, setAssignment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -94,6 +95,13 @@ const AssignmentDetails: React.FC = () => {
           }
         );
         const data = response.data;
+
+        if (data.requirements) {
+          const parsedReqs = data.requirements.split("_-_-_-_");
+          setRequirements(parsedReqs.length ? parsedReqs : [""]);
+        } else {
+          setRequirements([""]);
+        }
 
         const enhancedAssignment = {
           title: data.title,
@@ -187,38 +195,25 @@ const AssignmentDetails: React.FC = () => {
                 {assignment.instructor}
               </span>
             </p>
-            <p className="text-gray-700 mt-4">{assignment.description}</p>
+            <p className="text-gray-700 mt-6">{assignment.description}</p>
           </div>
 
           {/* Objectives */}
-          <div className="bg-white p-5 rounded shadow">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">
-              Objectives
-            </h2>
-            <ul className="space-y-2">
-              {assignment.objectives.map((obj: string, i: number) => (
-                <li key={i} className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                  {obj}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Deliverables */}
-          <div className="bg-white p-5 rounded shadow">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">
-              Deliverables
-            </h2>
-            <ul className="space-y-2">
-              {assignment.deliverables.map((del: string, i: number) => (
-                <li key={i} className="flex items-center text-gray-700">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                  {del}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {requirements.length > 0 && requirements[0] !== "" && (
+            <div className="bg-white p-x-2 py-5 rounded">
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">
+                Requirements
+              </h2>
+              <ul className="space-y-2">
+                {requirements.map((obj: string, i: number) => (
+                  <li key={i} className="flex items-center text-gray-700">
+                    <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                    {obj}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Right Column */}
@@ -239,27 +234,11 @@ const AssignmentDetails: React.FC = () => {
           </div>
 
           {/* Grading Breakdown */}
-          {assignment.rubric && (
-            <div className="bg-white p-4 rounded shadow space-y-3">
-              <h3 className="text-md font-semibold text-gray-700">
-                Grading Breakdown
-              </h3>
-              {assignment.rubric.map((r: any, i: number) => (
-                <p
-                  key={i}
-                  className="flex justify-between text-sm text-gray-700"
-                >
-                  <span>{r.label}</span>
-                  <span>{r.marks}</span>
-                </p>
-              ))}
-              <hr />
-              <p className="flex justify-between text-sm font-bold text-gray-800">
-                <span>Total</span>
-                <span>{assignment.maxMarks}</span>
-              </p>
-            </div>
-          )}
+          <div className="bg-white p-4 rounded shadow space-y-3">
+            <p className="flex justify-between text-sm font-bold text-gray-800">
+              <span>Total Marks : {assignment.maxMarks}</span>
+            </p>
+          </div>
 
           {/* Contact Instructor */}
           <div className="bg-white p-4 rounded shadow space-y-2">

@@ -60,7 +60,8 @@ const FacultyOnLeaveList: React.FC = () => {
         const response = await fetch(`${apiUrl}/faculties?skip=0&limit=100`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
           }
         });
 
@@ -167,9 +168,11 @@ const FacultyOnLeaveList: React.FC = () => {
 
                 {/* Faculty Info */}
                 <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-red-600 mb-1">
-                    {faculty.user.username}
-                  </h3>
+                 <h3 className="text-xl font-bold mb-1"
+                        style={{ color: "rgb(20, 36, 76)" }}
+                      >
+                         {faculty.user.username}
+                   </h3>
                   <p className="text-gray-700 text-sm leading-relaxed">
                     {faculty.designation}
                   </p>

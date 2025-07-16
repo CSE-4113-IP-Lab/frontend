@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Upload, X, FileText } from "lucide-react";
 import { NoticeService } from "@/services/noticeService";
-import type { Post, PostType, FileAttachment } from "@/types";
+import type { Post, PostType, FileAttachment, UserRole } from "@/types";
 
 export default function EditNotice() {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +23,10 @@ export default function EditNotice() {
   const [loadingNotice, setLoadingNotice] = useState(true);
   const [notice, setNotice] = useState<Post | null>(null);
   const [newAttachments, setNewAttachments] = useState<File[]>([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState<number[]>(
+    []
+  );
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [formData, setFormData] = useState({
     type: "notice" as PostType,
     title: "",
@@ -31,6 +35,16 @@ export default function EditNotice() {
   });
 
   useEffect(() => {
+    // Get user role from localStorage (consistent with Assignments component)
+    const role = localStorage.getItem("role") as UserRole;
+    setUserRole(role);
+
+    // Redirect non-admin users
+    if (role !== "admin") {
+      navigate("/notice");
+      return;
+    }
+
     const fetchNotice = async () => {
       if (!id) return;
 
@@ -55,6 +69,17 @@ export default function EditNotice() {
     fetchNotice();
   }, [id, navigate]);
 
+  // Show loading or redirect for non-admin users
+  if (userRole !== "admin") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Access Denied. Redirecting...</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
@@ -66,6 +91,11 @@ export default function EditNotice() {
         parseInt(id),
         formData
       );
+
+      // Remove deleted attachments
+      for (const attachmentId of deletedAttachmentIds) {
+        await NoticeService.removeAttachment(parseInt(id), attachmentId);
+      }
 
       // Upload new attachments if any
       for (const file of newAttachments) {
@@ -90,18 +120,14 @@ export default function EditNotice() {
     setNewAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const removeExistingAttachment = async (fileId: number) => {
-    if (!id) return;
+  const removeExistingAttachment = (fileId: number) => {
+    // Mark attachment for deletion instead of immediately deleting
+    setDeletedAttachmentIds((prev) => [...prev, fileId]);
+  };
 
-    try {
-      await NoticeService.removeAttachment(parseInt(id), fileId);
-      // Refresh the notice data
-      const updatedNotice = await NoticeService.getNotice(parseInt(id));
-      setNotice(updatedNotice);
-    } catch (error) {
-      console.error("Error removing attachment:", error);
-      alert("Failed to remove attachment. Please try again.");
-    }
+  const restoreExistingAttachment = (fileId: number) => {
+    // Remove from deletion list to restore the attachment
+    setDeletedAttachmentIds((prev) => prev.filter((id) => id !== fileId));
   };
 
   if (loadingNotice) {
@@ -134,7 +160,7 @@ export default function EditNotice() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-slate-800 text-white">
+      {/* <header className="bg-slate-800 text-white">
         <div className="flex items-center justify-between px-6 py-4">
           <nav className="flex items-center space-x-8">
             <a
@@ -164,7 +190,7 @@ export default function EditNotice() {
             LOG OUT
           </Button>
         </div>
-      </header>
+      </header> */}
 
       {/* Main Content */}
       <main className="px-6 py-8">
@@ -186,9 +212,9 @@ export default function EditNotice() {
               <CardTitle>Notice Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6 w-full p-2">
                 {/* Notice Type */}
-                <div className="space-y-2">
+                <div className="space-y-2 w-full p-2">
                   <Label htmlFor="type">Notice Type</Label>
                   <Select
                     value={formData.type}
@@ -207,7 +233,7 @@ export default function EditNotice() {
                 </div>
 
                 {/* Title */}
-                <div className="space-y-2">
+                <div className="space-y-2 w-full p-2">
                   <Label htmlFor="title">Title</Label>
                   <Input
                     id="title"
@@ -224,7 +250,7 @@ export default function EditNotice() {
                 </div>
 
                 {/* Date */}
-                <div className="space-y-2">
+                <div className="space-y-2 w-full p-2">
                   <Label htmlFor="date">Date</Label>
                   <Input
                     id="date"
@@ -238,7 +264,7 @@ export default function EditNotice() {
                 </div>
 
                 {/* Content */}
-                <div className="space-y-2">
+                <div className="space-y-2 w-full p-2">
                   <Label htmlFor="content">Content</Label>
                   <Textarea
                     id="content"
@@ -257,36 +283,78 @@ export default function EditNotice() {
 
                 {/* Existing Attachments */}
                 {notice.attachments && notice.attachments.length > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 w-full p-2">
                     <Label>Current Attachments</Label>
                     <div className="space-y-2">
-                      {notice.attachments.map((attachment: FileAttachment) => (
-                        <div
-                          key={attachment.id}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                          <div className="flex items-center space-x-3">
-                            <FileText className="w-5 h-5 text-gray-600" />
-                            <span className="text-sm text-gray-700">
-                              {attachment.filename}
-                            </span>
+                      {notice.attachments.map((attachment: FileAttachment) => {
+                        const isMarkedForDeletion =
+                          deletedAttachmentIds.includes(attachment.id);
+                        return (
+                          <div
+                            key={attachment.id}
+                            className={`flex items-center justify-between p-3 rounded ${
+                              isMarkedForDeletion
+                                ? "bg-red-50 border border-red-200"
+                                : "bg-gray-50"
+                            }`}>
+                            <div className="flex items-center space-x-3">
+                              <FileText
+                                className={`w-5 h-5 ${
+                                  isMarkedForDeletion
+                                    ? "text-red-400"
+                                    : "text-gray-600"
+                                }`}
+                              />
+                              <span
+                                className={`text-sm ${
+                                  isMarkedForDeletion
+                                    ? "text-red-500 line-through"
+                                    : "text-gray-700"
+                                }`}>
+                                {attachment.filename ||
+                                  attachment.url.split("/").pop() ||
+                                  "Download File"}
+                              </span>
+                              {isMarkedForDeletion && (
+                                <span className="text-xs text-red-500 font-medium">
+                                  (Will be deleted)
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              {isMarkedForDeletion ? (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="cursor-pointer text-green-600 hover:text-green-800"
+                                  onClick={() =>
+                                    restoreExistingAttachment(attachment.id)
+                                  }>
+                                  Restore
+                                </Button>
+                              ) : (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="cursor-pointer"
+                                  onClick={() =>
+                                    removeExistingAttachment(attachment.id)
+                                  }>
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              removeExistingAttachment(attachment.id)
-                            }>
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
 
                 {/* New Attachments */}
-                <div className="space-y-2">
+                <div className="space-y-2 w-full p-2">
                   <Label>Add New Attachments</Label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
                     <div className="text-center">
@@ -314,7 +382,7 @@ export default function EditNotice() {
 
                   {/* Display new uploaded files */}
                   {newAttachments.length > 0 && (
-                    <div className="mt-4 space-y-2">
+                    <div className="mt-4 space-y-2 w-full p-2">
                       <h4 className="text-sm font-medium text-gray-900">
                         New Files to Upload:
                       </h4>
@@ -323,7 +391,7 @@ export default function EditNotice() {
                           key={index}
                           className="flex items-center justify-between p-2 bg-blue-50 rounded">
                           <span className="text-sm text-blue-700">
-                            {file.name}
+                            {file.name || "File"}
                           </span>
                           <Button
                             type="button"
@@ -339,15 +407,18 @@ export default function EditNotice() {
                 </div>
 
                 {/* Submit Buttons */}
-                <div className="flex justify-end space-x-4 pt-6">
+                <div className="flex justify-end space-x-4 pt-6 w-full p-2">
                   <Button
                     type="button"
-                    variant="outline"
+                    // variant="outline"
                     onClick={() => navigate(-1)}
                     disabled={loading}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={loading}>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-[#14244c] text-white hover:bg-[#ecb31d] cursor-pointer">
                     {loading ? "Updating..." : "Update Notice"}
                   </Button>
                 </div>

@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Pencil, Trash } from "lucide-react";
+import Card from "../../components/Card";
+import Button from "../../components/Button";
 import {
   programService,
   type ProgramResponse,
@@ -7,6 +11,7 @@ import {
 import type { CourseResponse } from "../../types";
 
 const ProgramOutlines: React.FC = () => {
+  const navigate = useNavigate();
   const [programs, setPrograms] = useState<ProgramResponse[]>([]);
   const [selectedProgram, setSelectedProgram] =
     useState<ProgramResponse | null>(null);
@@ -15,9 +20,17 @@ const ProgramOutlines: React.FC = () => {
   const [isLoadingOutline, setIsLoadingOutline] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [usingFallbackData, setUsingFallbackData] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<CourseResponse | null>(
+    null
+  );
 
   // Load programs on component mount
   useEffect(() => {
+    // Get user role from localStorage
+    const role = localStorage.getItem("role");
+    setUserRole(role);
+
     const loadPrograms = async () => {
       try {
         setIsLoading(true);
@@ -397,10 +410,25 @@ const ProgramOutlines: React.FC = () => {
     }
   };
 
+  const handleDeleteProgram = async (programId: number) => {
+    try {
+      await programService.deleteProgram(programId);
+      setPrograms(programs.filter((p) => p.id !== programId));
+      if (selectedProgram?.id === programId) {
+        setSelectedProgram(null);
+        setOutline(null);
+      }
+    } catch (error) {
+      console.error("Failed to delete program:", error);
+      alert("Failed to delete program. Please try again.");
+    }
+  };
+
   const renderCourseCard = (course: CourseResponse) => (
     <div
       key={course.id}
-      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+      className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() => setSelectedCourse(course)}>
       <div className="flex justify-between items-start mb-2">
         <h4 className="font-semibold text-gray-800">{course.name}</h4>
         {course.course_code && (
@@ -451,6 +479,22 @@ const ProgramOutlines: React.FC = () => {
           {course.description}
         </p>
       )}
+
+      <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+        <span className="text-xs text-gray-500">Click to view details</span>
+        <svg
+          className="w-4 h-4 text-gray-400 transition-colors"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </div>
     </div>
   );
 
@@ -514,6 +558,95 @@ const ProgramOutlines: React.FC = () => {
     );
   };
 
+  const CourseDetailModal: React.FC<{
+    course: CourseResponse;
+    onClose: () => void;
+  }> = ({ course, onClose }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">
+                {course.name}
+              </h2>
+              {course.course_code && (
+                <span className="inline-block mt-2 text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded font-mono">
+                  {course.course_code}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="text-center p-3 bg-blue-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">
+                {course.credits}
+              </div>
+              <div className="text-sm text-gray-600">Credits</div>
+            </div>
+
+            {course.semester && (
+              <div className="text-center p-3 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">
+                  {course.semester}
+                </div>
+                <div className="text-sm text-gray-600">Semester</div>
+              </div>
+            )}
+
+            {course.year && (
+              <div className="text-center p-3 bg-purple-50 rounded-lg">
+                <div className="text-2xl font-bold text-purple-600">
+                  {course.year}
+                </div>
+                <div className="text-sm text-gray-600">Year</div>
+              </div>
+            )}
+
+            {course.batch && (
+              <div className="text-center p-3 bg-orange-50 rounded-lg">
+                <div className="text-lg font-bold text-orange-600">
+                  {course.batch}
+                </div>
+                <div className="text-sm text-gray-600">Batch</div>
+              </div>
+            )}
+          </div>
+
+          {course.description && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                Course Description
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                {course.description}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -533,14 +666,16 @@ const ProgramOutlines: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="px-4 pr-2 py-12">
       {/* Header */}
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-extrabold text-gray-800">
-          🎓 Degree Outlines
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold uppercase text-primary-dark mb-4">
+          DEGREE OUTLINES
         </h1>
-        <p className="text-lg text-gray-500 mt-2">
-          Explore program structures and course requirements
+        <p className="text-text-secondary leading-relaxed max-w-3xl">
+          Explore program structures and course requirements. View detailed
+          course outlines, semester breakdowns, and academic progression paths
+          for each degree program.
         </p>
 
         {/* Data Source Indicator */}
@@ -570,48 +705,106 @@ const ProgramOutlines: React.FC = () => {
         </div>
       </div>
 
+      {/* Admin Tools */}
+      {userRole === "admin" && (
+        <Card cornerStyle="tl" className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-primary-dark mb-2">
+                ADMIN TOOLS
+              </h2>
+              <p className="text-text-secondary">
+                Create new programs, manage existing ones, and access
+                administrative features.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                cornerStyle="br"
+                onClick={() => navigate("/programs/create")}>
+                <Plus className="inline w-4 h-4 mr-2" />
+                CREATE PROGRAM
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Program Selection */}
-      <div className="mb-8 bg-white p-6 rounded-xl shadow border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          📚 Select a Program
+      <Card cornerStyle="tl" className="mb-8">
+        <h2 className="text-xl font-bold text-primary-dark mb-4">
+          SELECT A PROGRAM
         </h2>
 
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <div className="ml-4 text-gray-600">Loading programs...</div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-yellow"></div>
+            <div className="ml-4 text-text-secondary">Loading programs...</div>
           </div>
         ) : programs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {programs.map((program) => (
-              <button
+              <div
                 key={program.id}
-                onClick={() => handleProgramSelect(program)}
-                className={`p-4 rounded-lg border-2 text-left transition-all duration-200 ${
+                className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                   selectedProgram?.id === program.id
                     ? "border-blue-500 bg-blue-50 shadow-md"
                     : "border-gray-200 hover:border-blue-300 hover:shadow-sm"
                 }`}>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg flex items-center justify-center text-sm font-bold">
-                    {program.type}
+                <div
+                  onClick={() => handleProgramSelect(program)}
+                  className="cursor-pointer">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      {program.type}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-800">
+                        {program.type} in {program.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {program.duration} years
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800">
-                      {program.type} in {program.name}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {program.duration} years
+
+                  {program.description && (
+                    <p className="text-sm text-gray-600 line-clamp-2">
+                      {program.description}
                     </p>
-                  </div>
+                  )}
                 </div>
 
-                {program.description && (
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {program.description}
-                  </p>
+                {/* Admin Actions */}
+                {userRole === "admin" && (
+                  <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/programs/edit/${program.id}`);
+                      }}
+                      className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                      <Pencil className="w-3 h-3" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (
+                          window.confirm(
+                            "Are you sure you want to delete this program?"
+                          )
+                        ) {
+                          handleDeleteProgram(program.id);
+                        }
+                      }}
+                      className="flex items-center gap-1 px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">
+                      <Trash className="w-3 h-3" />
+                      Delete
+                    </button>
+                  </div>
                 )}
-              </button>
+              </div>
             ))}
           </div>
         ) : (
@@ -630,7 +823,7 @@ const ProgramOutlines: React.FC = () => {
             </button>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Program Outline */}
       {selectedProgram && (
@@ -707,9 +900,17 @@ const ProgramOutlines: React.FC = () => {
                     <div className="text-gray-600 text-lg font-medium">
                       No courses found
                     </div>
-                    <div className="text-gray-500 text-sm mt-1">
+                    <div className="text-gray-500 text-sm mt-1 mb-4">
                       Course information may not be available yet
                     </div>
+                    {userRole === "admin" && (
+                      <Button
+                        cornerStyle="br"
+                        onClick={() => navigate("/courses")}
+                        size="sm">
+                        Manage Courses
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -726,6 +927,14 @@ const ProgramOutlines: React.FC = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* Course Detail Modal */}
+      {selectedCourse && (
+        <CourseDetailModal
+          course={selectedCourse}
+          onClose={() => setSelectedCourse(null)}
+        />
       )}
     </div>
   );

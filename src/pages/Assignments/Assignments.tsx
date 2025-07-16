@@ -47,121 +47,6 @@ const Assignments: React.FC = () => {
     "Avoid plagiarism at all costs.",
   ];
 
-  // const assignmentstatic = [
-  //   {
-  //     id: 1,
-  //     title: "Machine Learning Project - Sentiment Analysis",
-  //     courseCode: "CSE 425",
-  //     courseName: "Artificial Intelligence",
-  //     instructor: "Dr. Mohammad Rahman",
-  //     assignedDate: "2025-01-10",
-  //     dueDate: "2025-01-25",
-  //     maxMarks: 50,
-  //     description:
-  //       "Implement a sentiment analysis system using machine learning algorithms. Use any dataset of your choice and compare at least 3 different algorithms.",
-  //     requirements: [
-  //       "Python implementation",
-  //       "Dataset of at least 1000 samples",
-  //       "Comparison report",
-  //       "Source code with documentation",
-  //     ],
-  //     status: "pending",
-  //     submittedDate: null,
-  //     grade: null,
-  //     feedback: null,
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Database Design and Implementation",
-  //     courseCode: "CSE 1",
-  //     courseName: "Database Management Systems",
-  //     instructor: "Dr. Fatima Khan",
-  //     assignedDate: "2025-01-05",
-  //     dueDate: "2025-01-20",
-  //     maxMarks: 40,
-  //     description:
-  //       "Design and implement a complete database system for a library management system including ER diagram, normalization, and SQL queries.",
-  //     requirements: [
-  //       "ER Diagram",
-  //       "Normalized tables",
-  //       "SQL DDL and DML scripts",
-  //       "Sample data insertion",
-  //     ],
-  //     status: "submitted",
-  //     submittedDate: "2025-01-18",
-  //     grade: 35,
-  //     feedback:
-  //       "Good work on normalization. ER diagram could be more detailed.",
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "Algorithm Analysis Report",
-  //     courseCode: "CSE 201",
-  //     courseName: "Data Structures and Algorithms",
-  //     instructor: "Dr. Ahmed Hassan",
-  //     assignedDate: "2024-12-15",
-  //     dueDate: "2025-01-15",
-  //     maxMarks: 30,
-  //     description:
-  //       "Analyze the time and space complexity of various sorting algorithms and provide empirical analysis with performance graphs.",
-  //     requirements: [
-  //       "Theoretical analysis",
-  //       "Implementation in C/C++",
-  //       "Performance graphs",
-  //       "Written report",
-  //     ],
-  //     status: "graded",
-  //     submittedDate: "2025-01-14",
-  //     grade: 28,
-  //     feedback:
-  //       "Excellent analysis and clear presentation. Minor issues with bubble sort implementation.",
-  //   },
-  //   {
-  //     id: 4,
-  //     title: "Web Application Development",
-  //     courseCode: "CSE 401",
-  //     courseName: "Software Engineering",
-  //     instructor: "Dr. Sarah Ahmed",
-  //     assignedDate: "2025-01-12",
-  //     dueDate: "2025-02-05",
-  //     maxMarks: 60,
-  //     description:
-  //       "Develop a complete web application following software engineering principles including requirements analysis, design, implementation, and testing.",
-  //     requirements: [
-  //       "Requirements document",
-  //       "System design",
-  //       "Working application",
-  //       "Test cases and results",
-  //     ],
-  //     status: "pending",
-  //     submittedDate: null,
-  //     grade: null,
-  //     feedback: null,
-  //   },
-  //   {
-  //     id: 5,
-  //     title: "Programming Fundamentals - Final Project",
-  //     courseCode: "CSE 101",
-  //     courseName: "Introduction to Programming",
-  //     instructor: "Mr. Karim Abdullah",
-  //     assignedDate: "2024-12-20",
-  //     dueDate: "2025-01-10",
-  //     maxMarks: 25,
-  //     description:
-  //       "Create a console-based application in C that demonstrates understanding of all programming concepts covered in the course.",
-  //     requirements: [
-  //       "C source code",
-  //       "User manual",
-  //       "Test cases",
-  //       "Presentation",
-  //     ],
-  //     status: "overdue",
-  //     submittedDate: null,
-  //     grade: null,
-  //     feedback: null,
-  //   },
-  // ];
-
   const getRandomRequirements = (requirements: string[]) => {
     const count = Math.floor(Math.random() * 3) + 3; // 3 to 5
     const shuffled = [...requirements].sort(() => 0.5 - Math.random());
@@ -203,6 +88,19 @@ const Assignments: React.FC = () => {
               course.teacher_id?.toString() === userId?.toString()
           );
         } else {
+          const studentRes = await axios.get(
+            `${import.meta.env.VITE_SERVER_URL}/students/${userId}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "ngrok-skip-browser-warning": "true",
+              },
+            }
+          );
+          console.log("Fetched student data:", studentRes.data);
+
+          const studentSem = studentRes.data.semester;
           const resSt = await axios.get(
             `${import.meta.env.VITE_SERVER_URL}/students/courses`,
             {
@@ -213,7 +111,12 @@ const Assignments: React.FC = () => {
               },
             }
           );
-          filteredCourses = resSt.data;
+          filteredCourses = resSt.data.filter(
+            (course: any) => course.semester == studentSem
+          );
+
+          console.log(studentSem);
+          console.log("Filtered courses for student:", filteredCourses);
         }
 
         // Set course ID list for internal use
@@ -233,6 +136,12 @@ const Assignments: React.FC = () => {
         console.error("Failed to fetch courses:", err);
       }
     };
+
+    fetchCourses();
+  }, []);
+
+  useEffect(() => {
+    const userRole = localStorage.getItem("role");
 
     const fetchAssignments = async () => {
       if (userRole === "faculty") {
@@ -280,18 +189,21 @@ const Assignments: React.FC = () => {
             }
           );
 
+          const semFilteredAssignments = res.data.filter((assignment: any) =>
+            courseIds.includes(assignment.course_id)
+          );
+
           console.log("Fetched student assignments:", res.data);
 
-          setAssignments(res.data);
+          setAssignments(semFilteredAssignments);
         } catch (error) {
           console.error("Failed to fetch assignments:", error);
         }
       }
     };
 
-    fetchCourses();
     fetchAssignments();
-  }, []);
+  }, [courseIds]);
 
   const statusOptions = [
     { label: "All Status", value: "all" },
@@ -464,7 +376,9 @@ const Assignments: React.FC = () => {
           const daysRemaining = getDaysRemaining(assignment.due_date);
           const isOverdue = daysRemaining < 0;
           const isDueSoon = daysRemaining <= 3 && daysRemaining >= 0;
-          const randomRequirements = getRandomRequirements(requirements);
+          const requirementList: string[] = assignment.requirements
+            ? assignment.requirements.split("_-_-_-_")
+            : [];
 
           return (
             <Card
@@ -512,7 +426,8 @@ const Assignments: React.FC = () => {
                         {assignment.status === "graded" &&
                           viewMode == "student" && (
                             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-bl font-bold">
-                              GRADE: {assignment.grade}/{assignment.maxMarks}
+                              GRADE: {assignment.submission.obtained_marks}/
+                              {assignment.marks}
                             </span>
                           )}
                       </div>
@@ -523,21 +438,26 @@ const Assignments: React.FC = () => {
                     {assignment.description}
                   </p>
 
-                  <div className="mb-4">
-                    <h4 className="font-bold text-sm uppercase text-primary-dark mb-2">
-                      REQUIREMENTS
-                    </h4>
-                    <ul className="space-y-1">
-                      {randomRequirements.map((req, index) => (
-                        <li key={index} className="flex items-start space-x-2">
-                          <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-text-secondary">
-                            {req}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {requirementList.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-bold text-sm uppercase text-primary-dark mb-2">
+                        REQUIREMENTS
+                      </h4>
+                      <ul className="space-y-1">
+                        {requirementList.map((req, index) => (
+                          <li
+                            key={index}
+                            className="flex items-start space-x-2"
+                          >
+                            <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-text-secondary">
+                              {req}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   {viewMode == "student" && assignment.status === "graded" && (
                     <div className="bg-blue-50 p-4 rounded-tl">

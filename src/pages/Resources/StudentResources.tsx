@@ -1,15 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { 
-  FileText, 
-  Download, 
-  BookOpen, 
-  Search,
+import {
+  FileText,
+  CheckCircle,
+  Star,
+  BarChart2,
   Calendar,
-  Settings,
+  CreditCard,
+  Download,
   Eye,
-  CreditCard
+  BookOpen,
+  Settings,
+  Search,
 } from "lucide-react";
 
 export default function StudentResources() {
@@ -24,9 +27,12 @@ export default function StudentResources() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">Student Resources</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                  Student Resources
+                </h1>
                 <p className="text-gray-600">
-                  Access academic resources, study materials, and useful tools for your studies.
+                  Access academic resources, study materials, and useful tools
+                  for your studies.
                 </p>
               </div>
             </div>
@@ -64,15 +70,27 @@ export default function StudentResources() {
                   Access course materials, textbooks, and study guides
                 </p>
                 <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <BookOpen className="w-4 h-4 mr-2" />
                     Course Materials
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <FileText className="w-4 h-4 mr-2" />
                     Lecture Notes
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     Past Papers
                   </Button>
@@ -93,29 +111,29 @@ export default function StudentResources() {
                   Borrow and reserve laboratory equipment
                 </p>
                 <div className="space-y-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full justify-start"
-                    onClick={() => navigate('/student/equipment')}
+                    onClick={() => navigate("/student/equipment")}
                   >
                     <Settings className="w-4 h-4 mr-2" />
                     Browse Equipment
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full justify-start"
-                    onClick={() => navigate('/student/equipment')}
+                    onClick={() => navigate("/student/equipment")}
                   >
                     <Calendar className="w-4 h-4 mr-2" />
                     Reserve Items
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full justify-start"
-                    onClick={() => navigate('/student/equipment?tab=current')}
+                    onClick={() => navigate("/student/equipment?tab=current")}
                   >
                     <Eye className="w-4 h-4 mr-2" />
                     My Requests
@@ -137,17 +155,117 @@ export default function StudentResources() {
                   Useful tools and calculators for academic work
                 </p>
                 <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <FileText className="w-4 h-4 mr-2" />
                     GPA Calculator
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <Calendar className="w-4 h-4 mr-2" />
                     Academic Calendar
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <BookOpen className="w-4 h-4 mr-2" />
                     Course Planner
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Assignments */}
+            <Card
+              className="hover:shadow-lg transition-shadow"
+              onClick={() => navigate("/assignments")}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-purple-600" />
+                  Assignments
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">
+                  View, submit, and track your assignments
+                </p>
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    View Assignments
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Submitted Assignments
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <Star className="w-4 h-4 mr-2" />
+                    Graded Assignments
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Grades */}
+            <Card
+              className="hover:shadow-lg transition-shadow"
+              onClick={() => navigate("/grades")}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart2 className="w-5 h-5 text-green-600" />
+                  Grades
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">
+                  Check your academic performance and transcript
+                </p>
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <BarChart2 className="w-4 h-4 mr-2" />
+                    View Grades
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Transcript
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Semester-wise Results
                   </Button>
                 </div>
               </CardContent>
@@ -166,15 +284,27 @@ export default function StudentResources() {
                   Manage tuition fees, payments, and financial records
                 </p>
                 <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <CreditCard className="w-4 h-4 mr-2" />
                     Pay Fees
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <Eye className="w-4 h-4 mr-2" />
                     Fee Statement
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     Payment History
                   </Button>

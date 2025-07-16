@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, FileText, Download, Archive } from "lucide-react";
 import { NoticeService } from "@/services/noticeService";
-import type { Post, PostType, FileAttachment } from "@/types";
+import type { Post, PostType, FileAttachment, UserRole } from "@/types";
 
 export default function ArchivedNoticeDetail() {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +18,8 @@ export default function ArchivedNoticeDetail() {
     if (id) {
       loadNotice(parseInt(id));
     }
+    // Note: Role-based features available for future enhancement
+    // const role = localStorage.getItem("role") as UserRole;
   }, [id]);
 
   const loadNotice = async (noticeId: number) => {

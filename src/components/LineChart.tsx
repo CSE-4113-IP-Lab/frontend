@@ -44,8 +44,8 @@ const LineChart: React.FC<LineChartProps> = ({ allLabels, allData }) => {
             type: "category",
           },
           y: {
-            min: 2,
-            beginAtZero: false,
+            min: 0,
+            beginAtZero: true,
           },
         },
       } as ChartOptions<"line">,
