@@ -23,6 +23,7 @@ export default function RoomManagement() {
   const [bookings, setBookings] = useState<RoomBooking[]>([]);
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<{ [key: string]: boolean }>({});
 
   // Check authentication and redirect if needed
   useEffect(() => {
@@ -70,6 +71,31 @@ export default function RoomManagement() {
     }
   };
 
+  const handleRollDailySlots = async () => {
+    if (!confirm('Are you sure you want to roll daily slots? This will move room schedules forward by one day.')) {
+      return;
+    }
+
+    try {
+      setActionLoading(prev => ({ ...prev, rollSlots: true }));
+      const result = await RoomService.rollDailySlots();
+      
+      if (result.success) {
+        alert(`Success! ${result.message}\nDeleted slots: ${result.deleted_slots}\nNew slots: ${result.new_slots}`);
+        // Reload data to reflect changes
+        await loadData();
+      } else {
+        throw new Error(result.message || 'Failed to roll daily slots');
+      }
+    } catch (error: any) {
+      console.error('Error rolling daily slots:', error);
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to roll daily slots';
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setActionLoading(prev => ({ ...prev, rollSlots: false }));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -93,14 +119,10 @@ export default function RoomManagement() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="rooms" className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               Rooms
-            </TabsTrigger>
-            <TabsTrigger value="schedule" className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              Schedules
             </TabsTrigger>
             <TabsTrigger value="bookings" className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
@@ -114,10 +136,20 @@ export default function RoomManagement() {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Room Management</CardTitle>
-                  <Button onClick={() => navigate('/admin/add-room')}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add New Room
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleRollDailySlots}
+                      disabled={actionLoading.rollSlots}
+                      variant="outline"
+                    >
+                      <Clock className="w-4 h-4 mr-2" />
+                      {actionLoading.rollSlots ? 'Rolling...' : 'Roll Daily Slots'}
+                    </Button>
+                    <Button onClick={() => navigate('/admin/add-room')}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add New Room
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -197,7 +229,7 @@ export default function RoomManagement() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => navigate(`/admin/room-management/room/${room.id}`)}
+                              onClick={() => navigate(`/room-booking/room/${room.id}`)}
                             >
                               <Eye className="w-4 h-4 mr-1" />
                               View
@@ -222,32 +254,6 @@ export default function RoomManagement() {
                     </Button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Schedule Tab */}
-          <TabsContent value="schedule">
-            <Card>
-              <CardHeader>
-                <CardTitle>Schedule Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Schedule Management Coming Soon
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    This feature is under development. You'll be able to:
-                  </p>
-                  <ul className="text-left max-w-md mx-auto space-y-2 text-gray-600">
-                    <li>• Define available time blocks for each room</li>
-                    <li>• Set 30-minute slot schedules</li>
-                    <li>• Configure room operating hours</li>
-                    <li>• Manage recurring availability patterns</li>
-                  </ul>
-                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -331,48 +337,24 @@ export default function RoomManagement() {
                             )}
                           </div>
                           <div className="flex gap-2">
-                            {booking.status === 'scheduled' && (
-                              <>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={async () => {
+                            {booking.status !== 'cancelled' && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={async () => {
+                                  if (confirm('Are you sure you want to cancel this booking?')) {
                                     try {
-                                      await RoomService.approveBooking(booking.id);
+                                      await RoomService.cancelBooking(booking.id);
                                       loadData(); // Refresh data
                                     } catch (error) {
-                                      console.error('Error approving booking:', error);
+                                      console.error('Error cancelling booking:', error);
                                     }
-                                  }}
-                                >
-                                  Approve
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={async () => {
-                                    if (confirm('Are you sure you want to cancel this booking?')) {
-                                      try {
-                                        await RoomService.cancelBooking(booking.id);
-                                        loadData(); // Refresh data
-                                      } catch (error) {
-                                        console.error('Error cancelling booking:', error);
-                                      }
-                                    }
-                                  }}
-                                >
-                                  Cancel
-                                </Button>
-                              </>
+                                  }
+                                }}
+                              >
+                                Cancel
+                              </Button>
                             )}
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => navigate(`/room-booking/booking/${booking.id}`)}
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              View
-                            </Button>
                           </div>
                         </div>
                       </div>

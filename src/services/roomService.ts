@@ -224,11 +224,6 @@ export class RoomService {
     return response.data;
   }
 
-  static async approveBooking(bookingId: number): Promise<{ message: string }> {
-    const response = await apiClient.put(`/rooms/bookings/${bookingId}/approve`);
-    return response.data;
-  }
-
   // Admin Utilities
   static async initializeAllSlots(): Promise<{ success: boolean; message: string; rooms_processed: number }> {
     const response = await apiClient.post('/rooms/admin/initialize-all-slots');

@@ -20,14 +20,35 @@ import Resources from "@/pages/Resources/Resources";
 import AdminResources from "@/pages/Resources/AdminResources";
 import StudentResources from "@/pages/Resources/StudentResources";
 import FacultyResources from "@/pages/Resources/FacultyResources";
-import RoomManagement from "@/pages/Resources/RoomManagement";
-import AddRoom from "@/pages/Resources/AddRoom";
 import EquipmentManagement from "@/pages/Admin/AdminEquipmentManagement";
 import StudentEquipmentPage from "@/pages/Student/StudentEquipment";
 import FacultyEquipmentPage from "@/pages/Faculty/FacultyEquipment";
-import { AdminRoute, StudentRoute, FacultyRoute } from "./components/ProtectedRoute";
+
+import FacultyRoomBooking from "@/pages/Faculty/FacultyRoomBooking";
+import { AdminRoute, StudentRoute, FacultyRoute, AdminOrFacultyRoute } from "@/components/ProtectedRoute";
+import ApiTest from "@/pages/ApiTest";
 import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
 import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
+import RoomDetail from "@/pages/RoomBooking/RoomDetail";
+
+import {
+  AdminRoute,
+  StudentRoute,
+  FacultyRoute,
+} from "@/components/ProtectedRoute";
+
+import ApiTest from "@/pages/ApiTest";
+
+
+import {
+  AvailableRooms,
+  BookRoom,
+  MyBookings,
+  RoomBookingDashboard,
+} from "@/pages/RoomBooking";
+
+import { AdminRoute, StudentRoute, FacultyRoute } from "./components/ProtectedRoute";
+import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
 
 // Admission Pages
 import { AdmissionPage } from "./pages/Admission/index";
@@ -37,6 +58,7 @@ import { AdmissionRequirements } from "./pages/Admission/Requirements";
 import ManageTimeline from "./pages/Admission/ManageTimeline";
 import CreateTimeline from "./pages/Admission/CreateTimeline";
 import EditTimeline from "./pages/Admission/EditTimeline";
+
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
@@ -380,22 +402,6 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "admin/room-management",
-        element: (
-          <AdminRoute>
-            <RoomManagement />
-          </AdminRoute>
-        ),
-      },
-      {
-        path: "admin/add-room",
-        element: (
-          <AdminRoute>
-            <AddRoom />
-          </AdminRoute>
-        ),
-      },
-      {
         path: "student/equipment",
         element: (
           <StudentRoute>
@@ -408,6 +414,14 @@ export const router = createBrowserRouter([
         element: (
           <FacultyRoute>
             <FacultyEquipmentPage />
+          </FacultyRoute>
+        ),
+      },
+      {
+        path: "faculty/room-booking",
+        element: (
+          <FacultyRoute>
+            <FacultyRoomBooking />
           </FacultyRoute>
         ),
       },
@@ -426,19 +440,45 @@ export const router = createBrowserRouter([
       {
         path: "room-booking/book",
         element: (
-          <FacultyRoute>
+          <AdminOrFacultyRoute>
             <BookRoom />
-          </FacultyRoute>
+          </AdminOrFacultyRoute>
         ),
       },
       {
         path: "room-booking/my-bookings",
         element: <MyBookings />,
       },
+
+      {
+        path: "room-booking/room/:id",
+        element: <RoomDetail />,
+      },
       {
         path: "room-booking/test",
         element: <RoomBookingTest />,
       },
+      {
+        path: "room-booking",
+        element: <RoomBookingDashboard />,
+      },
+      {
+        path: "room-booking/available",
+        element: <AvailableRooms />,
+      },
+      {
+        path: "room-booking/book",
+        element: (
+          <AdminOrFacultyRoute>
+            <BookRoom />
+          </AdminOrFacultyRoute>
+        ),
+      },
+      {
+        path: "room-booking/my-bookings",
+        element: <MyBookings />,
+      },
+
       {
         path: "room-booking",
         element: <RoomBookingDashboard />,

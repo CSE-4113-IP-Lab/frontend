@@ -15,9 +15,11 @@ const AssignmentCreate = () => {
     due_date: "",
     marks: "",
     description: "",
+    requirements: "",
   });
 
   const [courses, setCourses] = useState<{ id: number; name: string }[]>([]);
+  const [requirements, setRequirements] = useState<string[]>([""]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -71,7 +73,16 @@ const AssignmentCreate = () => {
           due_date: new Date(data.due_date).toISOString().slice(0, 16), // Format for input[datetime-local]
           marks: data.marks.toString(),
           description: data.description || "",
+          requirements: data.requirements || "",
         });
+
+        // Split string into array if exists
+        if (data.requirements) {
+          const parsedReqs = data.requirements.split("_-_-_-_");
+          setRequirements(parsedReqs.length ? parsedReqs : [""]);
+        } else {
+          setRequirements([""]);
+        }
       } catch (err: any) {
         console.error(err);
         alert("Failed to load assignment data.");
@@ -110,6 +121,7 @@ const AssignmentCreate = () => {
       marks: parseFloat(formData.marks),
       type: "ASSIGNMENT",
       created_by,
+      requirements: requirements.filter((r) => r.trim() !== "").join("_-_-_-_"),
     };
 
     try {
@@ -238,6 +250,39 @@ const AssignmentCreate = () => {
             placeholder="Enter detailed assignment description..."
             required
           ></textarea>
+        </div>
+
+        {/* Requirements */}
+        <div className="w-full">
+          <label className="block text-left text-sm font-bold text-primary-dark mb-2">
+            REQUIREMENTS
+          </label>
+
+          {requirements.map((req, index) => (
+            <div key={index} className="flex flex-col mb-2">
+              <input
+                type="text"
+                value={req}
+                onChange={(e) => {
+                  const updated = [...requirements];
+                  updated[index] = e.target.value;
+                  setRequirements(updated);
+                }}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-yellow focus:border-transparent"
+                placeholder={`Requirement ${index + 1}`}
+              />
+              {index === requirements.length - 1 && (
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => setRequirements([...requirements, ""])}
+                  className="px-2 py-1 rounded mt-2 text-sm"
+                >
+                  + Add More Requirement
+                </Button>
+              )}
+            </div>
+          ))}
         </div>
 
         {/* Buttons */}

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CgPassword } from "react-icons/cg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface OtpProps {
   setShowOtp: (value: boolean) => void;
@@ -15,6 +16,8 @@ const Otp = ({ setShowOtp }: OtpProps) => {
   const [timeCount, setTimeCount] = useState<number>(180);
   const [email, setEmail] = useState<string>("");
   const router = useNavigate();
+  const { isAuthenticated, setIsAuthenticated, setAuthenticationFlag } =
+    useAuth();
 
   useEffect(() => {
     const otpObject: any = JSON.parse(
@@ -121,7 +124,10 @@ const Otp = ({ setShowOtp }: OtpProps) => {
           localStorage.setItem("token", response.data.access_token);
           localStorage.setItem("id", response.data.used_id);
           localStorage.setItem("role", response.data.user_role);
+          localStorage.setItem("userRole", response.data.user_role);
           // setToastMessage("OTP verification successfully");
+          setIsAuthenticated && setIsAuthenticated(true);
+          setAuthenticationFlag && setAuthenticationFlag(true);
           setShowOtp(false);
           localStorage.removeItem("otpObject");
           router("/");
