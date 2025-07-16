@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from '@/contexts/AuthContext';
 import { RoomService, type Room, type RoomBooking, type BookRoomRequest } from '@/services/roomService';
+import { getBookingDateRange } from '@/utils/dateUtils';
 
 export default function RoomBookingTest() {
   const { user, isAuthenticated } = useAuth();
@@ -137,8 +138,8 @@ export default function RoomBookingTest() {
                     type="date"
                     value={bookingForm.booking_date}
                     onChange={(e) => setBookingForm(prev => ({ ...prev, booking_date: e.target.value }))}
-                    min={new Date().toISOString().split('T')[0]}
-                    max={new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                    min={getBookingDateRange().min}
+                    max={getBookingDateRange().max}
                     required
                   />
                 </div>

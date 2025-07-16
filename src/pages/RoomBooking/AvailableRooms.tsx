@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Calendar, MapPin, Users, Clock } from 'lucide-react';
 import { RoomService, type Room, type AvailableRoomsRequest } from '@/services/roomService';
 import { useAuth } from '@/contexts/AuthContext';
+import { getBookingDateRange } from '@/utils/dateUtils';
 
 interface AvailableRoomsProps {}
 
@@ -199,8 +200,8 @@ const AvailableRooms: React.FC<AvailableRoomsProps> = () => {
                   type="date"
                   value={searchParams.booking_date}
                   onChange={(e) => handleInputChange('booking_date', e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  max={new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                  min={getBookingDateRange().min}
+                  max={getBookingDateRange().max}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>

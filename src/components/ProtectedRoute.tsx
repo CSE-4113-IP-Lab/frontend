@@ -66,3 +66,7 @@ export const StudentOrFacultyRoute: React.FC<{ children: React.ReactNode }> = ({
     {children}
   </ProtectedRoute>
 );
+
+export const AdminOrFacultyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <ProtectedRoute requiredRoles={['admin', 'staff', 'faculty']}>{children}</ProtectedRoute>
+);

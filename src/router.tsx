@@ -23,6 +23,30 @@ import FacultyResources from "@/pages/Resources/FacultyResources";
 import EquipmentManagement from "@/pages/Admin/AdminEquipmentManagement";
 import StudentEquipmentPage from "@/pages/Student/StudentEquipment";
 import FacultyEquipmentPage from "@/pages/Faculty/FacultyEquipment";
+
+import FacultyRoomBooking from "@/pages/Faculty/FacultyRoomBooking";
+import { AdminRoute, StudentRoute, FacultyRoute, AdminOrFacultyRoute } from "@/components/ProtectedRoute";
+import ApiTest from "@/pages/ApiTest";
+import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
+import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
+import RoomDetail from "@/pages/RoomBooking/RoomDetail";
+
+import {
+  AdminRoute,
+  StudentRoute,
+  FacultyRoute,
+} from "@/components/ProtectedRoute";
+
+import ApiTest from "@/pages/ApiTest";
+
+
+import {
+  AvailableRooms,
+  BookRoom,
+  MyBookings,
+  RoomBookingDashboard,
+} from "@/pages/RoomBooking";
+
 import { AdminRoute, StudentRoute, FacultyRoute } from "./components/ProtectedRoute";
 import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
 
@@ -34,6 +58,7 @@ import { AdmissionRequirements } from "./pages/Admission/Requirements";
 import ManageTimeline from "./pages/Admission/ManageTimeline";
 import CreateTimeline from "./pages/Admission/CreateTimeline";
 import EditTimeline from "./pages/Admission/EditTimeline";
+
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import CreateSchedule from "./pages/Schedule/classSchedule/CreateSchedule";
@@ -427,6 +452,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "faculty/room-booking",
+        element: (
+          <FacultyRoute>
+            <FacultyRoomBooking />
+          </FacultyRoute>
+        ),
+      },
+      {
         path: "api-test",
         element: <ApiTestPage />,
       },
@@ -441,15 +474,45 @@ export const router = createBrowserRouter([
       {
         path: "room-booking/book",
         element: (
-          <FacultyRoute>
+          <AdminOrFacultyRoute>
             <BookRoom />
-          </FacultyRoute>
+          </AdminOrFacultyRoute>
         ),
       },
       {
         path: "room-booking/my-bookings",
         element: <MyBookings />,
       },
+
+      {
+        path: "room-booking/room/:id",
+        element: <RoomDetail />,
+      },
+      {
+        path: "room-booking/test",
+        element: <RoomBookingTest />,
+      },
+      {
+        path: "room-booking",
+        element: <RoomBookingDashboard />,
+      },
+      {
+        path: "room-booking/available",
+        element: <AvailableRooms />,
+      },
+      {
+        path: "room-booking/book",
+        element: (
+          <AdminOrFacultyRoute>
+            <BookRoom />
+          </AdminOrFacultyRoute>
+        ),
+      },
+      {
+        path: "room-booking/my-bookings",
+        element: <MyBookings />,
+      },
+
       {
         path: "room-booking",
         element: <RoomBookingDashboard />,
