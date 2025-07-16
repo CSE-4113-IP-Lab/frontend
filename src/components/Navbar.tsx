@@ -10,6 +10,7 @@ import {
 import { Search, Menu, X, ChevronRight, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
 
 interface NavbarProps {
   className?: string;
@@ -36,15 +37,37 @@ const additionalNavItems = [
 
 export function Navbar({ className }: NavbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { user, logout, isAuthenticated } = useAuth();
+  const {
+    user,
+    logout,
+    isAuthenticated,
+    setAuthenticationFlag,
+    authenticationFlag,
+  } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const id = localStorage.getItem("id");
+    const role = localStorage.getItem("role");
+    const token = localStorage.getItem("token");
+
+    if (id && role && token) {
+      setAuthenticationFlag && setAuthenticationFlag(true);
+    } else {
+      setAuthenticationFlag && setAuthenticationFlag(false);
+    }
+  }, []);
 
   const handleLogin = () => {
     navigate("/auth");
   };
 
   const handleLogout = () => {
-    logout();
+    // logout();
+    localStorage.removeItem("id");
+    localStorage.removeItem("role");
+    localStorage.removeItem("token");
+    setAuthenticationFlag && setAuthenticationFlag(false);
     navigate("/");
   };
 
@@ -84,7 +107,7 @@ export function Navbar({ className }: NavbarProps) {
             </Button>
 
             {/* Login/Logout Button (hidden on mobile) */}
-            {isAuthenticated ? (
+            {authenticationFlag ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button

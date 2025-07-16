@@ -88,6 +88,19 @@ const Assignments: React.FC = () => {
               course.teacher_id?.toString() === userId?.toString()
           );
         } else {
+          const studentRes = await axios.get(
+            `${import.meta.env.VITE_SERVER_URL}/students/${userId}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "ngrok-skip-browser-warning": "true",
+              },
+            }
+          );
+          console.log("Fetched student data:", studentRes.data);
+
+          const studentSem = studentRes.data.semester;
           const resSt = await axios.get(
             `${import.meta.env.VITE_SERVER_URL}/students/courses`,
             {
@@ -98,7 +111,12 @@ const Assignments: React.FC = () => {
               },
             }
           );
-          filteredCourses = resSt.data;
+          filteredCourses = resSt.data.filter(
+            (course: any) => course.semester == studentSem
+          );
+
+          console.log(studentSem);
+          console.log("Filtered courses for student:", filteredCourses);
         }
 
         // Set course ID list for internal use
@@ -118,6 +136,12 @@ const Assignments: React.FC = () => {
         console.error("Failed to fetch courses:", err);
       }
     };
+
+    fetchCourses();
+  }, []);
+
+  useEffect(() => {
+    const userRole = localStorage.getItem("role");
 
     const fetchAssignments = async () => {
       if (userRole === "faculty") {
@@ -165,18 +189,21 @@ const Assignments: React.FC = () => {
             }
           );
 
+          const semFilteredAssignments = res.data.filter((assignment: any) =>
+            courseIds.includes(assignment.course_id)
+          );
+
           console.log("Fetched student assignments:", res.data);
 
-          setAssignments(res.data);
+          setAssignments(semFilteredAssignments);
         } catch (error) {
           console.error("Failed to fetch assignments:", error);
         }
       }
     };
 
-    fetchCourses();
     fetchAssignments();
-  }, []);
+  }, [courseIds]);
 
   const statusOptions = [
     { label: "All Status", value: "all" },
@@ -349,7 +376,9 @@ const Assignments: React.FC = () => {
           const daysRemaining = getDaysRemaining(assignment.due_date);
           const isOverdue = daysRemaining < 0;
           const isDueSoon = daysRemaining <= 3 && daysRemaining >= 0;
-          const randomRequirements = getRandomRequirements(requirements);
+          const requirementList: string[] = assignment.requirements
+            ? assignment.requirements.split("_-_-_-_")
+            : [];
 
           return (
             <Card
@@ -409,21 +438,26 @@ const Assignments: React.FC = () => {
                     {assignment.description}
                   </p>
 
-                  <div className="mb-4">
-                    <h4 className="font-bold text-sm uppercase text-primary-dark mb-2">
-                      REQUIREMENTS
-                    </h4>
-                    <ul className="space-y-1">
-                      {randomRequirements.map((req, index) => (
-                        <li key={index} className="flex items-start space-x-2">
-                          <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-text-secondary">
-                            {req}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {requirementList.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-bold text-sm uppercase text-primary-dark mb-2">
+                        REQUIREMENTS
+                      </h4>
+                      <ul className="space-y-1">
+                        {requirementList.map((req, index) => (
+                          <li
+                            key={index}
+                            className="flex items-start space-x-2"
+                          >
+                            <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-text-secondary">
+                              {req}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   {viewMode == "student" && assignment.status === "graded" && (
                     <div className="bg-blue-50 p-4 rounded-tl">
