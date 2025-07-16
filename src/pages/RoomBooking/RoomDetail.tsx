@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RoomService, type Room, type WeeklySchedule, type DaySchedule } from "@/services/roomService";
-import { Calendar, MapPin, Clock, Users, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import { Calendar, MapPin, Clock, Users, CheckCircle, XCircle, ArrowLeft, ShoppingCart } from "lucide-react";
 
 
 
@@ -12,7 +12,17 @@ export default function RoomDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // --- Booking slot checkout state ---
+  // --- Multi-slot booking state ---
+  const [isMultiMode, setIsMultiMode] = useState(false);
+  const [selectedSlots, setSelectedSlots] = useState<any[]>([]);
+  const [multiBookingPurpose, setMultiBookingPurpose] = useState('');
+  const [multiBookingNotes, setMultiBookingNotes] = useState('');
+  const [multiBookingLoading, setMultiBookingLoading] = useState(false);
+  const [multiBookingError, setMultiBookingError] = useState<string | null>(null);
+  const [multiBookingSuccess, setMultiBookingSuccess] = useState<string | null>(null);
+  const [showMultiBookingDialog, setShowMultiBookingDialog] = useState(false);
+
+  // --- Single slot checkout state ---
   const [checkoutSlot, setCheckoutSlot] = useState<any | null>(null);
   const [checkoutPurpose, setCheckoutPurpose] = useState('');
   const [checkoutNotes, setCheckoutNotes] = useState('');
@@ -80,7 +90,8 @@ export default function RoomDetail() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-BD', {
+      timeZone: 'Asia/Dhaka',
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -89,9 +100,68 @@ export default function RoomDetail() {
   };
 
   const getDayName = (offset: number) => {
-    const date = new Date();
-    date.setDate(date.getDate() + offset);
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const today = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Dhaka"}));
+    const date = new Date(today.getTime() + offset * 24 * 60 * 60 * 1000);
+    return date.toLocaleDateString('en-BD', { 
+      timeZone: 'Asia/Dhaka',
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  // Multi-slot booking functions
+  const handleSlotSelection = (slot: any, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedSlots(prev => [...prev, slot]);
+    } else {
+      setSelectedSlots(prev => prev.filter(s => s.slot_time !== slot.slot_time));
+    }
+  };
+
+  const handleMultiBookingSubmit = async () => {
+    if (selectedSlots.length === 0 || !room || !daySchedule) return;
+    
+    setMultiBookingLoading(true);
+    setMultiBookingError(null);
+    setMultiBookingSuccess(null);
+    
+    try {
+      const bookingPromises = selectedSlots.map(slot => {
+        const bookingData = {
+          room_id: room.id,
+          booking_date: daySchedule.date,
+          start_time: slot.slot_time,
+          end_time: getNextSlotTime(slot.slot_time),
+          purpose: multiBookingPurpose,
+          notes: multiBookingNotes,
+        };
+        return RoomService.bookRoom(bookingData);
+      });
+      
+      await Promise.all(bookingPromises);
+      setMultiBookingSuccess(`Successfully booked ${selectedSlots.length} slots!`);
+      
+      setTimeout(() => {
+        setShowMultiBookingDialog(false);
+        setSelectedSlots([]);
+        setMultiBookingPurpose('');
+        setMultiBookingNotes('');
+        setIsMultiMode(false);
+        fetchDaySchedule();
+      }, 1500);
+    } catch (err: any) {
+      setMultiBookingError(err?.response?.data?.detail || 'Multi-slot booking failed');
+    } finally {
+      setMultiBookingLoading(false);
+    }
+  };
+
+  const toggleMultiMode = () => {
+    setIsMultiMode(!isMultiMode);
+    setSelectedSlots([]);
+    setMultiBookingError(null);
+    setMultiBookingSuccess(null);
   };
 
   function handleOpenCheckout(slot: any) {
@@ -104,7 +174,7 @@ export default function RoomDetail() {
 
   function getNextSlotTime(slotTime: string) {
     // slotTime: '09:00:00' => returns '09:30:00'
-    const [h, m, s] = slotTime.split(':').map(Number);
+    const [h, m] = slotTime.split(':').map(Number);
     let minutes = h * 60 + m + 30;
     let nh = Math.floor(minutes / 60);
     let nm = minutes % 60;
@@ -250,7 +320,33 @@ export default function RoomDetail() {
       {/* Day Selection */}
       <Card>
         <CardHeader>
-          <CardTitle>Select Date (Next 7 Days)</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>Select Date (Next 7 Days)</span>
+            <div className="flex items-center space-x-2">
+              {daySchedule && daySchedule.slots.some(slot => slot.is_available) && (
+                <>
+                  <Button
+                    variant={isMultiMode ? "default" : "outline"}
+                    size="sm"
+                    onClick={toggleMultiMode}
+                    className="flex items-center space-x-2"
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    <span>{isMultiMode ? "Exit Multi-Select" : "Multi-Select"}</span>
+                  </Button>
+                  {isMultiMode && selectedSlots.length > 0 && (
+                    <Button
+                      size="sm"
+                      onClick={() => setShowMultiBookingDialog(true)}
+                      className="flex items-center space-x-2"
+                    >
+                      <span>Book {selectedSlots.length} Slots</span>
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-7 gap-2">
@@ -283,41 +379,61 @@ export default function RoomDetail() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {daySchedule.slots.map((slot, index) => (
-                <div
-                  key={index}
-                  className={`p-3 rounded-lg border-2 flex flex-col gap-2 ${
-                    slot.is_available
-                      ? "border-green-200 bg-green-50"
-                      : "border-red-200 bg-red-50"
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    {slot.is_available ? (
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-red-600" />
-                    )}
-                    <span className="font-medium">
-                      {formatTime(slot.slot_time)}
-                    </span>
-                  </div>
-                  <div className="text-xs">
-                    {slot.is_available ? (
-                      <span className="text-green-600 font-medium">Available</span>
-                    ) : (
-                      <span className="text-red-600">
-                        Booked (ID: {slot.booking_id})
+              {daySchedule.slots.map((slot, index) => {
+                const isSelected = selectedSlots.some(s => s.slot_time === slot.slot_time);
+                return (
+                  <div
+                    key={index}
+                    className={`p-3 rounded-lg border-2 flex flex-col gap-2 ${
+                      slot.is_available
+                        ? isSelected && isMultiMode
+                          ? "border-blue-500 bg-blue-50 cursor-pointer"
+                          : isMultiMode
+                          ? "border-green-200 bg-green-50 cursor-pointer hover:border-blue-300 hover:bg-blue-25"
+                          : "border-green-200 bg-green-50"
+                        : "border-red-200 bg-red-50"
+                    }`}
+                    onClick={() => {
+                      if (isMultiMode && slot.is_available) {
+                        handleSlotSelection(slot, !isSelected);
+                      }
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      {isMultiMode && slot.is_available && (
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {}} // Handled by div onClick
+                          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 pointer-events-none"
+                        />
+                      )}
+                      {slot.is_available ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className="font-medium">
+                        {formatTime(slot.slot_time)}
                       </span>
+                    </div>
+                    <div className="text-xs">
+                      {slot.is_available ? (
+                        <span className="text-green-600 font-medium">Available</span>
+                      ) : (
+                        <span className="text-red-600">
+                          Booked (ID: {slot.booking_id})
+                        </span>
+                      )}
+                    </div>
+                    {slot.is_available && !isMultiMode && (
+                      <Button size="sm" className="mt-2" onClick={() => handleOpenCheckout(slot)}>
+                        Book Slot
+                      </Button>
                     )}
                   </div>
-                  {slot.is_available && (
-                    <Button size="sm" className="mt-2" onClick={() => handleOpenCheckout(slot)}>
-                      Checkout
-                    </Button>
-                  )}
-                </div>
-              ))}
+                );
+              })}
       {/* Checkout Dialog */}
       <Dialog open={!!checkoutSlot} onOpenChange={() => setCheckoutSlot(null)}>
         <DialogContent>
@@ -346,6 +462,66 @@ export default function RoomDetail() {
               </DialogFooter>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Multi-Slot Booking Dialog */}
+      <Dialog open={showMultiBookingDialog} onOpenChange={setShowMultiBookingDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Book Multiple Slots</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <div className="font-medium mb-2">Selected Slots ({selectedSlots.length}):</div>
+              <div className="text-sm text-gray-600 space-y-1">
+                {selectedSlots.map((slot, index) => (
+                  <div key={index} className="flex justify-between">
+                    <span>{formatTime(slot.slot_time)} - {formatTime(getNextSlotTime(slot.slot_time))}</span>
+                    <span>{daySchedule?.date}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Purpose</label>
+              <input 
+                type="text" 
+                value={multiBookingPurpose} 
+                onChange={e => setMultiBookingPurpose(e.target.value)} 
+                required 
+                className="w-full border px-3 py-2 rounded" 
+                placeholder="Purpose for all selected slots" 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Notes</label>
+              <textarea 
+                value={multiBookingNotes} 
+                onChange={e => setMultiBookingNotes(e.target.value)} 
+                className="w-full border px-3 py-2 rounded" 
+                placeholder="Notes (optional, will apply to all slots)" 
+              />
+            </div>
+            {multiBookingError && <div className="text-red-600 text-sm">{multiBookingError}</div>}
+            {multiBookingSuccess && <div className="text-green-600 text-sm">{multiBookingSuccess}</div>}
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowMultiBookingDialog(false)} 
+                disabled={multiBookingLoading}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleMultiBookingSubmit} 
+                disabled={multiBookingLoading || selectedSlots.length === 0 || !multiBookingPurpose.trim()}
+              >
+                {multiBookingLoading ? 'Booking...' : `Book ${selectedSlots.length} Slots`}
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
             </div>

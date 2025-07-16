@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RoomService, type Room, type BookRoomRequest } from '@/services/roomService';
@@ -182,9 +183,19 @@ const BookRoom: React.FC<BookRoomProps> = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Book Room</h1>
-          <Button variant="outline" onClick={() => navigate('/room-booking/my-bookings')}>
-            Booking History
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/room-booking/available')}
+              className="flex items-center space-x-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Rooms</span>
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/room-booking/my-bookings')}>
+              Booking History
+            </Button>
+          </div>
         </div>
 
         {/* Success Message */}

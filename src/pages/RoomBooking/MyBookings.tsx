@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { RoomService, type RoomBooking, type RoomBookingsParams } from '../../services/roomService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -106,7 +107,24 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">My Bookings</h1>
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate('/room-booking/available')}
+                className="flex items-center space-x-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to Rooms</span>
+              </button>
+              <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
+            </div>
+            <button
+              onClick={() => navigate('/room-booking/available')}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Book a Room
+            </button>
+          </div>
           <div className="flex justify-center">
             <div className="text-lg">Loading bookings...</div>
           </div>
@@ -118,7 +136,24 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">My Bookings</h1>
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/room-booking/available')}
+              className="flex items-center space-x-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Rooms</span>
+            </button>
+            <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
+          </div>
+          <button
+            onClick={() => navigate('/room-booking/available')}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Book a Room
+          </button>
+        </div>
         
         {/* Filters */}
         <div className="bg-white shadow-sm rounded-lg border mb-8">
