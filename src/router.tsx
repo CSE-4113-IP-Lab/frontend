@@ -79,6 +79,11 @@ import FacultyOnLeaveList from "@/pages/FacultyInformation/FacultyOnLeaveList";
 import ResearchGallery from "./services/ResearchGallery";
 import { CreateSchedule, EditSchedule } from "./pages/Schedule/classSchedule";
 import SchedulePage from "./pages/Schedule/schedule";
+import FeeStructure from "./pages/Fee/FeeStructure";
+import PaymentDeadlines from "./pages/Fee/PaymentDeadlines";
+import TransactionHistory from "./pages/Fee/TransactionHistory";
+import ConfirmationFeedback from "./pages/Fee/ConfirmationFeedback";
+import FeeCreate from "./pages/Fee/FeeCreate";
 
 export const router = createBrowserRouter([
   {
@@ -136,7 +141,27 @@ export const router = createBrowserRouter([
         path: "auth",
         element: <Auth />, // Placeholder for Auth page, replace with
       },
-      // {
+
+      {
+        path: "fee/structure",
+        element: <FeeStructure />,
+      },
+      {
+        path: "fee/deadlines",
+        element: <PaymentDeadlines />,
+      },
+      {
+        path: "fee/history",
+        element: <TransactionHistory />,
+      },
+      {
+        path: "fee/confirm",
+        element: <ConfirmationFeedback />,
+      },
+      {
+        path: "fee/create",
+        element: <FeeCreate />,
+      },
       //   path: "notice",
       //   element: <NoticeBoardPage />,
       // },
@@ -298,13 +323,13 @@ export const router = createBrowserRouter([
           </AdminRoute>
         ),
       },
-    
-     
+
+
       {
         path: "class-schedule",
         element: <ClassSchedule />,
       },
-      
+
       {
         path: "programs",
         element: <ProgramOutlines />,
