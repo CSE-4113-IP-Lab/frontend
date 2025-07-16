@@ -1,23 +1,24 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Plus,
-  MapPin,
-  Calendar,
-  Clock,
-  Eye
-} from "lucide-react";
+import { Plus, MapPin, Calendar, Clock, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { RoomService, type Room, type RoomBooking, type SystemStatus } from "@/services/roomService";
+import {
+  RoomService,
+  type Room,
+  type RoomBooking,
+  type SystemStatus,
+} from "@/services/roomService";
 
 export default function RoomManagement() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'rooms');
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") || "rooms"
+  );
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [bookings, setBookings] = useState<RoomBooking[]>([]);
@@ -25,16 +26,16 @@ export default function RoomManagement() {
   const [error, setError] = useState<string | null>(null);
 
   // Check authentication and redirect if needed
-  useEffect(() => {
-    if (!isAuthenticated || !user) {
-      navigate('/auth');
-      return;
-    }
-  }, [isAuthenticated, user, navigate]);
+  // useEffect(() => {
+  //   if (!isAuthenticated || !user) {
+  //     navigate('/auth');
+  //     return;
+  //   }
+  // }, [isAuthenticated, user, navigate]);
 
   // Update active tab from URL params
   useEffect(() => {
-    const tab = searchParams.get('tab');
+    const tab = searchParams.get("tab");
     if (tab) {
       setActiveTab(tab);
     }
@@ -55,16 +56,18 @@ export default function RoomManagement() {
       const status = await RoomService.getSystemStatus();
       setSystemStatus(status);
 
-      if (activeTab === 'rooms') {
-        const roomsData = await RoomService.getAllRooms({ include_schedule: false });
+      if (activeTab === "rooms") {
+        const roomsData = await RoomService.getAllRooms({
+          include_schedule: false,
+        });
         setRooms(roomsData);
-      } else if (activeTab === 'bookings') {
+      } else if (activeTab === "bookings") {
         const bookingsData = await RoomService.getBookings({ limit: 50 });
         setBookings(bookingsData);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
-      setError('Failed to load data');
+      console.error("Error loading data:", error);
+      setError("Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -77,11 +80,15 @@ export default function RoomManagement() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Room Management</h1>
-              <p className="text-gray-600">Manage rooms, schedules, and bookings</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Room Management
+              </h1>
+              <p className="text-gray-600">
+                Manage rooms, schedules, and bookings
+              </p>
             </div>
             <Button
-              onClick={() => navigate('/admin/resources')}
+              onClick={() => navigate("/admin/resources")}
               variant="outline"
             >
               Back to Admin Resources
@@ -114,7 +121,7 @@ export default function RoomManagement() {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Room Management</CardTitle>
-                  <Button onClick={() => navigate('/admin/add-room')}>
+                  <Button onClick={() => navigate("/admin/add-room")}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add New Room
                   </Button>
@@ -137,20 +144,36 @@ export default function RoomManagement() {
                     {systemStatus && (
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <div className="p-4 bg-blue-50 rounded-lg">
-                          <h3 className="font-medium text-gray-900">Total Rooms</h3>
-                          <p className="text-2xl font-bold text-blue-600">{systemStatus.total_rooms}</p>
+                          <h3 className="font-medium text-gray-900">
+                            Total Rooms
+                          </h3>
+                          <p className="text-2xl font-bold text-blue-600">
+                            {systemStatus.total_rooms}
+                          </p>
                         </div>
                         <div className="p-4 bg-green-50 rounded-lg">
-                          <h3 className="font-medium text-gray-900">Available</h3>
-                          <p className="text-2xl font-bold text-green-600">{systemStatus.available_rooms}</p>
+                          <h3 className="font-medium text-gray-900">
+                            Available
+                          </h3>
+                          <p className="text-2xl font-bold text-green-600">
+                            {systemStatus.available_rooms}
+                          </p>
                         </div>
                         <div className="p-4 bg-orange-50 rounded-lg">
-                          <h3 className="font-medium text-gray-900">Today's Bookings</h3>
-                          <p className="text-2xl font-bold text-orange-600">{systemStatus.today_bookings}</p>
+                          <h3 className="font-medium text-gray-900">
+                            Today's Bookings
+                          </h3>
+                          <p className="text-2xl font-bold text-orange-600">
+                            {systemStatus.today_bookings}
+                          </p>
                         </div>
                         <div className="p-4 bg-purple-50 rounded-lg">
-                          <h3 className="font-medium text-gray-900">Active Bookings</h3>
-                          <p className="text-2xl font-bold text-purple-600">{systemStatus.active_bookings}</p>
+                          <h3 className="font-medium text-gray-900">
+                            Active Bookings
+                          </h3>
+                          <p className="text-2xl font-bold text-purple-600">
+                            {systemStatus.active_bookings}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -163,11 +186,15 @@ export default function RoomManagement() {
                             <h3 className="font-semibold text-gray-900">
                               Room {room.room_number}
                             </h3>
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              room.status === 'available' ? 'bg-green-100 text-green-800' :
-                              room.status === 'occupied' ? 'bg-red-100 text-red-800' :
-                              'bg-yellow-100 text-yellow-800'
-                            }`}>
+                            <span
+                              className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                room.status === "available"
+                                  ? "bg-green-100 text-green-800"
+                                  : room.status === "occupied"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }`}
+                            >
                               {room.status}
                             </span>
                           </div>
@@ -183,21 +210,31 @@ export default function RoomManagement() {
                             </p>
                           )}
                           <p className="text-sm text-gray-600 mb-3">
-                            <strong>Hours:</strong> {RoomService.formatTime(room.operating_start_time)} - {RoomService.formatTime(room.operating_end_time)}
+                            <strong>Hours:</strong>{" "}
+                            {RoomService.formatTime(room.operating_start_time)}{" "}
+                            - {RoomService.formatTime(room.operating_end_time)}
                           </p>
                           <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
-                              onClick={() => navigate(`/room-booking/book?room_id=${room.id}`)}
+                              onClick={() =>
+                                navigate(
+                                  `/room-booking/book?room_id=${room.id}`
+                                )
+                              }
                             >
                               <Calendar className="w-4 h-4 mr-1" />
                               Book
                             </Button>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
-                              onClick={() => navigate(`/admin/room-management/room/${room.id}`)}
+                              onClick={() =>
+                                navigate(
+                                  `/admin/room-management/room/${room.id}`
+                                )
+                              }
                             >
                               <Eye className="w-4 h-4 mr-1" />
                               View
@@ -216,7 +253,7 @@ export default function RoomManagement() {
                     <p className="text-gray-600 mb-4">
                       Get started by adding your first room to the system.
                     </p>
-                    <Button onClick={() => navigate('/room-booking/book')}>
+                    <Button onClick={() => navigate("/room-booking/book")}>
                       <Plus className="w-4 h-4 mr-2" />
                       Add First Room
                     </Button>
@@ -259,18 +296,18 @@ export default function RoomManagement() {
                 <div className="flex justify-between items-center">
                   <CardTitle>Booking Management</CardTitle>
                   <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => loadData()}
                     >
                       <Eye className="w-4 h-4 mr-2" />
                       Refresh
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
-                      onClick={() => navigate('/room-booking/my-bookings')}
+                      onClick={() => navigate("/room-booking/my-bookings")}
                     >
                       My Bookings
                     </Button>
@@ -296,14 +333,19 @@ export default function RoomManagement() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <h3 className="font-semibold text-gray-900">
-                                Room {booking.room?.room_number || 'Unknown'}
+                                Room {booking.room?.room_number || "Unknown"}
                               </h3>
-                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                booking.status === 'scheduled' ? 'bg-green-100 text-green-800' :
-                                booking.status === 'ongoing' ? 'bg-blue-100 text-blue-800' :
-                                booking.status === 'completed' ? 'bg-gray-100 text-gray-800' :
-                                'bg-red-100 text-red-800'
-                              }`}>
+                              <span
+                                className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                  booking.status === "scheduled"
+                                    ? "bg-green-100 text-green-800"
+                                    : booking.status === "ongoing"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : booking.status === "completed"
+                                    ? "bg-gray-100 text-gray-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
                                 {booking.status}
                               </span>
                             </div>
@@ -311,13 +353,17 @@ export default function RoomManagement() {
                               <strong>Purpose:</strong> {booking.purpose}
                             </p>
                             <p className="text-sm text-gray-600 mb-1">
-                              <strong>Date:</strong> {RoomService.formatDate(booking.booking_date)}
+                              <strong>Date:</strong>{" "}
+                              {RoomService.formatDate(booking.booking_date)}
                             </p>
                             <p className="text-sm text-gray-600 mb-1">
-                              <strong>Time:</strong> {RoomService.formatTime(booking.start_time)} - {RoomService.formatTime(booking.end_time)}
+                              <strong>Time:</strong>{" "}
+                              {RoomService.formatTime(booking.start_time)} -{" "}
+                              {RoomService.formatTime(booking.end_time)}
                             </p>
                             <p className="text-sm text-gray-600 mb-1">
-                              <strong>Duration:</strong> {booking.duration_slots * 30} minutes
+                              <strong>Duration:</strong>{" "}
+                              {booking.duration_slots * 30} minutes
                             </p>
                             {booking.user_name && (
                               <p className="text-sm text-gray-600 mb-1">
@@ -331,32 +377,46 @@ export default function RoomManagement() {
                             )}
                           </div>
                           <div className="flex gap-2">
-                            {booking.status === 'scheduled' && (
+                            {booking.status === "scheduled" && (
                               <>
-                                <Button 
-                                  variant="outline" 
+                                <Button
+                                  variant="outline"
                                   size="sm"
                                   onClick={async () => {
                                     try {
-                                      await RoomService.approveBooking(booking.id);
+                                      await RoomService.approveBooking(
+                                        booking.id
+                                      );
                                       loadData(); // Refresh data
                                     } catch (error) {
-                                      console.error('Error approving booking:', error);
+                                      console.error(
+                                        "Error approving booking:",
+                                        error
+                                      );
                                     }
                                   }}
                                 >
                                   Approve
                                 </Button>
-                                <Button 
-                                  variant="outline" 
+                                <Button
+                                  variant="outline"
                                   size="sm"
                                   onClick={async () => {
-                                    if (confirm('Are you sure you want to cancel this booking?')) {
+                                    if (
+                                      confirm(
+                                        "Are you sure you want to cancel this booking?"
+                                      )
+                                    ) {
                                       try {
-                                        await RoomService.cancelBooking(booking.id);
+                                        await RoomService.cancelBooking(
+                                          booking.id
+                                        );
                                         loadData(); // Refresh data
                                       } catch (error) {
-                                        console.error('Error cancelling booking:', error);
+                                        console.error(
+                                          "Error cancelling booking:",
+                                          error
+                                        );
                                       }
                                     }
                                   }}
@@ -365,10 +425,12 @@ export default function RoomManagement() {
                                 </Button>
                               </>
                             )}
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
-                              onClick={() => navigate(`/room-booking/booking/${booking.id}`)}
+                              onClick={() =>
+                                navigate(`/room-booking/booking/${booking.id}`)
+                              }
                             >
                               <Eye className="w-4 h-4 mr-1" />
                               View
@@ -387,7 +449,7 @@ export default function RoomManagement() {
                     <p className="text-gray-600 mb-4">
                       No room bookings have been made yet.
                     </p>
-                    <Button onClick={() => navigate('/room-booking/book')}>
+                    <Button onClick={() => navigate("/room-booking/book")}>
                       <Plus className="w-4 h-4 mr-2" />
                       Make First Booking
                     </Button>
