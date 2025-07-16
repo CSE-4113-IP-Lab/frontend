@@ -112,7 +112,7 @@ const FacultyProfile: React.FC<FacultyProfileProps> = ({
   const apiUrl = import.meta.env.VITE_ENDPOINT;
   const targetFacultyId = facultyId || id;
   const userRole = localStorage.getItem("role");
-  const identity =  localStorage.getItem("id");
+  //const identity =  localStorage.getItem("id");
   const userEmail = localStorage.getItem("userEmail");
   console.log('User role:', userRole);
 

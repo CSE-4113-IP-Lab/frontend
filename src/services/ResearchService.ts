@@ -228,7 +228,7 @@ class ResearchService {
 
   private getToken(): string {
     // Get token from localStorage, sessionStorage, or context
-    return localStorage.getItem("authToken") || "dummy-token";
+    return localStorage.getItem("token") || "dummy-token";
   }
 
   private getDummyData(): ResearchContribution[] {

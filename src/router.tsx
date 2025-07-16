@@ -25,6 +25,7 @@ import StudentEquipmentPage from "@/pages/Student/StudentEquipment";
 import FacultyEquipmentPage from "@/pages/Faculty/FacultyEquipment";
 
 import FacultyRoomBooking from "@/pages/Faculty/FacultyRoomBooking";
+
 import {
   AdminRoute,
   StudentRoute,
@@ -41,6 +42,12 @@ import {
 import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
 import RoomDetail from "@/pages/RoomBooking/RoomDetail";
 
+import { AdminRoute, StudentRoute, FacultyRoute, AdminOrFacultyRoute } from "@/components/ProtectedRoute";
+import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
+import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
+import RoomDetail from "@/pages/RoomBooking/RoomDetail";
+
+
 // Admission Pages
 import { AdmissionPage } from "./pages/Admission/index";
 import { ApplicationForm } from "./pages/Admission/ApplicationForm";
@@ -51,28 +58,19 @@ import CreateTimeline from "./pages/Admission/CreateTimeline";
 import EditTimeline from "./pages/Admission/EditTimeline";
 
 import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
-import CreateSchedule from "./pages/Schedule/classSchedule/CreateSchedule";
-import EditSchedule from "./pages/Schedule/classSchedule/EditSchedule";
-import SchedulePage from "./pages/Schedule/schedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
 import CreateExamSchedule from "./pages/Schedule/examSchedule/CreateExamSchedule";
 import EditExamSchedule from "./pages/Schedule/examSchedule/EditExamSchedule";
+import MeetingPage from "./pages/Meeting/MeetingPage";
 import ArchivedEvents from "./pages/Event/ArchivedEvents";
 import EventPage from "./pages/Event/EventPage";
 import UpcomingEvents from "./pages/Event/UpcomingEvents";
 import EventDetails from "./pages/Event/EventDetails";
 import TestComponent from "./pages/Test/TestComponent";
 import CourseList from "./pages/Courses/CourseList";
-
-// import CourseCreate from "./pages/Courses/CourseCreate";
-// import CourseEdit from "./pages/Courses/CourseEdit";
 import CourseCreate from "./pages/Courses/CourseCreate";
 import CourseEdit from "./pages/Courses/CourseEdit";
 import ProgramOutlines from "./pages/Programs/ProgramOutlines";
-// import ProgramCreate from "./pages/Programs/ProgramCreate";
-// import ProgramEdit from "./pages/Programs/ProgramEdit";
-// import ProgramCreate from "./pages/Programs/ProgramCreate";
-// import ProgramEdit from "./pages/Programs/ProgramEdit";
 import ProgramCreate from "./pages/Programs/ProgramCreate";
 import ProgramEdit from "./pages/Programs/ProgramEdit";
 import ErrorPage from "./ErrorPage";
@@ -92,9 +90,24 @@ import ActiveFacultyList from "@/pages/FacultyInformation/ActiveFacultyList";
 import NewFacultyYearwise from "@/pages/FacultyInformation/NewFacultyYearwise";
 import FacultyByResearch from "@/pages/FacultyInformation/FacultyByResearch";
 import FacultyOnLeaveList from "@/pages/FacultyInformation/FacultyOnLeaveList";
+
 import ResearchGallery from "./services/ReseaechGallery";
 import AddRoom from "./pages/Resources/AddRoom";
 import RoomManagement from "./pages/Resources/RoomManagement";
+
+import ResearchGallery from "./services/ResearchGallery";
+import { CreateSchedule, EditSchedule } from "./pages/Schedule/classSchedule";
+import SchedulePage from "./pages/Schedule/schedule";
+import FeeStructure from "./pages/Fee/FeeStructure";
+import PaymentDeadlines from "./pages/Fee/PaymentDeadlines";
+import TransactionHistory from "./pages/Fee/TransactionHistory";
+import ConfirmationFeedback from "./pages/Fee/ConfirmationFeedback";
+import FeeCreate from "./pages/Fee/FeeCreate";
+import AwardsResearchPage from "./components/AwarResearchPage";
+
+import {StudentProfile} from "@/pages/Student/StudentProfile";
+import {StudentEditProfile} from "@/pages/Student/EditStudentProfile";
+
 
 export const router = createBrowserRouter([
   {
@@ -152,7 +165,27 @@ export const router = createBrowserRouter([
         path: "auth",
         element: <Auth />, // Placeholder for Auth page, replace with
       },
-      // {
+
+      {
+        path: "fee/structure",
+        element: <FeeStructure />,
+      },
+      {
+        path: "fee/deadlines",
+        element: <PaymentDeadlines />,
+      },
+      {
+        path: "fee/history",
+        element: <TransactionHistory />,
+      },
+      {
+        path: "fee/confirm",
+        element: <ConfirmationFeedback />,
+      },
+      {
+        path: "fee/create",
+        element: <FeeCreate />,
+      },
       //   path: "notice",
       //   element: <NoticeBoardPage />,
       // },
@@ -271,6 +304,10 @@ export const router = createBrowserRouter([
         element: <CourseList />,
       },
       {
+        path: "schedule",
+        element: <SchedulePage />,
+      },
+      {
         path: "courses/create",
         element: (
           <AdminRoute>
@@ -318,36 +355,27 @@ export const router = createBrowserRouter([
         element: <ProgramOutlines />,
       },
       {
-        path: "programs/create",
+        path: "schedule/edit/:id",
         element: (
           <AdminRoute>
-            <ProgramCreate />
+            <EditSchedule />
           </AdminRoute>
         ),
       },
+
       {
-        path: "programs/edit/:id",
-        element: (
-          <AdminRoute>
-            <ProgramEdit />
-          </AdminRoute>
-        ),
+        path: "meetings",
+        element: <MeetingPage />,
       },
+
       {
-        path: "programs/create",
-        element: (
-          <AdminRoute>
-            <ProgramCreate />
-          </AdminRoute>
-        ),
+        path: "class-schedule",
+        element: <ClassSchedule />,
       },
+
       {
-        path: "programs/edit/:id",
-        element: (
-          <AdminRoute>
-            <ProgramEdit />
-          </AdminRoute>
-        ),
+        path: "programs",
+        element: <ProgramOutlines />,
       },
       {
         path: "programs/create",
@@ -432,6 +460,14 @@ export const router = createBrowserRouter([
             <StudentEquipmentPage />
           </StudentRoute>
         ),
+      },
+      {
+        path: "student/profile",
+        element: <StudentProfile />,
+      },
+      {
+        path: "student/profile/edit",
+        element: <StudentEditProfile />,
       },
       {
         path: "faculty/equipment",
@@ -545,6 +581,12 @@ export const router = createBrowserRouter([
           </AdminRoute>
         ),
       },
+        element: <ResearchGallery/>, // Change to true for admin view
+      },
+      {
+        path: "awards",
+        element: <AwardsResearchPage />, // Change to true for admin view
+      }
     ],
   },
 ]);

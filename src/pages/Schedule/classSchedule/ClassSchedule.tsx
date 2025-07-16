@@ -259,9 +259,6 @@ const ClassSchedule: React.FC = () => {
         setError(
           err instanceof Error ? err.message : "Failed to load schedules"
         );
-        setError(
-          err instanceof Error ? err.message : "Failed to load schedules"
-        );
         console.error("Error loading schedule data:", err);
       } finally {
         setIsLoading(false);
@@ -411,14 +408,20 @@ const ClassSchedule: React.FC = () => {
 
   const renderScheduleGrid = () => {
     return (
-      <div className="w-full overflow-x-auto">
-        <div className="min-w-[800px]">
-          <table className="w-full border border-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="border border-gray-200 p-3 text-left font-medium text-gray-700">
-                  Time
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="border border-gray-200 p-3 text-left font-medium text-gray-700">
+                Time
+              </th>
+              {daysOfWeek.map((day) => (
+                <th
+                  key={day}
+                  className="border border-gray-200 p-3 text-left font-medium text-gray-700">
+                  {day.charAt(0).toUpperCase() + day.slice(1)}
                 </th>
+
                 {daysOfWeek.map((day) => (
                   <th
                     key={day}
@@ -503,6 +506,81 @@ const ClassSchedule: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {timeSlots.map((timeSlot) => (
+              <tr key={timeSlot} className="hover:bg-gray-50">
+                <td className="border border-gray-200 p-3 font-medium text-gray-700 bg-gray-50">
+                  {timeSlot}
+                </td>
+                {daysOfWeek.map((day) => {
+                  const schedule = schedules.find(
+                    (s) =>
+                      s.day_of_week === day &&
+                      `${s.start_time}-${s.end_time}` === timeSlot
+                  );
+
+                  return (
+                    <td
+                      key={`${day}-${timeSlot}`}
+                      className="border border-gray-200 p-2">
+                      {schedule?.course ? (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 hover:bg-blue-100 transition-colors relative">
+                          <div className="font-semibold text-blue-900 text-sm">
+                            {schedule.course.course_code}
+                          </div>
+                          <div className="text-blue-700 text-xs mb-1">
+                            {schedule.course.name}
+                          </div>
+                          {schedule.room && (
+                            <div className="flex items-center gap-1 text-gray-600 text-xs mb-1">
+                              <MapPin className="w-3 h-3" />
+                              <span>{schedule.room}</span>
+                            </div>
+                          )}
+                          <div className="text-green-600 text-xs font-medium">
+                            {schedule.batch ? `Batch ${schedule.batch}` : ""}
+                            {schedule.semester
+                              ? ` • ${schedule.semester} Semester`
+                              : ""}
+                          </div>
+
+                          {/* Admin Actions */}
+                          {userRole === "admin" && (
+                            <div className="absolute top-1 right-1 flex gap-1">
+                              <button
+                                onClick={() =>
+                                  navigate(`/schedule/edit/${schedule.id}`)
+                                }
+                                className="p-1 bg-white rounded-full shadow-sm hover:bg-gray-50"
+                                title="Edit Schedule">
+                                <Pencil className="w-3 h-3 text-blue-600" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDeleteSchedule(schedule.id)
+                                }
+                                className="p-1 bg-white rounded-full shadow-sm hover:bg-gray-50"
+                                title="Delete Schedule">
+                                <Trash className="w-3 h-3 text-red-600" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="h-20"></div>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
       </div>
     );
   };
@@ -530,10 +608,6 @@ const ClassSchedule: React.FC = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    <span>
-                      {schedule.day_of_week.charAt(0).toUpperCase() +
-                        schedule.day_of_week.slice(1)}
-                    </span>
                     <span>
                       {schedule.day_of_week.charAt(0).toUpperCase() +
                         schedule.day_of_week.slice(1)}
