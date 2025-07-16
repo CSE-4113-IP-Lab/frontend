@@ -26,29 +26,13 @@ import FacultyEquipmentPage from "@/pages/Faculty/FacultyEquipment";
 
 import FacultyRoomBooking from "@/pages/Faculty/FacultyRoomBooking";
 import { AdminRoute, StudentRoute, FacultyRoute, AdminOrFacultyRoute } from "@/components/ProtectedRoute";
-import ApiTest from "@/pages/ApiTest";
 import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
 import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
 import RoomDetail from "@/pages/RoomBooking/RoomDetail";
 
-import {
-  AdminRoute,
-  StudentRoute,
-  FacultyRoute,
-} from "@/components/ProtectedRoute";
 
 import ApiTest from "@/pages/ApiTest";
 
-
-import {
-  AvailableRooms,
-  BookRoom,
-  MyBookings,
-  RoomBookingDashboard,
-} from "@/pages/RoomBooking";
-
-import { AdminRoute, StudentRoute, FacultyRoute } from "./components/ProtectedRoute";
-import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
 
 // Admission Pages
 import { AdmissionPage } from "./pages/Admission/index";
@@ -92,7 +76,7 @@ import ActiveFacultyList from "@/pages/FacultyInformation/ActiveFacultyList";
 import NewFacultyYearwise from "@/pages/FacultyInformation/NewFacultyYearwise";
 import FacultyByResearch from "@/pages/FacultyInformation/FacultyByResearch";
 import FacultyOnLeaveList from "@/pages/FacultyInformation/FacultyOnLeaveList";
-import ResearchGallery from "./services/ReseaechGallery";
+import ResearchGallery from "./services/ResearchGallery";
 import { CreateSchedule, EditSchedule } from "./pages/Schedule/classSchedule";
 import SchedulePage from "./pages/Schedule/schedule";
 
