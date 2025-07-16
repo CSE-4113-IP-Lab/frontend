@@ -21,6 +21,7 @@ const navItems = [
   { label: "FACULTY", href: "/faculty" },
   { label: "NOTICE", href: "/notice" },
   { label: "EVENT", href: "/event" },
+  { label: "MEETING", href: "/meetings" },
   { label: "CONTACT", href: "/contact" },
   { label: "SCHEDULE", href: "/schedule" },
   { label: "RESOURCES", href: "/resources" }
