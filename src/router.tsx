@@ -31,8 +31,6 @@ import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
 import RoomDetail from "@/pages/RoomBooking/RoomDetail";
 
 
-import ApiTest from "@/pages/ApiTest";
-
 
 // Admission Pages
 import { AdmissionPage } from "./pages/Admission/index";
@@ -48,6 +46,7 @@ import ClassSchedule from "./pages/Schedule/classSchedule/ClassSchedule";
 import ExamSchedule from "./pages/Schedule/examSchedule/ExamSchedule";
 import CreateExamSchedule from "./pages/Schedule/examSchedule/CreateExamSchedule";
 import EditExamSchedule from "./pages/Schedule/examSchedule/EditExamSchedule";
+import MeetingPage from "./pages/Meeting/MeetingPage";
 import ArchivedEvents from "./pages/Event/ArchivedEvents";
 import EventPage from "./pages/Event/EventPage";
 import UpcomingEvents from "./pages/Event/UpcomingEvents";
@@ -325,6 +324,10 @@ export const router = createBrowserRouter([
         ),
       },
 
+      {
+        path: "meetings",
+        element: <MeetingPage />,
+      },
 
       {
         path: "class-schedule",
