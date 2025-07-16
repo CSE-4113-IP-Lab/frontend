@@ -85,6 +85,10 @@ import ConfirmationFeedback from "./pages/Fee/ConfirmationFeedback";
 import FeeCreate from "./pages/Fee/FeeCreate";
 import AwardsResearchPage from "./components/AwarResearchPage";
 
+import {StudentProfile} from "@/pages/Student/StudentProfile";
+import {StudentEditProfile} from "@/pages/Student/EditStudentProfile";
+
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -421,6 +425,14 @@ export const router = createBrowserRouter([
             <StudentEquipmentPage />
           </StudentRoute>
         ),
+      },
+      {
+        path: "student/profile",
+        element: <StudentProfile />,
+      },
+      {
+        path: "student/profile/edit",
+        element: <StudentEditProfile />,
       },
       {
         path: "faculty/equipment",

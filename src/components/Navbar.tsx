@@ -46,6 +46,9 @@ export function Navbar({ className }: NavbarProps) {
     authenticationFlag,
   } = useAuth();
   const navigate = useNavigate();
+  const userRole = localStorage.getItem("role");
+  const userEmail = localStorage.getItem("userEmail");
+  const userid=  parseInt(localStorage.getItem("id")||"0");
 
   useEffect(() => {
     const id = localStorage.getItem("id");
@@ -70,6 +73,47 @@ export function Navbar({ className }: NavbarProps) {
     localStorage.removeItem("token");
     setAuthenticationFlag && setAuthenticationFlag(false);
     navigate("/");
+  };
+
+  const handleProfileClick = async () => {
+    if (userRole === "faculty") {
+      try {
+        // Get token from localStorage
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+        
+        // Fetch faculty data using the user ID
+        const response = await fetch(`${import.meta.env.VITE_ENDPOINT}/faculties/user/${userid}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'accept': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
+        
+        if (response.ok) {
+          const facultyData = await response.json();
+          // Navigate to faculty profile with the faculty ID (facultyData.id is the faculty ID)
+          navigate(`/faculty/profile/${facultyData.id}`);
+        } else {
+          // Fallback to regular profile page if API call fails
+          navigate("/profile");
+        }
+      } catch (error) {
+        console.error('Error fetching faculty data:', error);
+        // Fallback to regular profile page on error
+        navigate("/profile");
+      }
+    }else if (userRole === "student") {
+        navigate(`/student/profile`);
+    }
+    else {
+      // For non-faculty users, go to regular profile page
+      navigate("/admin/profile");
+    }
   };
 
   return (
@@ -121,7 +165,7 @@ export function Navbar({ className }: NavbarProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  <DropdownMenuItem onClick={handleProfileClick}>
                     <User className="h-4 w-4 mr-2" />
                     Profile
                   </DropdownMenuItem>
