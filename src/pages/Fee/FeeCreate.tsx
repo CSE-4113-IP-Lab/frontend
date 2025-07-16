@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const FeeCreate = () => {
   const [formData, setFormData] = useState({
@@ -9,9 +9,38 @@ const FeeCreate = () => {
     description: "",
     due_date: "",
   });
+  const [programs, setPrograms] = useState([]); // State to store programs
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/programs/public`,
+          {
+            params: { skip: 0, limit: 100 },
+            headers: {
+              "ngrok-skip-browser-warning": "69420",
+            },
+          }
+        );
+
+        if (response?.data) {
+          setPrograms(response.data);
+        } else {
+          console.error("Empty response data:", response);
+          alert("Received empty data from server.");
+        }
+      } catch (error) {
+        console.error("Error fetching programs:", error);
+        alert("Failed to fetch programs. Please try again.");
+      }
+    };
+
+    fetchPrograms();
+  }, []);
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -39,19 +68,26 @@ const FeeCreate = () => {
               htmlFor="program_id"
               className="block text-sm font-medium text-gray-700"
             >
-              Program ID
+              Program
             </label>
-            <input
+            <select
               id="program_id"
-              type="text"
               value={formData.program_id}
               onChange={(e) =>
                 setFormData({ ...formData, program_id: e.target.value })
               }
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Enter Program ID"
               required
-            />
+            >
+              <option value="" disabled>
+                Select a Program
+              </option>
+              {programs.map((program: any) => (
+                <option key={program.id} value={program.id}>
+                  {program.name} ({program.type})
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label
