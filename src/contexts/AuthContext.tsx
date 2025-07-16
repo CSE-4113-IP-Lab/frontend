@@ -22,6 +22,8 @@ interface AuthContextType {
   canAccessCourse: (courseCode: string) => boolean;
   loading: boolean;
   setIsAuthenticated?: (isAuthenticated: boolean) => void; // Optional setter for isAuthenticated
+  authenticationFlag?: boolean; // Optional flag for authentication state
+  setAuthenticationFlag?: (flag: boolean) => void; // Optional setter for authentication flag
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +34,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [authenticationFlag, setAuthenticationFlag] = useState(false);
 
   useEffect(() => {
     // Check for saved authentication state
@@ -113,6 +116,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     canAccessCourse,
     loading,
     setIsAuthenticated, // Optional setter for isAuthenticated
+    authenticationFlag, // Optional flag for authentication state
+    setAuthenticationFlag, // Optional setter for authentication flag
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
