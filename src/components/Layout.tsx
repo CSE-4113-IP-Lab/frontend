@@ -98,7 +98,7 @@ export function Layout() {
             <h3 className="font-bold text-lg mb-4 text-white">QUICK LINKS</h3>
             <div className="space-y-2">
               <Link
-                to="/admissions"
+                to="/admission"
                 className="block text-sm hover:text-yellow-400 transition-colors text-gray-300">
                 Admissions
               </Link>
