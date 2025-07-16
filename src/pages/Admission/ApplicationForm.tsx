@@ -11,14 +11,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertIcon } from '@/components/ui/alert';
 import { admissionService } from '../../services/admissionService';
-
-// Define ProgramResponse interface since we're not using programService
-type ProgramResponse = {
-  id: number;
-  name: string;
-  description?: string;
-  duration?: string;
-};
+import { programService, type ProgramResponse } from '../../services/programService';
 
 // Define form schema using Zod
 const formSchema = z.object({
@@ -62,17 +55,20 @@ export function ApplicationForm() {
   useEffect(() => {
     const fetchPrograms = async () => {
       try {
-        // TODO: Replace with actual API call to fetch programs
-        // const data = await programService.getPublicPrograms();
+        // Fetch programs from the API
+        const data = await programService.getPublicPrograms();
+        setPrograms(data);
+      } catch (err) {
+        console.error('Failed to fetch programs:', err);
+        setError('Failed to load programs');
+        
+        // Fallback to mock data if API fails
         const mockPrograms: ProgramResponse[] = [
-          { id: 1, name: 'Computer Science', description: 'Bachelor of Science in Computer Science', duration: '4 years' },
-          { id: 2, name: 'Electrical Engineering', description: 'Bachelor of Science in Electrical Engineering', duration: '4 years' },
-          { id: 3, name: 'Business Administration', description: 'Bachelor of Business Administration', duration: '4 years' },
+          { id: 1, type: 'BSc', name: 'Computer Science', description: 'Bachelor of Science in Computer Science', duration: 4, is_active: 1 },
+          { id: 2, type: 'BSc', name: 'Electrical Engineering', description: 'Bachelor of Science in Electrical Engineering', duration: 4, is_active: 1 },
+          { id: 3, type: 'BBA', name: 'Business Administration', description: 'Bachelor of Business Administration', duration: 4, is_active: 1 },
         ];
         setPrograms(mockPrograms);
-      } catch (err) {
-        setError('Failed to load programs');
-        console.error(err);
       }
     };
 
@@ -157,7 +153,7 @@ export function ApplicationForm() {
                         <SelectContent>
                           {programs.map((program) => (
                             <SelectItem key={program.id} value={String(program.id)}>
-                              {program.name}
+                              {program.type} - {program.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -281,17 +277,17 @@ export function ApplicationForm() {
                   <p className="text-sm text-gray-500">Upload all required documents for your application</p>
                 </div>
                 
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center transition-colors hover:border-blue-400">
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center transition-colors hover:border-[#14244c]">
                   <div className="flex flex-col items-center justify-center space-y-2">
-                    <div className="p-3 bg-blue-100 rounded-full">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="p-3 bg-[#ecb31d] rounded-full">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#14244c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                       </svg>
                     </div>
                     <div className="text-sm text-gray-600">
                       <label
                         htmlFor="file-upload"
-                        className="relative cursor-pointer font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
+                        className="relative cursor-pointer font-medium text-[#14244c] hover:text-[#ecb31d] focus-within:outline-none"
                       >
                         <span>Click to upload</span>
                         <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple />
@@ -306,12 +302,12 @@ export function ApplicationForm() {
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-3 p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-start space-x-3 p-4 bg-[#ecb31d]/10 rounded-lg">
                   <div className="flex items-center h-5">
                     <input
                       id="terms"
                       type="checkbox"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-[#14244c] focus:ring-[#14244c] border-gray-300 rounded"
                       required
                     />
                   </div>
@@ -327,14 +323,14 @@ export function ApplicationForm() {
                   variant="outline"
                   onClick={() => window.history.back()}
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto border-[#14244c] text-[#14244c] hover:bg-[#14244c] hover:text-white transition-colors"
                 >
                   Back
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all"
+                  className="w-full sm:w-auto bg-[#14244c] hover:bg-[#ecb31d] text-white hover:text-[#14244c] transition-colors cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>

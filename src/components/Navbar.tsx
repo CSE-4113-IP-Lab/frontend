@@ -27,7 +27,7 @@ const navItems = [
 const additionalNavItems = [
   { label: "Academics", href: "/academics" },
   { label: "Research", href: "/research" },
-  { label: "Admissions", href: "/admissions" },
+  { label: "Admissions", href: "/admission" },
   { label: "Faculty", href: "/faculty" },
   { label: "Schedule", href: "/schedule" },
 ];
