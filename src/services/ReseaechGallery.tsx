@@ -7,7 +7,13 @@ import { researchService, type ResearchContribution } from "./ResearchService";
 import { useEffect, useMemo, useState } from "react";
 import { AddResearchModal } from "@/components/AddResearchModal";
 
-const ResearchGallery = ({ isAdmin = false }) => {
+const ResearchGallery = () => {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    setIsAdmin(role === "faculty" || role === "admin");
+  }, []);
   const [research, setResearch] = useState<ResearchContribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,7 +39,18 @@ const ResearchGallery = ({ isAdmin = false }) => {
       try {
         setLoading(true);
         const data = await researchService.getResearchContributions();
-        setResearch(data);
+        console.log('Fetched research data:', data);
+        // Optional: Validate data structure matches your interface
+        if (Array.isArray(data) && data.every(item =>
+          'id' in item &&
+          'title' in item &&
+          'supervisor' in item &&
+          'user' in item
+        )) {
+          setResearch(data);
+        } else {
+          console.error('Data format mismatch:', data);
+        }
       } catch (error) {
         console.error('Error fetching research:', error);
       } finally {
@@ -57,7 +74,7 @@ const ResearchGallery = ({ isAdmin = false }) => {
   // Filtered research
   const filteredResearch = useMemo(() => {
     return research.filter(item => {
-      const matchesSearch = !searchQuery || 
+      const matchesSearch = !searchQuery ||
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.supervisor.username.toLowerCase().includes(searchQuery.toLowerCase());
@@ -115,14 +132,14 @@ const ResearchGallery = ({ isAdmin = false }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex justify-center items-center min-h-96">
+        <div className="border-b-2 border-blue-600 rounded-full w-8 h-8 animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="mx-auto px-4 py-8 max-w-7xl">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -131,13 +148,13 @@ const ResearchGallery = ({ isAdmin = false }) => {
       >
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Research Gallery</h1>
+            <h1 className="mb-2 font-bold text-gray-900 text-3xl">Research Gallery</h1>
             <p className="text-gray-600">Explore our department's research grants, fellowships, and publications.</p>
           </div>
           {isAdmin && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white transition-colors"
             >
               <Plus size={16} />
               Add Research
@@ -153,18 +170,18 @@ const ResearchGallery = ({ isAdmin = false }) => {
         transition={{ delay: 0.1 }}
         className="mb-8"
       >
-        <div className="flex flex-col lg:flex-row gap-4 mb-4">
+        <div className="flex lg:flex-row flex-col gap-4 mb-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="top-1/2 left-3 absolute text-gray-400 -translate-y-1/2 transform" size={20} />
             <input
               type="text"
               placeholder="Search research..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="py-2 pr-4 pl-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           </div>
-          
+
           <div className="flex flex-wrap gap-2">
             <FilterDropdown
               label="Type"
@@ -199,10 +216,10 @@ const ResearchGallery = ({ isAdmin = false }) => {
 
         {hasActiveFilters && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Active filters:</span>
+            <span className="text-gray-500 text-sm">Active filters:</span>
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors"
+              className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full text-gray-700 text-sm transition-colors"
             >
               <X size={14} />
               Clear all
@@ -221,13 +238,13 @@ const ResearchGallery = ({ isAdmin = false }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">{category}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <h2 className="mb-6 font-bold text-gray-900 text-2xl">{category}</h2>
+              <div className="gap-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                 {items.map((item, index) => (
-                  <ResearchCard 
-                    key={item.id} 
-                    research={item} 
-                    index={index} 
+                  <ResearchCard
+                    key={item.id}
+                    research={item}
+                    index={index}
                     isAdmin={isAdmin}
                     onDelete={async () => setDeleteModal({ isOpen: true, research: item })}
                   />
@@ -243,7 +260,7 @@ const ResearchGallery = ({ isAdmin = false }) => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-center py-12"
+          className="py-12 text-center"
         >
           <p className="text-gray-500 text-lg">No research found matching your criteria.</p>
         </motion.div>

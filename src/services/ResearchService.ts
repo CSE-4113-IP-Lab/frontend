@@ -1,3 +1,5 @@
+import apiClient from "./apiClient";
+
 // Types
 export interface Supervisor {
   username: string;
@@ -65,18 +67,18 @@ class ResearchService {
         }
       });
 
-      const response = await fetch(`${this.baseUrl}/researchs?${params}`, {
+      const response = await apiClient.get(`/researchs?${params}`, {
         headers: {
-          'Authorization': `Bearer ${this.getToken()}`,
           'Content-Type': 'application/json',
         },
       });
 
-      if (!response.ok) {
+      if (response.status < 200 || response.status >= 300) {
         throw new Error('Failed to fetch research contributions');
       }
-
-      return await response.json();
+      console.log(response)
+      return response.data;
+      
     } catch (error) {
       console.warn('Using dummy data due to API error:', error);
       return this.getDummyData();
@@ -85,18 +87,18 @@ class ResearchService {
 
   async getResearchById(id: number): Promise<ResearchContribution> {
     try {
-      const response = await fetch(`${this.baseUrl}/researchs/${id}`, {
+      const response = await apiClient.get(`/researchs/${id}`, {
         headers: {
           'Authorization': `Bearer ${this.getToken()}`,
           'Content-Type': 'application/json',
         },
       });
 
-      if (!response.ok) {
+      if (response.status < 200 || response.status >= 300) {
         throw new Error('Failed to fetch research contribution');
       }
 
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.warn('Using dummy data due to API error:', error);
       const dummyData = this.getDummyData();
@@ -110,18 +112,18 @@ class ResearchService {
 
   async getResearchByUser(userId: number): Promise<ResearchContribution[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/researchs/user/${userId}`, {
+      const response = await apiClient.get(`/researchs/user/${userId}`, {
         headers: {
           'Authorization': `Bearer ${this.getToken()}`,
           'Content-Type': 'application/json',
         },
       });
 
-      if (!response.ok) {
+      if (response.status < 200 || response.status >= 300) {
         throw new Error('Failed to fetch user research contributions');
       }
 
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.warn('Using dummy data due to API error:', error);
       const dummyData = this.getDummyData();
@@ -131,20 +133,18 @@ class ResearchService {
 
   async createResearch(data: CreateResearchData): Promise<ResearchContribution> {
     try {
-      const response = await fetch(`${this.baseUrl}/researchs`, {
-        method: 'POST',
+      const response = await apiClient.post(`/researchs`,data, {
         headers: {
           'Authorization': `Bearer ${this.getToken()}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
+      if (response.status < 200 || response.status >= 300) {
         throw new Error('Failed to create research contribution');
       }
 
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.warn('Simulating research creation due to API error:', error);
       // Simulate successful creation
@@ -180,8 +180,7 @@ class ResearchService {
 
   async updateResearch(id: number, data: Partial<CreateResearchData>): Promise<ResearchContribution> {
     try {
-      const response = await fetch(`${this.baseUrl}/researchs/${id}`, {
-        method: 'PUT',
+      const response = await apiClient.put(`/researchs/${id}`, {
         headers: {
           'Authorization': `Bearer ${this.getToken()}`,
           'Content-Type': 'application/json',
@@ -189,11 +188,11 @@ class ResearchService {
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
+      if (response.status < 200 || response.status >= 300) {
         throw new Error('Failed to update research contribution');
       }
 
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.warn('Simulating research update due to API error:', error);
       throw error;
@@ -202,15 +201,14 @@ class ResearchService {
 
   async deleteResearch(id: number): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/researchs/${id}`, {
-        method: 'DELETE',
+      const response = await apiClient.delete(`/researchs/${id}`, {
         headers: {
           'Authorization': `Bearer ${this.getToken()}`,
           'Content-Type': 'application/json',
         },
       });
 
-      if (!response.ok) {
+      if (response.status < 200 || response.status >= 300) {
         throw new Error('Failed to delete research contribution');
       }
     } catch (error) {
@@ -221,7 +219,7 @@ class ResearchService {
 
   private getToken(): string {
     // Get token from localStorage, sessionStorage, or context
-    return localStorage.getItem('authToken') || 'dummy-token';
+    return localStorage.getItem('accessToken') || 'dummy-token';
   }
 
   private getDummyData(): ResearchContribution[] {
