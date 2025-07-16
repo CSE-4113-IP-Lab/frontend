@@ -84,6 +84,7 @@ import PaymentDeadlines from "./pages/Fee/PaymentDeadlines";
 import TransactionHistory from "./pages/Fee/TransactionHistory";
 import ConfirmationFeedback from "./pages/Fee/ConfirmationFeedback";
 import FeeCreate from "./pages/Fee/FeeCreate";
+import AwardsResearchPage from "./components/AwarResearchPage";
 
 export const router = createBrowserRouter([
   {
@@ -510,7 +511,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "research-gallery",
-        element: <ResearchGallery isAdmin={false} />, // Change to true for admin view
+        element: <ResearchGallery/>, // Change to true for admin view
+      },
+      {
+        path: "awards",
+        element: <AwardsResearchPage />, // Change to true for admin view
       }
     ],
   },

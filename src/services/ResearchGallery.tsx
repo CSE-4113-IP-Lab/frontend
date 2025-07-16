@@ -144,23 +144,30 @@ const ResearchGallery = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="mb-2 font-bold text-gray-900 text-3xl">Research Gallery</h1>
-            <p className="text-gray-600">Explore our department's research grants, fellowships, and publications.</p>
-          </div>
+        className="mb-8">
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="mb-2 font-bold text-gray-900 text-3xl">Research Gallery</h1>
+          <p className="text-gray-600">Explore our department's research grants, fellowships, and publications.</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => window.location.href = "/awards"} // Change "/some-page" to your target route
+            className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg text-gray-800 transition-colors"
+          >
+            Awards
+          </button>
           {isAdmin && (
             <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white transition-colors"
+        onClick={() => setShowAddModal(true)}
+        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white transition-colors"
             >
-              <Plus size={16} />
-              Add Research
+        <Plus size={16} />
+        Add Research
             </button>
           )}
         </div>
+      </div>
       </motion.div>
 
       {/* Search and Filters */}
