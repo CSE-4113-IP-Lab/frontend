@@ -82,6 +82,10 @@ import FacultyByResearch from "@/pages/FacultyInformation/FacultyByResearch";
 import FacultyOnLeaveList from "@/pages/FacultyInformation/FacultyOnLeaveList";
 import ResearchGallery from "./services/ReseaechGallery";
 
+import {StudentProfile} from "@/pages/Student/StudentProfile";
+import {StudentEditProfile} from "@/pages/Student/EditStudentProfile";
+
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -424,6 +428,14 @@ export const router = createBrowserRouter([
             <StudentEquipmentPage />
           </StudentRoute>
         ),
+      },
+      {
+        path: "student/profile",
+        element: <StudentProfile />,
+      },
+      {
+        path: "student/profile/edit",
+        element: <StudentEditProfile />,
       },
       {
         path: "faculty/equipment",
