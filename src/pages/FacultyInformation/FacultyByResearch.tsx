@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, BookOpen, Eye, Award } from 'lucide-react';
+import { Search, BookOpen, Eye, Award ,ArrowLeft} from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 interface Faculty {
@@ -73,9 +73,11 @@ const FacultyByResearch: React.FC = () => {
         
         const authHeaders: Record<string, string> = token ? {
           'Authorization': `Bearer ${token}`,
-          'accept': 'application/json'
+          'accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
         } : {
-          'accept': 'application/json'
+          'accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
         };
 
         console.log('Fetching faculty data with expertise...');
@@ -183,27 +185,42 @@ const FacultyByResearch: React.FC = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#E8E9EA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+       
+         
+         
         
         {/* Header Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <BookOpen className="w-8 h-8 text-gray-800" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Faculty by Research Area
-            </h1>
-          </div>
-          <p className="text-lg text-gray-600 mb-4">
-            Explore our faculty members organized by their research expertise and specializations.
-          </p>
-          <div className="flex items-center gap-2 text-gray-500">
-            <Award className="w-5 h-5" />
-            <span>{expertiseGroups.length} research areas • {facultyData.length} faculty members</span>
+
+          <button
+                    onClick={() => navigate('/faculty')}
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 transition-colors duration-200 font-medium"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                    Back to Faculty Overview
+                  </button>
+
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <BookOpen className="w-8 h-8 text-gray-800" />
+              <h1 className="text-3xl font-bold text-gray-900">
+                Faculty by Research Area
+              </h1>
+            </div>
+            
+            <p className="text-lg text-gray-600 mb-4">
+              Explore our faculty members organized by their research expertise and specializations.
+            </p>
+            <div className="flex items-center justify-center gap-2 text-gray-500">
+              <Award className="w-5 h-5" />
+              <span>{expertiseGroups.length} research areas • {facultyData.length} faculty members</span>
+            </div>
           </div>
         </div>
 
         {/* Search Section */}
-        <div className="mb-8">
-          <div className="relative max-w-md">
+        <div className="mb-8 flex justify-center">
+          <div className="relative max-w-2xl w-full">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
             </div>
@@ -255,7 +272,9 @@ const FacultyByResearch: React.FC = () => {
                       
                       {/* Faculty Info */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-red-600 text-base truncate">
+                        <h3 className="text-xl font-bold mb-1"
+                        style={{ color: "rgb(20, 36, 76)" }}
+                         >
                           {faculty.user.username}
                         </h3>
                         <p className="text-sm text-gray-600 truncate">

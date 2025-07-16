@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Card from '../../components/Card';
+import { ArrowLeft } from 'lucide-react';
 import { RoomService, type RoomBooking, type RoomBookingsParams } from '../../services/roomService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -107,7 +107,24 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">My Bookings</h1>
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate('/room-booking/available')}
+                className="flex items-center space-x-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to Rooms</span>
+              </button>
+              <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
+            </div>
+            <button
+              onClick={() => navigate('/room-booking/available')}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Book a Room
+            </button>
+          </div>
           <div className="flex justify-center">
             <div className="text-lg">Loading bookings...</div>
           </div>
@@ -119,10 +136,27 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">My Bookings</h1>
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/room-booking/available')}
+              className="flex items-center space-x-2 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Rooms</span>
+            </button>
+            <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
+          </div>
+          <button
+            onClick={() => navigate('/room-booking/available')}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Book a Room
+          </button>
+        </div>
         
         {/* Filters */}
-        <Card className="mb-8">
+        <div className="bg-white shadow-sm rounded-lg border mb-8">
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-4">Filter Bookings</h2>
             <div className="flex gap-4">
@@ -156,7 +190,7 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Error Message */}
         {error && (
@@ -174,7 +208,7 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
         {/* Bookings List */}
         <div className="space-y-6">
           {bookings.map((booking) => (
-            <Card key={booking.id} className="hover:shadow-lg transition-shadow">
+            <div key={booking.id} className="bg-white shadow-sm rounded-lg border hover:shadow-lg transition-shadow">
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -255,17 +289,10 @@ const MyBookings: React.FC<MyBookingsProps> = () => {
                         {actionLoading[booking.id] ? 'Cancelling...' : 'Cancel'}
                       </button>
                     )}
-                    
-                    <button
-                      onClick={() => window.location.href = `/room-booking/booking/${booking.id}`}
-                      className="px-3 py-1 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                    >
-                      View Details
-                    </button>
                   </div>
                 </div>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
 

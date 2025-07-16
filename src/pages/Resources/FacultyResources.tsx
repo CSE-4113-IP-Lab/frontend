@@ -143,11 +143,11 @@ export default function FacultyResources() {
                   </div>
                   <Button 
                     size="sm"
-                    onClick={() => navigate('/faculty/room-booking')}
+                    onClick={() => navigate('/room-booking/book')}
                     className="bg-orange-600 hover:bg-orange-700"
                   >
                     <Calendar className="w-4 h-4 mr-1" />
-                    Book Now
+                    Quick Book Room
                   </Button>
                 </div>
               </div>
@@ -275,10 +275,10 @@ export default function FacultyResources() {
                   variant="outline" 
                   size="sm" 
                   className="w-full justify-start hover:bg-teal-50"
-                  onClick={() => navigate('/room-booking')}
+                  onClick={() => navigate('/room-booking/my-bookings')}
                 >
                   <Clock className="w-4 h-4 mr-2" />
-                  View Schedules
+                  Upcoming Booking
                 </Button>
                 <Button 
                   variant="outline" 
@@ -287,7 +287,7 @@ export default function FacultyResources() {
                   onClick={() => navigate('/room-booking/my-bookings')}
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  My Bookings & History
+                  Booking History
                 </Button>
               </div>
             </CardContent>
@@ -512,115 +512,6 @@ export default function FacultyResources() {
                   <Eye className="w-4 h-4 mr-2" />
                   Policies
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Room Booking Hub */}
-          <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500 col-span-1 md:col-span-2 lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-blue-600" />
-                Room Booking Hub
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">
-                Complete room management: browse, schedule, and track bookings
-              </p>
-              
-              {/* Quick Stats Dashboard */}
-              {systemStatus && (
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                  <div className="p-2 bg-blue-50 rounded-lg text-center">
-                    <p className="text-lg font-bold text-blue-600">{systemStatus.total_rooms}</p>
-                    <p className="text-xs text-gray-600">Total Rooms</p>
-                  </div>
-                  <div className="p-2 bg-green-50 rounded-lg text-center">
-                    <p className="text-lg font-bold text-green-600">{systemStatus.available_rooms}</p>
-                    <p className="text-xs text-gray-600">Available</p>
-                  </div>
-                  <div className="p-2 bg-orange-50 rounded-lg text-center">
-                    <p className="text-lg font-bold text-orange-600">{myBookings.length}</p>
-                    <p className="text-xs text-gray-600">My Bookings</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Featured Available Rooms */}
-              {rooms.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Featured Rooms</h4>
-                  <div className="space-y-1">
-                    {rooms.slice(0, 2).map((room) => (
-                      <div key={room.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
-                        <div>
-                          <span className="font-medium text-sm">Room {room.room_number}</span>
-                          <p className="text-xs text-gray-500">{room.capacity} seats • {room.purpose}</p>
-                        </div>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          room.status === 'available' ? 'bg-green-100 text-green-800' :
-                          room.status === 'occupied' ? 'bg-red-100 text-red-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {room.status}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Next Booking Preview */}
-              {myBookings.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Next Booking</h4>
-                  <div className="p-3 bg-blue-50 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-sm">Room {myBookings[0].room?.room_number}</p>
-                        <p className="text-xs text-gray-600">{myBookings[0].purpose}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500">{myBookings[0].booking_date}</p>
-                        <p className="text-xs font-medium text-blue-600">
-                          {RoomService.formatTime(myBookings[0].start_time)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Main Action Buttons */}
-              <div className="space-y-2">
-                <Button 
-                  className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={() => navigate('/room-booking/available')}
-                >
-                  <MapPin className="w-4 h-4 mr-2" />
-                  Browse Available Rooms
-                </Button>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="justify-start hover:bg-blue-50"
-                    onClick={() => navigate('/room-booking')}
-                  >
-                    <Clock className="w-4 h-4 mr-1" />
-                    Schedules
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="justify-start hover:bg-blue-50"
-                    onClick={() => navigate('/room-booking/my-bookings')}
-                  >
-                    <Eye className="w-4 h-4 mr-1" />
-                    My Bookings
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>

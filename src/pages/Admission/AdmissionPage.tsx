@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { admissionService, type AdmissionTimeline } from '../../services/admissionService';
-import { format, parseISO } from 'date-fns';
+import { programService } from '../../services/programService';
+import { format, parseISO, differenceInDays } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,64 +16,70 @@ import { motion } from 'framer-motion';
 
 const AdmissionPage = () => {
   const [timelines, setTimelines] = useState<AdmissionTimeline[]>([]);
+  const [programs, setPrograms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const loadTimelines = async () => {
+  // Calculate dynamic statistics
+  const statistics = useMemo(() => {
+    const now = new Date();
+    const activeTimelines = timelines.filter(timeline => 
+      new Date(timeline.application_end_date) > now
+    );
+    
+    const nearestDeadline = activeTimelines.length > 0 
+      ? Math.min(...activeTimelines.map(timeline => 
+          differenceInDays(new Date(timeline.application_end_date), now)
+        ))
+      : 0;
+
+    return {
+      openPrograms: activeTimelines.length,
+      daysLeft: nearestDeadline,
+      totalPrograms: programs.length,
+      totalApplications: timelines.length // This could be replaced with actual application count from API
+    };
+  }, [timelines, programs]);
+
+  const loadData = async () => {
     try {
-      console.log('Starting to load timelines...');
+      console.log('Starting to load admission data...');
       setLoading(true);
       setError(null);
       
-      // First try to load the data with authentication
-      try {
-        const data = await admissionService.getAdmissionTimelines();
-        console.log('Received authenticated timelines data:', data);
-        
-        if (data.length === 0) {
-          console.log('No timelines data available');
-          setError('No admission timelines available at the moment.');
-        } else {
-          setTimelines(data);
-          console.log('Timelines state updated with authenticated data:', data);
-        }
-      } catch (authError: any) {
-        console.log('Falling back to public timeline data due to:', authError.message);
-        
-        // If authenticated request fails, try to load public data
-        try {
-          // Use type assertion to bypass TypeScript error
-          const publicData = await (admissionService as any).getPublicAdmissionTimelines();
-          
-          if (publicData && publicData.length > 0) {
-            setTimelines(publicData);
-            console.log('Successfully loaded public timelines:', publicData);
-          } else {
-            setError('No admission information is currently available.');
-          }
-        } catch (publicErr) {
-          console.error('Failed to load public timelines:', publicErr);
-          setError('Failed to load admission information. Please try again later.');
-        }
+      // Load timelines and programs concurrently
+      const [timelinesData, programsData] = await Promise.allSettled([
+        admissionService.getAdmissionTimelines().catch(() => 
+          (admissionService as any).getPublicAdmissionTimelines()
+        ),
+        programService.getPublicPrograms().catch(() => [])
+      ]);
+
+      // Handle timelines data
+      if (timelinesData.status === 'fulfilled' && timelinesData.value) {
+        setTimelines(timelinesData.value);
+      } else {
+        setError('No admission timelines available at the moment.');
       }
+
+      // Handle programs data
+      if (programsData.status === 'fulfilled' && programsData.value) {
+        setPrograms(programsData.value);
+      }
+
     } catch (err: any) {
-      console.error('Unexpected error in loadTimelines:', {
-        message: err.message,
-        status: err.response?.status,
-        data: err.response?.data
-      });
+      console.error('Unexpected error in loadData:', err);
       setError('Failed to load admission information. Please try again later.');
     } finally {
       setLoading(false);
-      console.log('Loading state set to false');
     }
   };
 
   useEffect(() => {
-    // Load timelines for all users, regardless of authentication
-    loadTimelines();
+    // Load data for all users, regardless of authentication
+    loadData();
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -157,24 +164,6 @@ const AdmissionPage = () => {
     );
   }
 
-  // Admission requirements data
-  const admissionRequirements = [
-    "Minimum GPA of 3.0 in HSC or equivalent examination",
-    "Minimum GPA of 3.0 in SSC or equivalent examination",
-    "Minimum GPA of 3.5 in Mathematics and Physics in HSC",
-    "Must have taken Mathematics and Physics in HSC or equivalent",
-    "Must have taken English in HSC or equivalent"
-  ];
-
-  // Required documents
-  const requiredDocuments = [
-    "SSC/O-Level mark sheet and certificate",
-    "HSC/A-Level mark sheet and certificate",
-    "Passport size photograph",
-    "National ID/Birth Registration Certificate",
-    "Testimonial from previous institution"
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -187,7 +176,7 @@ const AdmissionPage = () => {
           </p>
         </div>
 
-        {/* Statistics Cards */}
+        {/* Dynamic Statistics Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center">
@@ -196,7 +185,7 @@ const AdmissionPage = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Open Programs</p>
-                <p className="text-2xl font-semibold text-[#14244c]">4</p>
+                <p className="text-2xl font-semibold text-[#14244c]">{statistics.openPrograms}</p>
               </div>
             </div>
           </div>
@@ -208,7 +197,9 @@ const AdmissionPage = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Days Left</p>
-                <p className="text-2xl font-semibold text-[#14244c]">15</p>
+                <p className="text-2xl font-semibold text-[#14244c]">
+                  {statistics.daysLeft > 0 ? statistics.daysLeft : 'N/A'}
+                </p>
               </div>
             </div>
           </div>
@@ -219,8 +210,8 @@ const AdmissionPage = () => {
                 <BookOpen className="w-6 h-6 text-[#14244c]" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Departments</p>
-                <p className="text-2xl font-semibold text-[#14244c]">6</p>
+                <p className="text-sm font-medium text-gray-500">Total Programs</p>
+                <p className="text-2xl font-semibold text-[#14244c]">{statistics.totalPrograms}</p>
               </div>
             </div>
           </div>
@@ -231,46 +222,12 @@ const AdmissionPage = () => {
                 <FileText className="w-6 h-6 text-[#ecb31d]" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Applications</p>
-                <p className="text-2xl font-semibold text-[#14244c]">124</p>
+                <p className="text-sm font-medium text-gray-500">Active Timelines</p>
+                <p className="text-2xl font-semibold text-[#14244c]">{statistics.totalApplications}</p>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Admission Requirements Section */}
-        <Card className="mb-8 border-none shadow-md">
-          <div className="px-6 py-5 border-b border-gray-200 bg-[#14244c] text-white rounded-t-lg">
-            <h2 className="text-lg font-medium">
-              Admission Requirements
-            </h2>
-            <p className="mt-1 text-sm text-gray-200">
-              General requirements for undergraduate admission
-            </p>
-          </div>
-          <CardContent className="divide-y divide-gray-200">
-            <div className="py-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <dt className="text-sm font-medium text-gray-500">Eligibility</dt>
-              <dd className="sm:col-span-2">
-                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
-                  {admissionRequirements.map((requirement, index) => (
-                    <li key={index}>{requirement}</li>
-                  ))}
-                </ul>
-              </dd>
-            </div>
-            <div className="py-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <dt className="text-sm font-medium text-gray-500">Required Documents</dt>
-              <dd className="sm:col-span-2">
-                <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
-                  {requiredDocuments.map((doc, index) => (
-                    <li key={index}>{doc}</li>
-                  ))}
-                </ul>
-              </dd>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Admission Timeline Section */}
         <div className="mb-8">
@@ -296,8 +253,14 @@ const AdmissionPage = () => {
                   <div className="bg-[#14244c] p-6 text-white">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="text-xl font-bold">Program {timeline.program_id}</h3>
-                        <p className="text-gray-200 text-sm mt-1">Admission Timeline</p>
+                        <h3 className="text-xl font-bold">
+                          {programs.find(p => p.id === timeline.program_id)?.name || `Program ${timeline.program_id}`}
+                        </h3>
+                        <p className="text-gray-200 text-sm mt-1">
+                          {programs.find(p => p.id === timeline.program_id)?.type && 
+                            `${programs.find(p => p.id === timeline.program_id)?.type} - `}
+                          Admission Timeline
+                        </p>
                       </div>
                       <Badge 
                         variant="outline" 

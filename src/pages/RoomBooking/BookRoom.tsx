@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RoomService, type Room, type BookRoomRequest, type AvailableRoomsRequest } from '@/services/roomService';
+import { RoomService, type Room, type BookRoomRequest } from '@/services/roomService';
 import { useAuth } from '@/contexts/AuthContext';
+import { getBookingDateRange } from '@/utils/dateUtils';
 
 interface BookRoomProps {}
 
@@ -13,12 +15,11 @@ const BookRoom: React.FC<BookRoomProps> = () => {
   const [searchParams] = useSearchParams();
   const roomIdParam = searchParams.get('room_id');
   
-  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
-  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
   
   const [bookingForm, setBookingForm] = useState<BookRoomRequest>({
     room_id: roomIdParam ? parseInt(roomIdParam) : 0,
@@ -27,14 +28,6 @@ const BookRoom: React.FC<BookRoomProps> = () => {
     end_time: '',
     purpose: '',
     notes: ''
-  });
-
-  const [searchForm, setSearchForm] = useState<AvailableRoomsRequest>({
-    booking_date: '',
-    start_time: '',
-    end_time: '',
-    purpose: '',
-    capacity: undefined
   });
 
   // Check authentication
@@ -49,12 +42,28 @@ const BookRoom: React.FC<BookRoomProps> = () => {
     if (roomIdParam) {
       loadSelectedRoom(parseInt(roomIdParam));
     }
+    loadAllRooms();
   }, [roomIdParam]);
+
+  const loadAllRooms = async () => {
+    try {
+      setLoadingRooms(true);
+      const roomsData = await RoomService.getAllRooms({ 
+        limit: 100, 
+        status: 'available',
+        include_schedule: false 
+      });
+      setRooms(roomsData);
+    } catch (err) {
+      console.error('Error loading rooms:', err);
+    } finally {
+      setLoadingRooms(false);
+    }
+  };
 
   const loadSelectedRoom = async (roomId: number) => {
     try {
-      const roomData = await RoomService.getRoom(roomId);
-      setSelectedRoom(roomData);
+      await RoomService.getRoom(roomId);
       setBookingForm(prev => ({ ...prev, room_id: roomId }));
     } catch (err) {
       setError('Failed to load room details');
@@ -62,40 +71,14 @@ const BookRoom: React.FC<BookRoomProps> = () => {
     }
   };
 
-  const searchAvailableRooms = async () => {
-    const validationError = validateSearchForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await RoomService.searchAvailableRooms(searchForm);
-      setAvailableRooms(response.available_rooms.map(room => ({
-        ...room,
-        status: 'available' as const,
-        operating_start_time: '08:00:00',
-        operating_end_time: '20:00:00',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })));
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || 'Failed to search rooms';
-      setError(errorMessage);
-      console.error('Error searching rooms:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const validateSearchForm = (): string | null => {
-    if (!searchForm.booking_date) return 'Please select booking date';
-    if (!searchForm.start_time) return 'Please select start time';
-    if (!searchForm.end_time) return 'Please select end time';
+  const validateBookingForm = (): string | null => {
+    if (!bookingForm.room_id) return 'Please enter room ID';
+    if (!bookingForm.purpose.trim()) return 'Please enter the purpose of booking';
+    if (!bookingForm.booking_date) return 'Please select booking date';
+    if (!bookingForm.start_time) return 'Please select start time';
+    if (!bookingForm.end_time) return 'Please select end time';
     
-    const bookingDate = new Date(searchForm.booking_date);
+    const bookingDate = new Date(bookingForm.booking_date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -105,8 +88,8 @@ const BookRoom: React.FC<BookRoomProps> = () => {
     if (bookingDate < today) return 'Booking date cannot be in the past';
     if (bookingDate >= oneWeekFromNow) return 'Booking date must be within the next 7 days';
     
-    const [startHour, startMinute] = searchForm.start_time.split(':').map(Number);
-    const [endHour, endMinute] = searchForm.end_time.split(':').map(Number);
+    const [startHour, startMinute] = bookingForm.start_time.split(':').map(Number);
+    const [endHour, endMinute] = bookingForm.end_time.split(':').map(Number);
     
     if (startHour < 8 || startHour >= 20) {
       return 'Start time must be between 8:00 AM and 8:00 PM';
@@ -131,23 +114,6 @@ const BookRoom: React.FC<BookRoomProps> = () => {
     return null;
   };
 
-  const validateBookingForm = (): string | null => {
-    if (!bookingForm.room_id) return 'Please select a room';
-    if (!bookingForm.purpose.trim()) return 'Please enter the purpose of booking';
-    if (!bookingForm.booking_date) return 'Please select booking date';
-    if (!bookingForm.start_time) return 'Please select start time';
-    if (!bookingForm.end_time) return 'Please select end time';
-    
-    return validateSearchForm(); // Same validation logic
-  };
-
-  const handleSearchFormChange = (field: keyof AvailableRoomsRequest, value: string | number | undefined) => {
-    setSearchForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
   const handleBookingFormChange = (field: keyof BookRoomRequest, value: string | number) => {
     setBookingForm(prev => ({
       ...prev,
@@ -156,13 +122,9 @@ const BookRoom: React.FC<BookRoomProps> = () => {
   };
 
   const handleRoomSelect = (room: Room) => {
-    setSelectedRoom(room);
     setBookingForm(prev => ({
       ...prev,
-      room_id: room.id,
-      booking_date: searchForm.booking_date,
-      start_time: searchForm.start_time,
-      end_time: searchForm.end_time
+      room_id: room.id
     }));
   };
 
@@ -191,8 +153,6 @@ const BookRoom: React.FC<BookRoomProps> = () => {
         purpose: '',
         notes: ''
       });
-      setSelectedRoom(null);
-      setAvailableRooms([]);
       
     } catch (err: any) {
       const errorMessage = err.response?.data?.detail || 'Failed to book room';
@@ -223,9 +183,19 @@ const BookRoom: React.FC<BookRoomProps> = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Book Room</h1>
-          <Button variant="outline" onClick={() => navigate('/room-booking/my-bookings')}>
-            My Bookings
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/room-booking/available')}
+              className="flex items-center space-x-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Rooms</span>
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/room-booking/my-bookings')}>
+              Booking History
+            </Button>
+          </div>
         </div>
 
         {/* Success Message */}
@@ -243,155 +213,78 @@ const BookRoom: React.FC<BookRoomProps> = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Search Available Rooms */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Search Available Rooms</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Booking Date <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="date"
-                  value={searchForm.booking_date}
-                  onChange={(e) => handleSearchFormChange('booking_date', e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  max={new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Time <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={searchForm.start_time}
-                    onChange={(e) => handleSearchFormChange('start_time', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select time</option>
-                    {timeOptions.slice(0, -1).map(time => (
-                      <option key={time} value={time}>{RoomService.formatTime(time)}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    End Time <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={searchForm.end_time}
-                    onChange={(e) => handleSearchFormChange('end_time', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select time</option>
-                    {timeOptions.slice(1).map(time => (
-                      <option key={time} value={time}>{RoomService.formatTime(time)}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Purpose (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={searchForm.purpose || ''}
-                  onChange={(e) => handleSearchFormChange('purpose', e.target.value)}
-                  placeholder="e.g., Meeting, Lecture"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Minimum Capacity (Optional)
-                </label>
-                <input
-                  type="number"
-                  value={searchForm.capacity || ''}
-                  onChange={(e) => handleSearchFormChange('capacity', e.target.value ? parseInt(e.target.value) : undefined)}
-                  placeholder="e.g., 20"
-                  min="1"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <Button 
-                onClick={searchAvailableRooms} 
-                disabled={loading}
-                className="w-full"
-              >
-                {loading ? 'Searching...' : 'Search Available Rooms'}
-              </Button>
-
-              {/* Available Rooms Results */}
-              {availableRooms.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="font-medium mb-3">Available Rooms</h3>
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {availableRooms.map((room) => (
-                      <div
-                        key={room.id}
-                        onClick={() => handleRoomSelect(room)}
-                        className={`border p-3 rounded-md cursor-pointer transition-colors ${
-                          selectedRoom?.id === room.id 
-                            ? 'border-blue-500 bg-blue-50' 
-                            : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-                        }`}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium">Room {room.room_number}</h4>
-                            <p className="text-sm text-gray-600">Purpose: {room.purpose}</p>
-                            <p className="text-sm text-gray-600">Capacity: {room.capacity} people</p>
-                            {room.location && (
-                              <p className="text-sm text-gray-600">Location: {room.location}</p>
-                            )}
-                          </div>
-                          {selectedRoom?.id === room.id && (
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                              Selected
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
           {/* Booking Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Booking Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {selectedRoom ? (
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Book Room</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Selected Room Info */}
-                  <div className="bg-blue-50 p-4 rounded-md">
-                    <h3 className="font-medium text-blue-900 mb-2">Selected Room</h3>
-                    <p className="text-sm text-blue-700">Room {selectedRoom.room_number}</p>
-                    <p className="text-sm text-blue-700">Capacity: {selectedRoom.capacity} people</p>
-                    <p className="text-sm text-blue-700">Purpose: {selectedRoom.purpose}</p>
-                    {bookingForm.booking_date && bookingForm.start_time && bookingForm.end_time && (
-                      <p className="text-sm text-blue-700 mt-2">
-                        <strong>Time:</strong> {RoomService.formatDate(bookingForm.booking_date)} 
-                        {' '}{RoomService.formatTime(bookingForm.start_time)} - {RoomService.formatTime(bookingForm.end_time)}
-                      </p>
-                    )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Room ID <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={bookingForm.room_id || ''}
+                      onChange={e => handleBookingFormChange('room_id', parseInt(e.target.value) || 0)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                      min="1"
+                    />
                   </div>
-
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Booking Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={bookingForm.booking_date}
+                      onChange={e => handleBookingFormChange('booking_date', e.target.value)}
+                      min={getBookingDateRange().min}
+                      max={getBookingDateRange().max}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Start Time <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={bookingForm.start_time}
+                        onChange={e => handleBookingFormChange('start_time', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        required
+                      >
+                        <option value="">Select time</option>
+                        {timeOptions.slice(0, -1).map((time) => (
+                          <option key={time} value={time}>{RoomService.formatTime(time)}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        End Time <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={bookingForm.end_time}
+                        onChange={e => handleBookingFormChange('end_time', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        required
+                      >
+                        <option value="">Select time</option>
+                        {timeOptions.slice(1).map((time) => (
+                          <option key={time} value={time}>{RoomService.formatTime(time)}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Purpose <span className="text-red-500">*</span>
@@ -399,26 +292,26 @@ const BookRoom: React.FC<BookRoomProps> = () => {
                     <input
                       type="text"
                       value={bookingForm.purpose}
-                      onChange={(e) => handleBookingFormChange('purpose', e.target.value)}
+                      onChange={e => handleBookingFormChange('purpose', e.target.value)}
                       placeholder="e.g., Team meeting, Class lecture"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
                   </div>
-
+                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Additional Notes (Optional)
                     </label>
                     <textarea
                       value={bookingForm.notes || ''}
-                      onChange={(e) => handleBookingFormChange('notes', e.target.value)}
+                      onChange={e => handleBookingFormChange('notes', e.target.value)}
                       placeholder="Any additional information..."
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
-
+                  
                   <Button 
                     type="submit" 
                     disabled={submitting}
@@ -427,13 +320,66 @@ const BookRoom: React.FC<BookRoomProps> = () => {
                     {submitting ? 'Booking...' : 'Book Room'}
                   </Button>
                 </form>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-gray-600">Search for available rooms to start booking</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Room List */}
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Available Rooms</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loadingRooms ? (
+                  <div className="text-center py-4">Loading rooms...</div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {rooms.map((room) => (
+                      <div
+                        key={room.id}
+                        onClick={() => handleRoomSelect(room)}
+                        className={`p-3 border rounded-lg cursor-pointer transition-colors hover:bg-blue-50 hover:border-blue-300 ${
+                          bookingForm.room_id === room.id 
+                            ? 'bg-blue-100 border-blue-500' 
+                            : 'bg-white border-gray-200'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium text-gray-900">
+                              Room {room.room_number}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Purpose: {room.purpose}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              Capacity: {room.capacity} people
+                            </p>
+                            {room.location && (
+                              <p className="text-sm text-gray-500">
+                                Location: {room.location}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                              {room.status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {rooms.length === 0 && (
+                      <div className="text-center py-4 text-gray-500">
+                        No rooms available
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

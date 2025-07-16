@@ -5,11 +5,30 @@ export interface Event {
   status: string;
   category: string;
   image: string;
+  imageUrl?: string | null; // New field for actual event image
   bgColor: string;
+  date: string; // Event date from backend
+}
+
+// Backend API Event interface
+export interface BackendEvent {
+  id: number;
+  title: string;
+  content: string;
+  date: string;
+  type: string;
+  created_at: string;
+  updated_at: string;
+  attachments?: any[];
+  participants?: any[];
 }
 
 export interface EventCardProps {
   event: Event;
+  onRegister?: (eventId: number) => void;
+  onUnregister?: (eventId: number) => void;
+  isRegistered?: boolean;
+  showRegistrationButton?: boolean;
 }
 
 export interface ExamScheduleItem {

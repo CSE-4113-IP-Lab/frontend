@@ -9,7 +9,6 @@ import {
   CheckCircle,
   Shield,
   Calendar,
-  Clock,
   MapPin
 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -334,15 +333,6 @@ export default function AdminResources() {
                     variant="outline" 
                     size="sm" 
                     className="w-full justify-start"
-                    onClick={() => navigate('/admin/room-management?tab=schedule')}
-                  >
-                    <Clock className="w-4 h-4 mr-2" />
-                    View Schedules
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full justify-start"
                     onClick={() => navigate('/admin/room-management?tab=bookings')}
                   >
                     <Eye className="w-4 h-4 mr-2" />
@@ -355,17 +345,17 @@ export default function AdminResources() {
                     onClick={async () => {
                       try {
                         setLoading(true);
-                        await RoomService.initializeAllSlots();
+                        await RoomService.rollDailySlots();
                         fetchAdminData(); // Refresh data
                       } catch (error) {
-                        console.error('Error initializing slots:', error);
+                        console.error('Error rolling daily slots:', error);
                       } finally {
                         setLoading(false);
                       }
                     }}
                   >
                     <Settings className="w-4 h-4 mr-2" />
-                    Initialize Slots
+                    Roll Daily Slots
                   </Button>
                 </div>
               </CardContent>
