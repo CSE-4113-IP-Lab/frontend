@@ -26,13 +26,14 @@ import FacultyEquipmentPage from "@/pages/Faculty/FacultyEquipment";
 
 import FacultyRoomBooking from "@/pages/Faculty/FacultyRoomBooking";
 
+import ApiTest from "@/pages/ApiTest";
+
 import {
   AdminRoute,
   StudentRoute,
   FacultyRoute,
   AdminOrFacultyRoute,
 } from "@/components/ProtectedRoute";
-import ApiTest from "@/pages/ApiTest";
 import {
   AvailableRooms,
   BookRoom,
@@ -41,12 +42,6 @@ import {
 } from "@/pages/RoomBooking";
 import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
 import RoomDetail from "@/pages/RoomBooking/RoomDetail";
-
-import { AdminRoute, StudentRoute, FacultyRoute, AdminOrFacultyRoute } from "@/components/ProtectedRoute";
-import { AvailableRooms, BookRoom, MyBookings, RoomBookingDashboard } from "@/pages/RoomBooking";
-import RoomBookingTest from "@/pages/RoomBooking/RoomBookingTest";
-import RoomDetail from "@/pages/RoomBooking/RoomDetail";
-
 
 // Admission Pages
 import { AdmissionPage } from "./pages/Admission/index";
@@ -91,23 +86,24 @@ import NewFacultyYearwise from "@/pages/FacultyInformation/NewFacultyYearwise";
 import FacultyByResearch from "@/pages/FacultyInformation/FacultyByResearch";
 import FacultyOnLeaveList from "@/pages/FacultyInformation/FacultyOnLeaveList";
 
-import ResearchGallery from "./services/ReseaechGallery";
 import AddRoom from "./pages/Resources/AddRoom";
 import RoomManagement from "./pages/Resources/RoomManagement";
 
 import ResearchGallery from "./services/ResearchGallery";
 import { CreateSchedule, EditSchedule } from "./pages/Schedule/classSchedule";
 import SchedulePage from "./pages/Schedule/schedule";
-import FeeStructure from "./pages/Fee/FeeStructure";
-import PaymentDeadlines from "./pages/Fee/PaymentDeadlines";
-import TransactionHistory from "./pages/Fee/TransactionHistory";
-import ConfirmationFeedback from "./pages/Fee/ConfirmationFeedback";
-import FeeCreate from "./pages/Fee/FeeCreate";
 import AwardsResearchPage from "./components/AwarResearchPage";
 
-import {StudentProfile} from "@/pages/Student/StudentProfile";
-import {StudentEditProfile} from "@/pages/Student/EditStudentProfile";
-
+import { StudentProfile } from "@/pages/Student/StudentProfile";
+import { StudentEditProfile } from "@/pages/Student/EditStudentProfile";
+import FeePage from "./pages/Fee/Fee";
+import CreateFee from "./pages/Fee/CreateFee";
+import EditFee from "./pages/Fee/EditFee";
+import UnpaidFees from "./pages/Fee/UnpaidFees";
+import MakePayment from "./pages/Fee/MakePayment";
+import PaymentSuccess from "./pages/Fee/PaymentSuccess";
+import PaymentDetails from "./pages/Fee/PaymentDetails";
+import AllPayments from "./pages/Fee/AllPayments";
 
 export const router = createBrowserRouter([
   {
@@ -166,26 +162,6 @@ export const router = createBrowserRouter([
         element: <Auth />, // Placeholder for Auth page, replace with
       },
 
-      {
-        path: "fee/structure",
-        element: <FeeStructure />,
-      },
-      {
-        path: "fee/deadlines",
-        element: <PaymentDeadlines />,
-      },
-      {
-        path: "fee/history",
-        element: <TransactionHistory />,
-      },
-      {
-        path: "fee/confirm",
-        element: <ConfirmationFeedback />,
-      },
-      {
-        path: "fee/create",
-        element: <FeeCreate />,
-      },
       //   path: "notice",
       //   element: <NoticeBoardPage />,
       // },
@@ -561,7 +537,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "research-gallery",
-        element: <ResearchGallery isAdmin={false} />, // Change to true for admin view
+        element: <ResearchGallery />, // Change to true for admin view
       },
 
       {
@@ -581,12 +557,20 @@ export const router = createBrowserRouter([
           </AdminRoute>
         ),
       },
-        element: <ResearchGallery/>, // Change to true for admin view
-      },
+
       {
         path: "awards",
         element: <AwardsResearchPage />, // Change to true for admin view
-      }
+      },
+
+      { path: "fee", element: <FeePage /> },
+      { path: "fee/create", element: <CreateFee /> },
+      { path: "fee/edit/:feeId", element: <EditFee /> },
+      { path: "fee/unpaid", element: <UnpaidFees /> },
+      { path: "fee/payment/new", element: <MakePayment /> },
+      { path: "fee/payment/success", element: <PaymentSuccess /> },
+      { path: "fee/payment/:paymentId", element: <PaymentDetails /> },
+      { path: "fee/payments", element: <AllPayments /> },
     ],
   },
 ]);

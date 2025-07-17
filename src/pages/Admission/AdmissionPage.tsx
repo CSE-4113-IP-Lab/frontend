@@ -1,16 +1,26 @@
-import { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { admissionService, type AdmissionTimeline } from '../../services/admissionService';
-import { programService } from '../../services/programService';
-import { format, parseISO, differenceInDays } from 'date-fns';
-import { useAuth } from '../../contexts/AuthContext';
-import { Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, Clock, BookOpen, ArrowRight, RefreshCw, FileText } from 'lucide-react';
-import { Alert, AlertDescription, AlertIcon } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { motion } from 'framer-motion';
+import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  admissionService,
+  type AdmissionTimeline,
+} from "../../services/admissionService";
+import { programService } from "../../services/programService";
+import { format, parseISO, differenceInDays } from "date-fns";
+import { useAuth } from "../../contexts/AuthContext";
+import { Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Calendar,
+  Clock,
+  BookOpen,
+  ArrowRight,
+  RefreshCw,
+  FileText,
+} from "lucide-react";
+import { Alert, AlertDescription, AlertIcon } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
 // Environment types are now defined in src/env.d.ts
 
@@ -19,59 +29,68 @@ const AdmissionPage = () => {
   const [programs, setPrograms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const [role, setRole] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role");
+    if (storedRole) {
+      setRole(storedRole);
+    }
+  }, []);
 
   // Calculate dynamic statistics
   const statistics = useMemo(() => {
     const now = new Date();
-    const activeTimelines = timelines.filter(timeline => 
-      new Date(timeline.application_end_date) > now
+    const activeTimelines = timelines.filter(
+      (timeline) => new Date(timeline.application_end_date) > now
     );
-    
-    const nearestDeadline = activeTimelines.length > 0 
-      ? Math.min(...activeTimelines.map(timeline => 
-          differenceInDays(new Date(timeline.application_end_date), now)
-        ))
-      : 0;
+
+    const nearestDeadline =
+      activeTimelines.length > 0
+        ? Math.min(
+            ...activeTimelines.map((timeline) =>
+              differenceInDays(new Date(timeline.application_end_date), now)
+            )
+          )
+        : 0;
 
     return {
       openPrograms: activeTimelines.length,
       daysLeft: nearestDeadline,
       totalPrograms: programs.length,
-      totalApplications: timelines.length // This could be replaced with actual application count from API
+      totalApplications: timelines.length, // This could be replaced with actual application count from API
     };
   }, [timelines, programs]);
 
   const loadData = async () => {
     try {
-      console.log('Starting to load admission data...');
+      console.log("Starting to load admission data...");
       setLoading(true);
       setError(null);
-      
+
       // Load timelines and programs concurrently
       const [timelinesData, programsData] = await Promise.allSettled([
-        admissionService.getAdmissionTimelines().catch(() => 
-          (admissionService as any).getPublicAdmissionTimelines()
-        ),
-        programService.getPublicPrograms().catch(() => [])
+        admissionService
+          .getAdmissionTimelines()
+          .catch(() => (admissionService as any).getPublicAdmissionTimelines()),
+        programService.getPublicPrograms().catch(() => []),
       ]);
 
       // Handle timelines data
-      if (timelinesData.status === 'fulfilled' && timelinesData.value) {
+      if (timelinesData.status === "fulfilled" && timelinesData.value) {
         setTimelines(timelinesData.value);
       } else {
-        setError('No admission timelines available at the moment.');
+        setError("No admission timelines available at the moment.");
       }
 
       // Handle programs data
-      if (programsData.status === 'fulfilled' && programsData.value) {
+      if (programsData.status === "fulfilled" && programsData.value) {
         setPrograms(programsData.value);
       }
-
     } catch (err: any) {
-      console.error('Unexpected error in loadData:', err);
-      setError('Failed to load admission information. Please try again later.');
+      console.error("Unexpected error in loadData:", err);
+      setError("Failed to load admission information. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -84,17 +103,17 @@ const AdmissionPage = () => {
 
   const formatDate = (dateString: string) => {
     try {
-      return format(parseISO(dateString), 'MMM d, yyyy');
+      return format(parseISO(dateString), "MMM d, yyyy");
     } catch (e) {
-      console.error('Invalid date format:', dateString);
-      return 'Invalid date';
+      console.error("Invalid date format:", dateString);
+      return "Invalid date";
     }
   };
 
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <motion.div 
+        <motion.div
           className="w-full max-w-md"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -103,13 +122,11 @@ const AdmissionPage = () => {
             <AlertIcon variant="destructive" />
             <div>
               <h3 className="font-medium">Something went wrong</h3>
-              <AlertDescription className="mt-1">
-                {error}
-              </AlertDescription>
+              <AlertDescription className="mt-1">{error}</AlertDescription>
             </div>
           </Alert>
           <div className="mt-6 text-center">
-            <Button 
+            <Button
               className="inline-flex items-center gap-2 bg-[#14244c] hover:bg-[#ecb31d] text-white hover:text-[#14244c] transition-colors cursor-pointer"
               onClick={() => window.location.reload()}
             >
@@ -134,11 +151,11 @@ const AdmissionPage = () => {
               Loading admission schedules and deadlines...
             </p>
           </div>
-          
+
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
-              <motion.div 
-                key={i} 
+              <motion.div
+                key={i}
                 className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -184,8 +201,12 @@ const AdmissionPage = () => {
                 <Calendar className="w-6 h-6 text-[#14244c]" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Open Programs</p>
-                <p className="text-2xl font-semibold text-[#14244c]">{statistics.openPrograms}</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Open Programs
+                </p>
+                <p className="text-2xl font-semibold text-[#14244c]">
+                  {statistics.openPrograms}
+                </p>
               </div>
             </div>
           </div>
@@ -198,7 +219,7 @@ const AdmissionPage = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Days Left</p>
                 <p className="text-2xl font-semibold text-[#14244c]">
-                  {statistics.daysLeft > 0 ? statistics.daysLeft : 'N/A'}
+                  {statistics.daysLeft > 0 ? statistics.daysLeft : "N/A"}
                 </p>
               </div>
             </div>
@@ -210,8 +231,12 @@ const AdmissionPage = () => {
                 <BookOpen className="w-6 h-6 text-[#14244c]" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Programs</p>
-                <p className="text-2xl font-semibold text-[#14244c]">{statistics.totalPrograms}</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Total Programs
+                </p>
+                <p className="text-2xl font-semibold text-[#14244c]">
+                  {statistics.totalPrograms}
+                </p>
               </div>
             </div>
           </div>
@@ -222,8 +247,12 @@ const AdmissionPage = () => {
                 <FileText className="w-6 h-6 text-[#ecb31d]" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Active Timelines</p>
-                <p className="text-2xl font-semibold text-[#14244c]">{statistics.totalApplications}</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Active Timelines
+                </p>
+                <p className="text-2xl font-semibold text-[#14244c]">
+                  {statistics.totalApplications}
+                </p>
               </div>
             </div>
           </div>
@@ -231,8 +260,10 @@ const AdmissionPage = () => {
 
         {/* Admission Timeline Section */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-[#14244c] mb-6">Admission Timeline</h2>
-          
+          <h2 className="text-2xl font-bold text-[#14244c] mb-6">
+            Admission Timeline
+          </h2>
+
           <div className="space-y-6">
             {timelines
               .sort((a, b) => {
@@ -240,145 +271,199 @@ const AdmissionPage = () => {
                 const bIsOpen = new Date(b.application_end_date) > new Date();
                 if (aIsOpen && !bIsOpen) return -1;
                 if (!aIsOpen && bIsOpen) return 1;
-                return new Date(b.application_end_date).getTime() - new Date(a.application_end_date).getTime();
+                return (
+                  new Date(b.application_end_date).getTime() -
+                  new Date(a.application_end_date).getTime()
+                );
               })
               .map((timeline) => (
-              <motion.div
-                key={timeline.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-all duration-300">
-                  <div className="bg-[#14244c] p-6 text-white">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-xl font-bold">
-                          {programs.find(p => p.id === timeline.program_id)?.name || `Program ${timeline.program_id}`}
-                        </h3>
-                        <p className="text-gray-200 text-sm mt-1">
-                          {programs.find(p => p.id === timeline.program_id)?.type && 
-                            `${programs.find(p => p.id === timeline.program_id)?.type} - `}
-                          Admission Timeline
-                        </p>
+                <motion.div
+                  key={timeline.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-all duration-300">
+                    <div className="bg-[#14244c] p-6 text-white">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-xl font-bold">
+                            {programs.find((p) => p.id === timeline.program_id)
+                              ?.name || `Program ${timeline.program_id}`}
+                          </h3>
+                          <p className="text-gray-200 text-sm mt-1">
+                            {programs.find((p) => p.id === timeline.program_id)
+                              ?.type &&
+                              `${
+                                programs.find(
+                                  (p) => p.id === timeline.program_id
+                                )?.type
+                              } - `}
+                            Admission Timeline
+                          </p>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className={
+                            new Date(timeline.application_end_date) > new Date()
+                              ? "bg-[#ecb31d] text-[#14244c] border-none"
+                              : "bg-gray-200 text-gray-700 border-none"
+                          }
+                        >
+                          {new Date(timeline.application_end_date) > new Date()
+                            ? "Open"
+                            : "Closed"}
+                        </Badge>
                       </div>
-                      <Badge 
-                        variant="outline" 
-                        className={new Date(timeline.application_end_date) > new Date() 
-                          ? "bg-[#ecb31d] text-[#14244c] border-none" 
-                          : "bg-gray-200 text-gray-700 border-none"
-                        }
-                      >
-                        {new Date(timeline.application_end_date) > new Date() ? 'Open' : 'Closed'}
-                      </Badge>
                     </div>
-                  </div>
-                  <CardContent className="p-6 bg-white">
-                    <div className="space-y-6">
-                      {/* Important Dates Section */}
-                      <div className="space-y-4">
-                        <h4 className="font-semibold text-[#14244c]">Timeline Details</h4>
-                        <div className="grid gap-4">
-                          {/* Application Period */}
-                          <div className="flex items-center text-gray-600">
-                            <Calendar className="w-5 h-5 mr-3 text-[#14244c]" />
-                            <div>
-                              <p className="text-sm font-medium">Application Period</p>
-                              <p className="text-sm">
-                                {formatDate(timeline.application_start_date)} - {formatDate(timeline.application_end_date)}
-                              </p>
+                    <CardContent className="p-6 bg-white">
+                      <div className="space-y-6">
+                        {/* Important Dates Section */}
+                        <div className="space-y-4">
+                          <h4 className="font-semibold text-[#14244c]">
+                            Timeline Details
+                          </h4>
+                          <div className="grid gap-4">
+                            {/* Application Period */}
+                            <div className="flex items-center text-gray-600">
+                              <Calendar className="w-5 h-5 mr-3 text-[#14244c]" />
+                              <div>
+                                <p className="text-sm font-medium">
+                                  Application Period
+                                </p>
+                                <p className="text-sm">
+                                  {formatDate(timeline.application_start_date)}{" "}
+                                  - {formatDate(timeline.application_end_date)}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                          
-                          {/* Admission Exam Date */}
-                          <div className="flex items-center text-gray-600">
-                            <BookOpen className="w-5 h-5 mr-3 text-[#14244c]" />
-                            <div>
-                              <p className="text-sm font-medium">Admission Exam Date</p>
-                              <p className="text-sm">{formatDate(timeline.admission_exam_date)}</p>
+
+                            {/* Admission Exam Date */}
+                            <div className="flex items-center text-gray-600">
+                              <BookOpen className="w-5 h-5 mr-3 text-[#14244c]" />
+                              <div>
+                                <p className="text-sm font-medium">
+                                  Admission Exam Date
+                                </p>
+                                <p className="text-sm">
+                                  {formatDate(timeline.admission_exam_date)}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                          
-                          {/* Result Publication */}
-                          <div className="flex items-center text-gray-600">
-                            <FileText className="w-5 h-5 mr-3 text-[#ecb31d]" />
-                            <div>
-                              <p className="text-sm font-medium">Result Publication Date</p>
-                              <p className="text-sm">{formatDate(timeline.result_publication_date)}</p>
+
+                            {/* Result Publication */}
+                            <div className="flex items-center text-gray-600">
+                              <FileText className="w-5 h-5 mr-3 text-[#ecb31d]" />
+                              <div>
+                                <p className="text-sm font-medium">
+                                  Result Publication Date
+                                </p>
+                                <p className="text-sm">
+                                  {formatDate(timeline.result_publication_date)}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                          
-                          {/* Confirmation Period */}
-                          <div className="flex items-center text-gray-600">
-                            <Clock className="w-5 h-5 mr-3 text-[#14244c]" />
-                            <div>
-                              <p className="text-sm font-medium">Admission Confirmation Period</p>
-                              <p className="text-sm">
-                                {formatDate(timeline.admission_confirmation_start_date)} - {formatDate(timeline.admission_confirmation_end_date)}
-                              </p>
+
+                            {/* Confirmation Period */}
+                            <div className="flex items-center text-gray-600">
+                              <Clock className="w-5 h-5 mr-3 text-[#14244c]" />
+                              <div>
+                                <p className="text-sm font-medium">
+                                  Admission Confirmation Period
+                                </p>
+                                <p className="text-sm">
+                                  {formatDate(
+                                    timeline.admission_confirmation_start_date
+                                  )}{" "}
+                                  -{" "}
+                                  {formatDate(
+                                    timeline.admission_confirmation_end_date
+                                  )}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Action Buttons */}
-                      <div className="pt-4 border-t border-gray-100 space-y-3">
-                        {user?.role === 'admin' ? (
-                          <Button
-                            className="w-full bg-[#14244c] hover:bg-[#ecb31d] text-white hover:text-[#14244c] transition-colors cursor-pointer"
-                            onClick={() => navigate(`/admission/edit/${timeline.id}`)}
-                          >
-                            Manage Timeline
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                          </Button>
-                        ) : (
-                          <>
+                        {/* Action Buttons */}
+                        <div className="pt-4 border-t border-gray-100 space-y-3">
+                          {role === "admin" ? (
                             <Button
-                              className={`w-full ${
-                                new Date(timeline.application_end_date) > new Date()
-                                  ? 'bg-[#14244c] hover:bg-[#ecb31d] text-white hover:text-[#14244c] transition-colors cursor-pointer font-semibold'
-                                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                              }`}                            onClick={() => {
-                              if (new Date(timeline.application_end_date) > new Date()) {
-                                navigate(`/admission/apply?program=${timeline.program_id}`);
+                              className="w-full bg-[#14244c] hover:bg-[#ecb31d] text-white hover:text-[#14244c] transition-colors cursor-pointer"
+                              onClick={() =>
+                                navigate(`/admission/edit/${timeline.id}`)
                               }
-                            }}
-                              disabled={new Date(timeline.application_end_date) <= new Date()}
                             >
-                              {new Date(timeline.application_end_date) > new Date() ? (
-                                <>Apply Now <ArrowRight className="w-4 h-4 ml-2" /></>
-                              ) : (
-                                'Application Closed'
-                              )}
+                              Manage Timeline
+                              <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
-                            {timeline.attachment && (
+                          ) : (
+                            <>
                               <Button
-                                variant="outline"
-                                className="w-full border-[#14244c] text-[#14244c] hover:bg-[#ecb31d] hover:border-[#ecb31d] hover:text-white transition-colors cursor-pointer"
-                                onClick={() => window.open(timeline.attachment?.url, '_blank')}
+                                className={`w-full ${
+                                  new Date(timeline.application_end_date) >
+                                  new Date()
+                                    ? "bg-[#14244c] hover:bg-[#ecb31d] text-white hover:text-[#14244c] transition-colors cursor-pointer font-semibold"
+                                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                }`}
+                                onClick={() => {
+                                  if (
+                                    new Date(timeline.application_end_date) >
+                                    new Date()
+                                  ) {
+                                    navigate(
+                                      `/admission/apply?program=${timeline.program_id}`
+                                    );
+                                  }
+                                }}
+                                disabled={
+                                  new Date(timeline.application_end_date) <=
+                                  new Date()
+                                }
                               >
-                                <FileText className="w-4 h-4 mr-2" />
-                                View Detailed Schedule
+                                {new Date(timeline.application_end_date) >
+                                new Date() ? (
+                                  <>
+                                    Apply Now{" "}
+                                    <ArrowRight className="w-4 h-4 ml-2" />
+                                  </>
+                                ) : (
+                                  "Application Closed"
+                                )}
                               </Button>
-                            )}
-                          </>
-                        )}
+                              {timeline.attachment && (
+                                <Button
+                                  variant="outline"
+                                  className="w-full border-[#14244c] text-[#14244c] hover:bg-[#ecb31d] hover:border-[#ecb31d] hover:text-white transition-colors cursor-pointer"
+                                  onClick={() =>
+                                    window.open(
+                                      timeline.attachment?.url,
+                                      "_blank"
+                                    )
+                                  }
+                                >
+                                  <FileText className="w-4 h-4 mr-2" />
+                                  View Detailed Schedule
+                                </Button>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
           </div>
         </div>
       </div>
 
       {/* Admin Controls */}
-      {user?.role === 'admin' && (
+      {role === "admin" && (
         <div className="fixed bottom-6 right-6">
           <Button
             className="bg-[#14244c] hover:bg-[#ecb31d] text-white hover:text-[#14244c] shadow-lg transition-colors cursor-pointer"
-            onClick={() => navigate('/admission/manage')}
+            onClick={() => navigate("/admission/manage")}
           >
             <Settings className="w-4 h-4 mr-2" />
             Manage Admissions

@@ -58,45 +58,6 @@ export default function StudentResources() {
           {/* Student Resource Categories */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Study Materials */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-blue-600" />
-                  Study Materials
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">
-                  Access course materials, textbooks, and study guides
-                </p>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    Course Materials
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Lecture Notes
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Past Papers
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Equipment */}
             <Card className="hover:shadow-lg transition-shadow">
@@ -143,45 +104,6 @@ export default function StudentResources() {
             </Card>
 
             {/* Academic Tools */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-indigo-600" />
-                  Academic Tools
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">
-                  Useful tools and calculators for academic work
-                </p>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    GPA Calculator
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Academic Calendar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    Course Planner
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Assignments */}
             <Card
@@ -272,7 +194,10 @@ export default function StudentResources() {
             </Card>
 
             {/* Fee */}
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card
+              className="hover:shadow-lg transition-shadow"
+              onClick={() => navigate("/fee")}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-teal-600" />

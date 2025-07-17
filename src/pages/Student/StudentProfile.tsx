@@ -1,19 +1,19 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Calendar, 
-  BookOpen, 
-  UserCheck, 
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  BookOpen,
+  UserCheck,
   Edit,
-  Loader2
-} from 'lucide-react';
+  Loader2,
+} from "lucide-react";
 
 interface StudentData {
   year: number;
@@ -43,18 +43,20 @@ export function StudentProfile() {
   const apiUrl = import.meta.env.VITE_ENDPOINT;
 
   // Helper function to get image URL
-  const getImageUrl = (image: string | { id: number; url: string } | null | undefined): string | null => {
-    if (typeof image === 'string') {
+  const getImageUrl = (
+    image: string | { id: number; url: string } | null | undefined
+  ): string | null => {
+    if (typeof image === "string") {
       // If it's already a full URL, return as is
-      if (image.startsWith('http')) {
+      if (image.startsWith("http")) {
         return image;
       }
       // If it's a relative path, construct full URL
       return `${apiUrl}/${image}`;
     }
-    if (typeof image === 'object' && image?.url) {
+    if (typeof image === "object" && image?.url) {
       // If it's already a full URL, return as is
-      if (image.url.startsWith('http')) {
+      if (image.url.startsWith("http")) {
         return image.url;
       }
       // If it's a relative path, construct full URL
@@ -69,28 +71,31 @@ export function StudentProfile() {
 
   const fetchStudentProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       if (!token) {
-        throw new Error('No authentication token found');
+        throw new Error("No authentication token found");
       }
 
-      const response = await fetch(`${import.meta.env.VITE_ENDPOINT}/students/me/profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'accept': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
+      const response = await fetch(
+        `${import.meta.env.VITE_ENDPOINT}/students/me/profile`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            accept: "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch student profile');
+        throw new Error("Failed to fetch student profile");
       }
 
       const data = await response.json();
       setStudentData(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -98,26 +103,26 @@ export function StudentProfile() {
 
   const handleEditProfile = () => {
     // Navigate to edit profile page
-    navigate('/student/profile/edit');
+    navigate("/student/profile/edit");
   };
 
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
   const getGenderBadgeColor = (gender: string) => {
-    switch (gender.toLowerCase()) {
-      case 'male':
-        return 'bg-blue-100 text-blue-800';
-      case 'female':
-        return 'bg-pink-100 text-pink-800';
+    switch (gender?.toLowerCase()) {
+      case "male":
+        return "bg-blue-100 text-blue-800";
+      case "female":
+        return "bg-pink-100 text-pink-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -158,9 +163,14 @@ export function StudentProfile() {
             <div className="text-red-500 mb-4">
               <User className="h-12 w-12 mx-auto" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Profile</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Error Loading Profile
+            </h2>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={fetchStudentProfile} className="bg-[#14244C] hover:bg-[#ECB31D] text-white">
+            <Button
+              onClick={fetchStudentProfile}
+              className="bg-[#14244C] hover:bg-[#ECB31D] text-white"
+            >
               Try Again
             </Button>
           </CardContent>
@@ -175,8 +185,12 @@ export function StudentProfile() {
         <Card className="max-w-md w-full">
           <CardContent className="p-6 text-center">
             <User className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No Profile Found</h2>
-            <p className="text-gray-600">Unable to load student profile data.</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              No Profile Found
+            </h2>
+            <p className="text-gray-600">
+              Unable to load student profile data.
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -189,16 +203,18 @@ export function StudentProfile() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Student Profile</h1>
-          <p className="mt-2 text-gray-600">View and manage your student information</p>
+          <p className="mt-2 text-gray-600">
+            View and manage your student information
+          </p>
         </div>
 
         {/* Profile Card */}
         <Card className="mb-8 overflow-hidden shadow-xl">
-          <CardHeader 
-            style={{ 
-              background: 'linear-gradient(135deg, #14244C 0%, #1a2f5a 100%)',
-              backgroundSize: '100% 100%'
-            }} 
+          <CardHeader
+            style={{
+              background: "linear-gradient(135deg, #14244C 0%, #1a2f5a 100%)",
+              backgroundSize: "100% 100%",
+            }}
             className="text-white py-8 px-6 relative"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
@@ -208,14 +224,17 @@ export function StudentProfile() {
                   <div className="relative">
                     <Avatar className="h-32 w-32 border-4 border-white shadow-2xl ring-4 ring-white/20">
                       {getImageUrl(studentData.user.image) ? (
-                        <AvatarImage 
-                          src={getImageUrl(studentData.user.image)!} 
+                        <AvatarImage
+                          src={getImageUrl(studentData.user.image)!}
                           alt={studentData.user.username}
                           className="object-cover transition-all duration-300 hover:scale-105"
                         />
                       ) : (
-                        <AvatarFallback 
-                          style={{ backgroundColor: '#ECB31D', color: '#14244C' }} 
+                        <AvatarFallback
+                          style={{
+                            backgroundColor: "#ECB31D",
+                            color: "#14244C",
+                          }}
                           className="text-4xl font-bold shadow-inner"
                         >
                           {getInitials(studentData.user.username)}
@@ -224,15 +243,24 @@ export function StudentProfile() {
                     </Avatar>
                   </div>
                   <div className="flex-1">
-                    <CardTitle className="text-3xl text-white font-bold mb-2 tracking-wide">{studentData.user.username}</CardTitle>
-                    <p className="text-blue-200 text-lg mb-3 font-medium">Student ID: {studentData.registration_number}</p>
+                    <CardTitle className="text-3xl text-white font-bold mb-2 tracking-wide">
+                      {studentData.user.username}
+                    </CardTitle>
+                    <p className="text-blue-200 text-lg mb-3 font-medium">
+                      Student ID: {studentData.registration_number}
+                    </p>
                     <div className="flex items-center space-x-3 flex-wrap">
                       {getVerificationStatus(studentData.user.is_verified)}
-                      <Badge className={`${getGenderBadgeColor(studentData.user.gender)} font-medium px-3 py-1`}>
+                      <Badge
+                        className={`${getGenderBadgeColor(
+                          studentData.user.gender
+                        )} font-medium px-3 py-1`}
+                      >
                         {studentData.user.gender}
                       </Badge>
                       <Badge className="bg-blue-100 text-blue-800 font-medium px-3 py-1">
-                        Year {studentData.year} • Semester {studentData.semester}
+                        Year {studentData.year} • Semester{" "}
+                        {studentData.semester}
                       </Badge>
                     </div>
                   </div>
@@ -265,21 +293,27 @@ export function StudentProfile() {
                   <Mail className="h-5 w-5 text-gray-500" />
                   <div>
                     <p className="text-sm text-gray-500">Email</p>
-                    <p className="font-medium text-gray-900">{studentData.user.email}</p>
+                    <p className="font-medium text-gray-900">
+                      {studentData.user.email}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Phone className="h-5 w-5 text-gray-500" />
                   <div>
                     <p className="text-sm text-gray-500">Phone</p>
-                    <p className="font-medium text-gray-900">{studentData.user.phone}</p>
+                    <p className="font-medium text-gray-900">
+                      {studentData.user.phone}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <UserCheck className="h-5 w-5 text-gray-500" />
                   <div>
                     <p className="text-sm text-gray-500">Gender</p>
-                    <p className="font-medium text-gray-900 capitalize">{studentData.user.gender}</p>
+                    <p className="font-medium text-gray-900 capitalize">
+                      {studentData.user.gender}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -300,40 +334,50 @@ export function StudentProfile() {
                   <Calendar className="h-5 w-5 text-gray-500" />
                   <div>
                     <p className="text-sm text-gray-500">Registration Number</p>
-                    <p className="font-medium text-gray-900">{studentData.registration_number}</p>
+                    <p className="font-medium text-gray-900">
+                      {studentData.registration_number}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <BookOpen className="h-5 w-5 text-gray-500" />
                   <div>
                     <p className="text-sm text-gray-500">Session</p>
-                    <p className="font-medium text-gray-900">{studentData.session}</p>
+                    <p className="font-medium text-gray-900">
+                      {studentData.session}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="h-5 w-5 bg-[#14244C] rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">{studentData.year}</span>
+                    <span className="text-white text-xs font-bold">
+                      {studentData.year}
+                    </span>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Current Year</p>
-                    <p className="font-medium text-gray-900">Year {studentData.year}</p>
+                    <p className="font-medium text-gray-900">
+                      Year {studentData.year}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="h-5 w-5 bg-[#ECB31D] rounded-full flex items-center justify-center">
-                    <span className="text-[#14244C] text-xs font-bold">{studentData.semester}</span>
+                    <span className="text-[#14244C] text-xs font-bold">
+                      {studentData.semester}
+                    </span>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Current Semester</p>
-                    <p className="font-medium text-gray-900">Semester {studentData.semester}</p>
+                    <p className="font-medium text-gray-900">
+                      Semester {studentData.semester}
+                    </p>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
-
-        
 
         {/* Actions */}
         <div className="mt-8 flex justify-center">
@@ -349,4 +393,3 @@ export function StudentProfile() {
     </div>
   );
 }
-

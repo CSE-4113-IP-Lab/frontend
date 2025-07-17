@@ -10,6 +10,8 @@ import {
   Shield,
   Calendar,
   MapPin,
+  CreditCard,
+  Download,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -343,6 +345,49 @@ export default function AdminResources() {
                   >
                     <Settings className="w-4 h-4 mr-2" />
                     Manage Inventory
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="hover:shadow-lg transition-shadow"
+              onClick={() => navigate("/fee")}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-teal-600" />
+                  Fee
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">
+                  Manage tuition fees, payments, and financial records
+                </p>
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Pay Fees
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Fee Statement
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Payment History
                   </Button>
                 </div>
               </CardContent>

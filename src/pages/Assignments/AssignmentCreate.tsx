@@ -23,6 +23,7 @@ const AssignmentCreate = () => {
 
   useEffect(() => {
     const fetchCourses = async () => {
+      const userId = localStorage.getItem("id");
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/courses`,
@@ -34,7 +35,9 @@ const AssignmentCreate = () => {
             },
           }
         );
-        setCourses(response.data);
+        setCourses(
+          response.data.filter((course: any) => course.teacher_id == userId)
+        );
         console.log("Fetched courses:", response.data);
       } catch (error) {
         console.error("Failed to fetch courses", error);

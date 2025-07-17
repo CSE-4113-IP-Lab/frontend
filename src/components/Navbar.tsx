@@ -21,19 +21,16 @@ const navItems = [
   { label: "FACULTY", href: "/faculty" },
   { label: "NOTICE", href: "/notice" },
   { label: "EVENT", href: "/event" },
-  { label: "MEETING", href: "/meetings" },
+  { label: "RESEARCH", href: "/research-gallery" },
+  { label: "ADMISSION", href: "/admission" },
   { label: "CONTACT", href: "/contact" },
-  { label: "SCHEDULE", href: "/schedule" },
-  { label: "RESOURCES", href: "/resources" }
-
 ];
 
 const additionalNavItems = [
-  { label: "Academics", href: "/academics" },
-  { label: "Research", href: "/research" },
-  { label: "Admissions", href: "/admission" },
-  { label: "Faculty", href: "/faculty" },
-  { label: "Schedule", href: "/schedule" },
+  { label: "SCHEDULE", href: "/schedule" },
+  { label: "RESOURCES", href: "/resources" },
+  { label: "PROGRAMS", href: "/programs" },
+  { label: "COURSES", href: "/courses" },
 ];
 
 export function Navbar({ className }: NavbarProps) {
@@ -48,7 +45,7 @@ export function Navbar({ className }: NavbarProps) {
   const navigate = useNavigate();
   const userRole = localStorage.getItem("role");
   const userEmail = localStorage.getItem("userEmail");
-  const userid=  parseInt(localStorage.getItem("id")||"0");
+  const userid = parseInt(localStorage.getItem("id") || "0");
 
   useEffect(() => {
     const id = localStorage.getItem("id");
@@ -79,21 +76,24 @@ export function Navbar({ className }: NavbarProps) {
     if (userRole === "faculty") {
       try {
         // Get token from localStorage
-        const token = localStorage.getItem('token');
-        
+        const token = localStorage.getItem("token");
+
         if (!token) {
-          throw new Error('No authentication token found');
+          throw new Error("No authentication token found");
         }
-        
+
         // Fetch faculty data using the user ID
-        const response = await fetch(`${import.meta.env.VITE_ENDPOINT}/faculties/user/${userid}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'accept': 'application/json',
-            'ngrok-skip-browser-warning': 'true'
+        const response = await fetch(
+          `${import.meta.env.VITE_ENDPOINT}/faculties/user/${userid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              accept: "application/json",
+              "ngrok-skip-browser-warning": "true",
+            },
           }
-        });
-        
+        );
+
         if (response.ok) {
           const facultyData = await response.json();
           // Navigate to faculty profile with the faculty ID (facultyData.id is the faculty ID)
@@ -103,14 +103,13 @@ export function Navbar({ className }: NavbarProps) {
           navigate("/profile");
         }
       } catch (error) {
-        console.error('Error fetching faculty data:', error);
+        console.error("Error fetching faculty data:", error);
         // Fallback to regular profile page on error
         navigate("/profile");
       }
-    }else if (userRole === "student") {
-        navigate(`/student/profile`);
-    }
-    else {
+    } else if (userRole === "student") {
+      navigate(`/student/profile`);
+    } else {
       // For non-faculty users, go to regular profile page
       navigate("/admin/profile");
     }
@@ -293,43 +292,9 @@ export function Navbar({ className }: NavbarProps) {
                       </Link>
                     </DropdownMenuItem>
                   ))}
-                  <DropdownMenuItem className="text-white hover:bg-white/10 focus:bg-white/10">
-                    <Link to="/profile" className="w-full">
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="text-white hover:bg-white/10 focus:bg-white/10">
-                    <Link to="/settings" className="w-full">
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="text-white hover:bg-white/10 focus:bg-white/10">
-                    <Link to="/help" className="w-full">
-                      Help
-                    </Link>
-                  </DropdownMenuItem>
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-        </div>
-
-        {/* Notice Bar */}
-        <div className="bg-gray-200 text-gray-800 px-4 py-2 text-sm border-t border-gray-300">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <span className="text-gray-700">
-                Notice !!! Shawon got cgpa -4 in semester 4-1
-              </span>
-              <ChevronRight className="h-4 w-4 ml-2 text-gray-600" />
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-5 w-5 text-gray-600 hover:text-gray-800 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </div>
       </div>

@@ -122,8 +122,8 @@ const Otp = ({ setShowOtp }: OtpProps) => {
           }
 
           localStorage.setItem("token", response.data.access_token);
-          localStorage.setItem("access_token", response.data.token);
-          localStorage.setItem("id", response.data.used_id);
+          localStorage.setItem("access_token", response.data.access_token);
+          localStorage.setItem("id", response.data.user_id);
           localStorage.setItem("role", response.data.user_role);
           localStorage.setItem("userRole", response.data.user_role);
           // setToastMessage("OTP verification successfully");

@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
+  import.meta.env.VITE_SERVER_URL || "http://127.0.0.1:8000/api/v1";
 
 export interface ExamScheduleItem {
   id: number;
@@ -85,6 +85,7 @@ class ExamScheduleService {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
         },
       });
 
@@ -122,6 +123,7 @@ class ExamScheduleService {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
           Authorization: `Bearer ${token}`,
         },
       });
@@ -148,6 +150,7 @@ class ExamScheduleService {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(scheduleData),
@@ -187,6 +190,7 @@ class ExamScheduleService {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
           Authorization: `Bearer ${token}`,
         },
       });
@@ -215,6 +219,7 @@ class ExamScheduleService {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
             Authorization: `Bearer ${token}`,
           },
         }
@@ -245,6 +250,7 @@ class ExamScheduleService {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(scheduleData),
@@ -272,6 +278,7 @@ class ExamScheduleService {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
             Authorization: `Bearer ${token}`,
           },
         }

@@ -13,7 +13,8 @@ export function Home() {
         style={{
           backgroundImage:
             "linear-gradient(rgba(20, 36, 76, 0.7), rgba(20, 36, 76, 0.7)), url('https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1000&auto=format&fit=crop')",
-        }}>
+        }}
+      >
         {/* CSEDU Header Section */}
         <div className="right-0 bottom-0 left-0 absolute">
           {/* Blue background box */}
@@ -27,10 +28,12 @@ export function Home() {
                   backgroundColor: "#ECB31D",
                   width: "85%",
                   paddingLeft: "2rem",
-                }}>
+                }}
+              >
                 <h1
                   className="font-bold text-6xl tracking-tight"
-                  style={{ color: "#14244C" }}>
+                  style={{ color: "#14244C" }}
+                >
                   CSE
                 </h1>
               </div>
@@ -38,7 +41,8 @@ export function Home() {
               <div className="flex flex-1 justify-start items-center pl-3 h-full">
                 <h1
                   className="font-bold text-6xl tracking-tight"
-                  style={{ color: "#ECB31D" }}>
+                  style={{ color: "#ECB31D" }}
+                >
                   DU
                 </h1>
               </div>
@@ -50,26 +54,6 @@ export function Home() {
             <div className="right-0 bottom-12 left-0 absolute bg-white/30 h-px"></div>
 
             {/* Navigation links at bottom */}
-            <div className="right-0 bottom-3 left-0 absolute">
-              <div className="flex justify-center space-x-8">
-                <button className="font-medium text-white hover:text-gray-300 text-lg padding-y-5">
-                  Academics
-                </button>
-                <button onClick={() => navigate('/research-gallery')}
-                className="font-medium text-white hover:text-gray-300 text-lg padding-y-5">
-                  Research
-                </button>
-                <button className="font-medium text-white hover:text-gray-300 text-lg padding-y-5">
-                  Admissions
-                </button>
-                <button className="font-medium text-white hover:text-gray-300 text-lg padding-y-5">
-                  Faculty
-                </button>
-                <button className="font-medium text-white hover:text-gray-300 text-lg padding-y-5">
-                  Schedule
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>

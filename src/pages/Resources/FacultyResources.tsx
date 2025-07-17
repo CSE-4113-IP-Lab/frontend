@@ -172,45 +172,6 @@ export default function FacultyResources() {
           {/* Faculty Resource Categories */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Course Management */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-blue-600" />
-                  Course Management
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">
-                  Manage courses, syllabi, and course materials
-                </p>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    My Courses
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Upload Materials
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Manage Syllabus
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Room Booking System */}
             <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-teal-500">
@@ -343,45 +304,6 @@ export default function FacultyResources() {
             </Card>
 
             {/* Student Management */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-green-600" />
-                  Student Management
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">
-                  Manage student enrollments, grades, and attendance
-                </p>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    Class Roster
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Grade Book
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    Attendance
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Assignment & Grading */}
             <Card
@@ -525,7 +447,10 @@ export default function FacultyResources() {
             </Card>
 
             {/* Research Resources */}
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card
+              className="hover:shadow-lg transition-shadow"
+              onClick={() => navigate("/research-gallery")}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-indigo-600" />
@@ -566,7 +491,10 @@ export default function FacultyResources() {
             </Card>
 
             {/* Schedule & Meetings */}
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card
+              className="hover:shadow-lg transition-shadow"
+              onClick={() => navigate("/meetings")}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-red-600" />
@@ -607,86 +535,6 @@ export default function FacultyResources() {
             </Card>
 
             {/* Teaching Resources */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Video className="w-5 h-5 text-yellow-600" />
-                  Teaching Resources
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">
-                  Teaching aids, presentation tools, and educational content
-                </p>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <Video className="w-4 h-4 mr-2" />
-                    Lecture Videos
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Presentations
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Teaching Tools
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Administrative */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-gray-600" />
-                  Administrative
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">
-                  Administrative forms, reports, and documentation
-                </p>
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Forms & Reports
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Faculty Handbook
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    Policies
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </main>
