@@ -4,11 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save } from "lucide-react";
 import { RoomService, type RoomCreateInput } from "@/services/roomService";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function AddRoom() {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);

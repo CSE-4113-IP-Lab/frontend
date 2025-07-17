@@ -159,39 +159,6 @@ export default function EditNotice() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      {/* <header className="bg-slate-800 text-white">
-        <div className="flex items-center justify-between px-6 py-4">
-          <nav className="flex items-center space-x-8">
-            <a
-              href="/"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              HOME
-            </a>
-            <a
-              href="/notice"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              NOTICE
-            </a>
-            <a
-              href="/events"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              EVENT
-            </a>
-            <a
-              href="/contact"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              Contact
-            </a>
-          </nav>
-          <Button
-            variant="outline"
-            className="text-white border-white hover:bg-white hover:text-slate-800 bg-transparent">
-            LOG OUT
-          </Button>
-        </div>
-      </header> */}
-
       {/* Main Content */}
       <main className="px-6 py-8">
         <div className="max-w-4xl mx-auto">
@@ -199,7 +166,8 @@ export default function EditNotice() {
           <Button
             variant="ghost"
             className="mb-6 p-0 h-auto text-gray-600 hover:text-gray-800"
-            onClick={() => navigate(-1)}>
+            onClick={() => navigate(-1)}
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Notice
           </Button>
@@ -220,7 +188,8 @@ export default function EditNotice() {
                     value={formData.type}
                     onValueChange={(value: PostType) =>
                       setFormData((prev) => ({ ...prev, type: value }))
-                    }>
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select notice type" />
                     </SelectTrigger>
@@ -296,7 +265,8 @@ export default function EditNotice() {
                               isMarkedForDeletion
                                 ? "bg-red-50 border border-red-200"
                                 : "bg-gray-50"
-                            }`}>
+                            }`}
+                          >
                             <div className="flex items-center space-x-3">
                               <FileText
                                 className={`w-5 h-5 ${
@@ -310,7 +280,8 @@ export default function EditNotice() {
                                   isMarkedForDeletion
                                     ? "text-red-500 line-through"
                                     : "text-gray-700"
-                                }`}>
+                                }`}
+                              >
                                 {attachment.filename ||
                                   attachment.url.split("/").pop() ||
                                   "Download File"}
@@ -330,7 +301,8 @@ export default function EditNotice() {
                                   className="cursor-pointer text-green-600 hover:text-green-800"
                                   onClick={() =>
                                     restoreExistingAttachment(attachment.id)
-                                  }>
+                                  }
+                                >
                                   Restore
                                 </Button>
                               ) : (
@@ -341,7 +313,8 @@ export default function EditNotice() {
                                   className="cursor-pointer"
                                   onClick={() =>
                                     removeExistingAttachment(attachment.id)
-                                  }>
+                                  }
+                                >
                                   <X className="w-4 h-4" />
                                 </Button>
                               )}
@@ -389,7 +362,8 @@ export default function EditNotice() {
                       {newAttachments.map((file, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between p-2 bg-blue-50 rounded">
+                          className="flex items-center justify-between p-2 bg-blue-50 rounded"
+                        >
                           <span className="text-sm text-blue-700">
                             {file.name || "File"}
                           </span>
@@ -397,7 +371,8 @@ export default function EditNotice() {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeNewAttachment(index)}>
+                            onClick={() => removeNewAttachment(index)}
+                          >
                             <X className="w-4 h-4" />
                           </Button>
                         </div>
@@ -412,13 +387,15 @@ export default function EditNotice() {
                     type="button"
                     // variant="outline"
                     onClick={() => navigate(-1)}
-                    disabled={loading}>
+                    disabled={loading}
+                  >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="bg-[#14244c] text-white hover:bg-[#ecb31d] cursor-pointer">
+                    className="bg-[#14244c] text-white hover:bg-[#ecb31d] cursor-pointer"
+                  >
                     {loading ? "Updating..." : "Update Notice"}
                   </Button>
                 </div>

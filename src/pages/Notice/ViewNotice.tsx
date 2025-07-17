@@ -126,39 +126,6 @@ export default function ViewNotice() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      {/* <header className="bg-slate-800 text-white">
-        <div className="flex items-center justify-between px-6 py-4">
-          <nav className="flex items-center space-x-8">
-            <a
-              href="/"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              HOME
-            </a>
-            <a
-              href="/notices"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              NOTICE
-            </a>
-            <a
-              href="/events"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              EVENT
-            </a>
-            <a
-              href="/contact"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              Contact
-            </a>
-          </nav>
-          <Button
-            variant="outline"
-            className="text-white border-white hover:bg-white hover:text-slate-800 bg-transparent">
-            LOG OUT
-          </Button>
-        </div>
-      </header> */}
-
       {/* Main Content */}
       <main className="bg-orange-50 min-h-screen px-6 py-12">
         <div className="max-w-4xl mx-auto">
@@ -166,7 +133,8 @@ export default function ViewNotice() {
           <Button
             variant="ghost"
             className="mb-6 p-0 h-auto text-gray-600 hover:text-gray-800"
-            onClick={() => navigate("/notice")}>
+            onClick={() => navigate("/notice")}
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Notices
           </Button>
@@ -178,7 +146,8 @@ export default function ViewNotice() {
                 variant="outline"
                 size="sm"
                 onClick={handleEdit}
-                className="flex items-center gap-2">
+                className="flex items-center gap-2"
+              >
                 <Edit className="w-4 h-4" />
                 Edit
               </Button>
@@ -186,7 +155,8 @@ export default function ViewNotice() {
                 variant="destructive"
                 size="sm"
                 onClick={handleDelete}
-                className="flex items-center gap-2">
+                className="flex items-center gap-2"
+              >
                 <Trash2 className="w-4 h-4" />
                 Delete
               </Button>
@@ -222,15 +192,23 @@ export default function ViewNotice() {
               </h2>
               <div className="space-y-4">
                 {notice.attachments.map((attachment) => (
-                    <div
+                  <div
                     key={attachment.id}
                     className="flex items-center space-x-3 p-4 bg-white rounded border hover:bg-gray-50 cursor-pointer"
-                    onClick={() => window.open(`${import.meta.env.VITE_SERVER_URL}/${attachment.url}`, "_blank")}>
+                    onClick={() =>
+                      window.open(
+                        `${import.meta.env.VITE_SERVER_URL}/${attachment.url}`,
+                        "_blank"
+                      )
+                    }
+                  >
                     <FileText className="w-5 h-5 text-gray-600" />
-                    <span className="text-gray-800">{attachment.filename ||
-                              attachment.url.split("/").pop() ||
-                              "Download File"}</span>
-                    </div>
+                    <span className="text-gray-800">
+                      {attachment.filename ||
+                        attachment.url.split("/").pop() ||
+                        "Download File"}
+                    </span>
+                  </div>
                 ))}
               </div>
             </div>

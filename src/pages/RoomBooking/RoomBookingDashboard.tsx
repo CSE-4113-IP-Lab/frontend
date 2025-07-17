@@ -1,14 +1,11 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router";
-import { useAuth } from "../../contexts/AuthContext";
 import Card from "../../components/Card";
 
 interface RoomBookingDashboardProps {}
 
 const RoomBookingDashboard: React.FC<RoomBookingDashboardProps> = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
-
   const handleNavigation = (path: string) => {
     navigate(path);
   };

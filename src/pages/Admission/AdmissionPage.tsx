@@ -6,7 +6,6 @@ import {
 } from "../../services/admissionService";
 import { programService } from "../../services/programService";
 import { format, parseISO, differenceInDays } from "date-fns";
-import { useAuth } from "../../contexts/AuthContext";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

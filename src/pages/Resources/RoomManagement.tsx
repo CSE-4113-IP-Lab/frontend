@@ -15,7 +15,7 @@ import {
 export default function RoomManagement() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, isAuthenticated, authenticationFlag } = useAuth();
+  const { authenticationFlag } = useAuth();
   const [activeTab, setActiveTab] = useState(
     searchParams.get("tab") || "rooms"
   );
@@ -43,7 +43,7 @@ export default function RoomManagement() {
     if (authenticationFlag) {
       loadData();
     }
-  }, [authenticationFlag]);
+  }, [activeTab, authenticationFlag]);
 
   const loadData = async () => {
     setLoading(true);

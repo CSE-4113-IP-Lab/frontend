@@ -87,39 +87,6 @@ export default function CreateNotice() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      {/* <header className="bg-slate-800 text-white">
-        <div className="flex items-center justify-between px-6 py-4">
-          <nav className="flex items-center space-x-8">
-            <a
-              href="/"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              HOME
-            </a>
-            <a
-              href="/notices"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              NOTICE
-            </a>
-            <a
-              href="/events"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              EVENT
-            </a>
-            <a
-              href="/contact"
-              className="text-sm font-medium tracking-wider hover:text-gray-300">
-              Contact
-            </a>
-          </nav>
-          <Button
-            variant="outline"
-            className="text-white border-white hover:bg-white hover:text-slate-800 bg-transparent">
-            LOG OUT
-          </Button>
-        </div>
-      </header> */}
-
       {/* Main Content */}
       <main className="px-6 py-8">
         <div className="max-w-4xl mx-auto">
@@ -127,7 +94,8 @@ export default function CreateNotice() {
           <Button
             variant="ghost"
             className="mb-6 p-0 h-auto text-gray-600 hover:text-gray-800"
-            onClick={() => navigate(-1)}>
+            onClick={() => navigate(-1)}
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Notices
           </Button>
@@ -137,149 +105,157 @@ export default function CreateNotice() {
             Create New Post
           </h1>
 
-            <Card>
+          <Card>
             <CardHeader>
               <CardTitle>Post Details</CardTitle>
             </CardHeader>
             <CardContent className="px-2">
               <form onSubmit={handleSubmit} className="space-y-6 w-full p-2">
-              {/* Post Type */}
-              <div className="space-y-2 w-full p-2">
-                <Label htmlFor="type">Post Type</Label>
-                <Select
-                value={formData.type}
-                onValueChange={(value: PostType) =>
-                  setFormData((prev) => ({ ...prev, type: value }))
-                }>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select post type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="notice">Notice</SelectItem>
-                  <SelectItem value="announcement">Announcement</SelectItem>
-                  <SelectItem value="event">Event</SelectItem>
-                </SelectContent>
-                </Select>
-              </div>
+                {/* Post Type */}
+                <div className="space-y-2 w-full p-2">
+                  <Label htmlFor="type">Post Type</Label>
+                  <Select
+                    value={formData.type}
+                    onValueChange={(value: PostType) =>
+                      setFormData((prev) => ({ ...prev, type: value }))
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select post type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="notice">Notice</SelectItem>
+                      <SelectItem value="announcement">Announcement</SelectItem>
+                      <SelectItem value="event">Event</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {/* Title */}
-              <div className="space-y-2 w-full p-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                  ...prev,
-                  title: e.target.value,
-                  }))
-                }
-                placeholder="Enter post title"
-                required
-                />
-              </div>
+                {/* Title */}
+                <div className="space-y-2 w-full p-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
+                    placeholder="Enter post title"
+                    required
+                  />
+                </div>
 
-              {/* Date */}
-              <div className="space-y-2 w-full p-2">
-                <Label htmlFor="date">Date</Label>
-                <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, date: e.target.value }))
-                }
-                required
-                />
-              </div>
+                {/* Date */}
+                <div className="space-y-2 w-full p-2">
+                  <Label htmlFor="date">Date</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, date: e.target.value }))
+                    }
+                    required
+                  />
+                </div>
 
-              {/* Content */}
-              <div className="space-y-2 w-full p-2">
-                <Label htmlFor="content">Content</Label>
-                <Textarea
-                id="content"
-                value={formData.content}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                  ...prev,
-                  content: e.target.value,
-                  }))
-                }
-                placeholder="Enter post content"
-                rows={10}
-                required
-                />
-              </div>
+                {/* Content */}
+                <div className="space-y-2 w-full p-2">
+                  <Label htmlFor="content">Content</Label>
+                  <Textarea
+                    id="content"
+                    value={formData.content}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        content: e.target.value,
+                      }))
+                    }
+                    placeholder="Enter post content"
+                    rows={10}
+                    required
+                  />
+                </div>
 
-              {/* Attachments */}
-              <div className="space-y-2 w-full p-2">
-                <Label>Attachments</Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                <div className="text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="mt-2">
-                  <label htmlFor="file-upload" className="cursor-pointer">
-                    <span className="mt-2 block text-sm font-medium text-gray-900">
-                    Upload files
-                    </span>
-                    <input
-                    id="file-upload"
-                    name="file-upload"
-                    type="file"
-                    className="sr-only"
-                    multiple
-                    onChange={handleFileUpload}
-                    />
-                  </label>
+                {/* Attachments */}
+                <div className="space-y-2 w-full p-2">
+                  <Label>Attachments</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                    <div className="text-center">
+                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                      <div className="mt-2">
+                        <label htmlFor="file-upload" className="cursor-pointer">
+                          <span className="mt-2 block text-sm font-medium text-gray-900">
+                            Upload files
+                          </span>
+                          <input
+                            id="file-upload"
+                            name="file-upload"
+                            type="file"
+                            className="sr-only"
+                            multiple
+                            onChange={handleFileUpload}
+                          />
+                        </label>
+                      </div>
+                      <p className="mt-1 text-sm text-gray-500">
+                        PNG, JPG, PDF up to 10MB
+                      </p>
+                    </div>
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">
-                  PNG, JPG, PDF up to 10MB
-                  </p>
-                </div>
+
+                  {/* Display uploaded files */}
+                  {attachments.length > 0 && (
+                    <div className="mt-4 space-y-2 w-full p-2">
+                      <h4 className="text-sm font-medium text-gray-900">
+                        Uploaded Files:
+                      </h4>
+                      {attachments.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                        >
+                          <span className="text-sm text-gray-700">
+                            {file.name}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeAttachment(index)}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {/* Display uploaded files */}
-                {attachments.length > 0 && (
-                <div className="mt-4 space-y-2 w-full p-2">
-                  <h4 className="text-sm font-medium text-gray-900">
-                  Uploaded Files:
-                  </h4>
-                  {attachments.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <span className="text-sm text-gray-700">
-                    {file.name}
-                    </span>
-                    <Button
+                {/* Submit Buttons */}
+                <div className="flex justify-end space-x-4 pt-6 w-full p-2">
+                  <Button
                     type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeAttachment(index)}>
-                    <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  ))}
+                    variant="outline"
+                    onClick={() => navigate(-1)}
+                    disabled={loading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-[#14244c] text-white hover:bg-[#ecb31d] cursor-pointer"
+                  >
+                    {loading ? "Creating..." : "Create Post"}
+                  </Button>
                 </div>
-                )}
-              </div>
-
-              {/* Submit Buttons */}
-              <div className="flex justify-end space-x-4 pt-6 w-full p-2">
-                <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(-1)}
-                disabled={loading}>
-                Cancel
-                </Button>
-                <Button type="submit" disabled={loading} className="bg-[#14244c] text-white hover:bg-[#ecb31d] cursor-pointer">
-                {loading ? "Creating..." : "Create Post"}
-                </Button>
-              </div>
               </form>
             </CardContent>
-            </Card>
+          </Card>
         </div>
       </main>
     </div>

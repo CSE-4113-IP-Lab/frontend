@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  BarChart3,
-  TrendingUp,
-  Award,
-  BookOpen,
-  Download,
-  Eye,
-} from "lucide-react";
+import { BarChart3, TrendingUp, Award, BookOpen, Download } from "lucide-react";
 import Card from "../../components/Card";
 import Button from "../../components/Button";
 import FilterBar from "../../components/FilterBar";

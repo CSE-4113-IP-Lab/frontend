@@ -1,6 +1,5 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router";
-import type { Event } from "../../types";
 import { allEvents } from "./eventData"; // Combine upcoming & archived
 import RegisterForm from "./RegisterForm";
 
@@ -15,7 +14,8 @@ const EventDetails: React.FC = () => {
         <h1 className="text-2xl font-bold mb-4">Event not found</h1>
         <button
           onClick={() => navigate(-1)}
-          className="text-blue-700 underline">
+          className="text-blue-700 underline"
+        >
           Go back
         </button>
       </div>

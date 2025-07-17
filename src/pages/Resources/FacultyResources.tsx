@@ -11,9 +11,7 @@ import {
 } from "@/services/roomService";
 import {
   FileText,
-  Download,
   BookOpen,
-  Video,
   Search,
   Calendar,
   Settings,
@@ -186,89 +184,6 @@ export default function FacultyResources() {
                   Reserve classrooms, labs, and meeting rooms with 30-minute
                   slot precision
                 </p>
-
-                {/* <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="p-3 bg-teal-50 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-700">
-                      Available Rooms
-                    </h4>
-                  </div>
-                  <div className="p-3 bg-orange-50 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-700">
-                      My Bookings
-                    </h4>
-                    <p className="text-xl font-bold text-orange-600">
-                      {myBookings.length}
-                    </p>
-                  </div>
-                </div> */}
-
-                {/* Available Rooms Preview */}
-                {/* {rooms.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">
-                      Available Rooms
-                    </h4>
-                    <div className="space-y-2 max-h-32 overflow-y-auto">
-                      {rooms.slice(0, 3).map((room) => (
-                        <div
-                          key={room.id}
-                          className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm"
-                        >
-                          <span className="font-medium">
-                            Room {room.room_number}
-                          </span>
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full ${
-                              room.status === "available"
-                                ? "bg-green-100 text-green-800"
-                                : room.status === "occupied"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
-                          >
-                            {room.status}
-                          </span>
-                        </div>
-                      ))}
-                      {rooms.length > 3 && (
-                        <p className="text-xs text-gray-500 text-center">
-                          +{rooms.length - 3} more rooms available
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )} */}
-
-                {/* My Upcoming Bookings
-                {myBookings.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">
-                      Upcoming Bookings
-                    </h4>
-                    <div className="space-y-2 max-h-32 overflow-y-auto">
-                      {myBookings.slice(0, 2).map((booking) => (
-                        <div
-                          key={booking.id}
-                          className="p-2 bg-gray-50 rounded text-sm"
-                        >
-                          <div className="flex justify-between items-start">
-                            <span className="font-medium">
-                              Room {booking.room?.room_number}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {booking.booking_date}
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-600">
-                            {RoomService.formatTime(booking.start_time)} -{" "}
-                            {RoomService.formatTime(booking.end_time)}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )} */}
 
                 {/* Action Buttons */}
                 <div className="space-y-2">

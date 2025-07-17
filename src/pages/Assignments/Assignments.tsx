@@ -29,30 +29,6 @@ const Assignments: React.FC = () => {
   >([]);
   const [courseIds, setCourseIds] = useState<number[]>([]); // For internal filtering logic
 
-  const requirements = [
-    "Submit the report in PDF format.",
-    "Include at least 3 case studies.",
-    "Use APA citation style.",
-    "Add diagrams wherever necessary.",
-    "Mention all external sources clearly.",
-    "Ensure the word count is at least 2000.",
-    "Proofread for grammar and spelling.",
-    "Attach the raw dataset used.",
-    "Provide a summary at the end.",
-    "Include relevant charts and tables.",
-    "Use 12pt Times New Roman font.",
-    "Maintain consistent formatting.",
-    "Include a title page with student info.",
-    "Submit through the university portal.",
-    "Avoid plagiarism at all costs.",
-  ];
-
-  const getRandomRequirements = (requirements: string[]) => {
-    const count = Math.floor(Math.random() * 3) + 3; // 3 to 5
-    const shuffled = [...requirements].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-  };
-
   const [assignments, setAssignments] = useState<any[]>([]);
 
   useEffect(() => {

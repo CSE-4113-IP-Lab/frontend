@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiClient } from "./apiClient";
 
 // Updated Room Types for new slot-based system
 export interface Room {
@@ -8,7 +8,7 @@ export interface Room {
   capacity: number;
   location?: string;
   description?: string;
-  status: 'available' | 'maintenance' | 'occupied';
+  status: "available" | "maintenance" | "occupied";
   operating_start_time: string;
   operating_end_time: string;
   created_at: string;
@@ -42,7 +42,7 @@ export interface RoomCreateInput {
   capacity: number;
   location?: string;
   description?: string;
-  status?: 'available' | 'maintenance' | 'occupied';
+  status?: "available" | "maintenance" | "occupied";
   operating_start_time?: string;
   operating_end_time?: string;
 }
@@ -53,7 +53,7 @@ export interface RoomUpdateInput {
   capacity?: number;
   location?: string;
   description?: string;
-  status?: 'available' | 'maintenance' | 'occupied';
+  status?: "available" | "maintenance" | "occupied";
   operating_start_time?: string;
   operating_end_time?: string;
 }
@@ -68,7 +68,7 @@ export interface RoomBooking {
   start_time: string;
   end_time: string;
   duration_slots: number;
-  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+  status: "scheduled" | "ongoing" | "completed" | "cancelled";
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -138,7 +138,7 @@ export interface RoomBookingsParams {
   limit?: number;
   room_id?: number;
   user_id?: number;
-  status?: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+  status?: "scheduled" | "ongoing" | "completed" | "cancelled";
   booking_date?: string;
 }
 
@@ -157,26 +157,32 @@ export class RoomService {
       limit: params?.limit || 100,
       include_schedule: params?.include_schedule || false,
       ...(params?.status && { status: params.status }),
-      ...(params?.purpose && { purpose: params.purpose })
+      ...(params?.purpose && { purpose: params.purpose }),
     };
-    
-    const response = await apiClient.get('/rooms/', { params: queryParams });
+
+    const response = await apiClient.get("/rooms/", { params: queryParams });
     return response.data;
   }
 
-  static async getRoom(roomId: number, includeSchedule: boolean = true): Promise<Room> {
+  static async getRoom(
+    roomId: number,
+    includeSchedule: boolean = true
+  ): Promise<Room> {
     const response = await apiClient.get(`/rooms/${roomId}`, {
-      params: { include_schedule: includeSchedule }
+      params: { include_schedule: includeSchedule },
     });
     return response.data;
   }
 
   static async createRoom(roomData: RoomCreateInput): Promise<Room> {
-    const response = await apiClient.post('/rooms/', roomData);
+    const response = await apiClient.post("/rooms/", roomData);
     return response.data;
   }
 
-  static async updateRoom(roomId: number, roomData: RoomUpdateInput): Promise<Room> {
+  static async updateRoom(
+    roomId: number,
+    roomData: RoomUpdateInput
+  ): Promise<Room> {
     const response = await apiClient.put(`/rooms/${roomId}`, roomData);
     return response.data;
   }
@@ -192,25 +198,37 @@ export class RoomService {
     return response.data;
   }
 
-  static async getRoomDaySchedule(roomId: number, dayOffset: number): Promise<DaySchedule> {
-    const response = await apiClient.get(`/rooms/${roomId}/schedule/${dayOffset}`);
+  static async getRoomDaySchedule(
+    roomId: number,
+    dayOffset: number
+  ): Promise<DaySchedule> {
+    const response = await apiClient.get(
+      `/rooms/${roomId}/schedule/${dayOffset}`
+    );
     return response.data;
   }
 
   // Room Search & Booking
-  static async searchAvailableRooms(searchRequest: AvailableRoomsRequest): Promise<AvailableRoomsResponse> {
-    const response = await apiClient.post('/rooms/search/available', searchRequest);
+  static async searchAvailableRooms(
+    searchRequest: AvailableRoomsRequest
+  ): Promise<AvailableRoomsResponse> {
+    const response = await apiClient.post(
+      "/rooms/search/available",
+      searchRequest
+    );
     return response.data;
   }
 
   static async bookRoom(bookingData: BookRoomRequest): Promise<RoomBooking> {
-    const response = await apiClient.post('/rooms/book', bookingData);
+    const response = await apiClient.post("/rooms/book", bookingData);
     return response.data;
   }
 
   // Booking Management
-  static async getBookings(params?: RoomBookingsParams): Promise<RoomBooking[]> {
-    const response = await apiClient.get('/rooms/bookings/', { params });
+  static async getBookings(
+    params?: RoomBookingsParams
+  ): Promise<RoomBooking[]> {
+    const response = await apiClient.get("/rooms/bookings/", { params });
     return response.data;
   }
 
@@ -225,18 +243,33 @@ export class RoomService {
   }
 
   // Admin Utilities
-  static async initializeAllSlots(): Promise<{ success: boolean; message: string; rooms_processed: number }> {
-    const response = await apiClient.post('/rooms/admin/initialize-all-slots');
+  static async initializeAllSlots(): Promise<{
+    success: boolean;
+    message: string;
+    rooms_processed: number;
+  }> {
+    const response = await apiClient.post("/rooms/admin/initialize-all-slots");
     return response.data;
   }
 
-  static async rollDailySlots(): Promise<{ success: boolean; message: string; deleted_slots: number; new_slots: number }> {
-    const response = await apiClient.post('/rooms/admin/roll-daily-slots');
+  static async rollDailySlots(): Promise<{
+    success: boolean;
+    message: string;
+    deleted_slots: number;
+    new_slots: number;
+  }> {
+    const response = await apiClient.post("/rooms/admin/roll-daily-slots");
     return response.data;
   }
 
-  static async cleanupExpiredBookings(): Promise<{ success: boolean; message: string; cleaned_bookings: number }> {
-    const response = await apiClient.post('/rooms/admin/cleanup-expired-bookings');
+  static async cleanupExpiredBookings(): Promise<{
+    success: boolean;
+    message: string;
+    cleaned_bookings: number;
+  }> {
+    const response = await apiClient.post(
+      "/rooms/admin/cleanup-expired-bookings"
+    );
     return response.data;
   }
 
@@ -255,7 +288,7 @@ export class RoomService {
     };
     active_bookings: number;
   }> {
-    const response = await apiClient.get('/rooms/admin/slot-statistics');
+    const response = await apiClient.get("/rooms/admin/slot-statistics");
     return response.data;
   }
 
@@ -266,33 +299,40 @@ export class RoomService {
     invalid_booking_refs: number;
     bookings_without_slots: number;
   }> {
-    const response = await apiClient.get('/rooms/admin/validate-slots');
+    const response = await apiClient.get("/rooms/admin/validate-slots");
     return response.data;
   }
 
   static async getSystemStatus(): Promise<SystemStatus> {
-    const response = await apiClient.get('/rooms/admin/system-status');
+    const response = await apiClient.get("/rooms/admin/system-status", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
     return response.data;
   }
 
   // Helper methods
   static formatTime(time: string): string {
-    return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+    return new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   }
 
   static formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric'
+    return new Date(date).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
     });
   }
 
-  static getNextAvailableSlots(schedule: WeeklySchedule, count: number = 5): Array<{
+  static getNextAvailableSlots(
+    schedule: WeeklySchedule,
+    count: number = 5
+  ): Array<{
     date: string;
     time: string;
     room_id: number;
@@ -312,7 +352,7 @@ export class RoomService {
             date: slot.slot_date,
             time: slot.slot_time,
             room_id: schedule.room_id,
-            room_number: schedule.room_number
+            room_number: schedule.room_number,
           });
         }
       }
@@ -323,24 +363,24 @@ export class RoomService {
 
   // Get today's bookings count for a specific user
   static async getTodayBookingsCount(): Promise<number> {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const bookings = await this.getBookings({
       booking_date: today,
-      status: 'scheduled'
+      status: "scheduled",
     });
     return bookings.length;
   }
 
   // Get user's upcoming bookings (next 7 days)
   static async getUpcomingBookings(limit: number = 10): Promise<RoomBooking[]> {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const bookings = await this.getBookings({
       limit,
-      status: 'scheduled'
+      status: "scheduled",
     });
-    
+
     // Filter bookings from today onwards
-    return bookings.filter(booking => booking.booking_date >= today);
+    return bookings.filter((booking) => booking.booking_date >= today);
   }
 }
 
